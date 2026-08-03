@@ -1,5 +1,5 @@
 import { useState } from "react";
-import {useNavigate , Link} from 'react';
+import {useNavigate , Link} from 'react-router-dom';
 
 export default function LoginUser(){
     const [email , setEmail] = useState('');
@@ -47,7 +47,8 @@ export default function LoginUser(){
 
     return(
       <>
-      <div >
+      <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-r from-black to-[#434343] p-4">
+        <div className="w-full max-w-md bg-gradient-to-br from-white/20 via-white/10 to-transparent backdrop-blur-md border border-white/20 shadow-2xl rounded-2xl p-8 text-white" >
        <h1>Welcome To ChatHive</h1>
        <form onSubmit={handleLogin}>
         <div>
@@ -79,6 +80,7 @@ export default function LoginUser(){
        </form>
        <p>Don't have an account? <Link to = "/register">Register here</Link> </p>
 
+      </div>
       </div>
       
       

@@ -1,10 +1,12 @@
 import { useState } from "react";
+import {useNavigate , Link} from 'react-router-dom';
 
 export default function RegisterUser(){
     const [ userName , setUserName] = useState('');
     const [email , setEmail] = useState('');
     const [plainPassword , setPassword] = useState('');
     const [loading , setLoading] = useState(false);
+    const navigate = useNavigate();
     const url = 'http://192.168.18.40:5000/register'
 
     const handleRegister = async(e)=>{
@@ -17,12 +19,12 @@ export default function RegisterUser(){
             const response = await fetch(url , {
                 method : 'POST',
                 headers : {
-                    "ContentType" : 'application/json'
+                    "Content-Type" : 'application/json'
                 },
                 body : JSON.stringify({userName , email , plainPassword})
             })
 
-            const result = response.json();
+            const result = await response.json();
 
             if(!response.ok){
                 throw new Error(result.error || 'User Already exists');
@@ -30,6 +32,7 @@ export default function RegisterUser(){
 
             alert(result.message);
             console.log(result.message)
+            navigate('/login');
         }
         catch (error){
             console.log(error.message);
@@ -81,11 +84,11 @@ export default function RegisterUser(){
                         {loading ? 'Registering' : 'Register'}
                     </button>
                 </div>
-
-
-
-
             </form>
+            <p>Already have an Account? <Link to="/login">Login</Link>
+
+            </p>
+
 
 
 
