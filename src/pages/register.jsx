@@ -47,15 +47,17 @@ export default function RegisterUser(){
             }
 
             setMessage({text : result.message , type : 'success'});
-            alert(result.message);
+            
             console.log(result.message)
-            navigate('/login');
-
+           setTimeout(() => {
+             navigate('/login');
+              }, 1000);
+ 
         }
         catch (error){
             console.log(error.message);
             setMessage({text : error.message , type : 'error'});
-            alert(error.message);
+            
         }
         finally{
             

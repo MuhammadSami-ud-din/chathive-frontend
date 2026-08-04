@@ -47,7 +47,7 @@ export default function LoginUser(){
       
       setTimeout(() => {
         navigate('/Dashboard');
-      }, 1500);
+      }, 1000);
     }
     catch(error){
       console.log(error.message);
