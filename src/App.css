@@ -4,15 +4,5 @@ html, body, #root {
   margin: 0;
   padding: 0;
   width: 100%;
-  min-height: 100vh; /* 👈 Set min-height to 100vh on ALL root containers */
-}
-
-body {
-  background-image: linear-gradient(to right, #000000, #434343);
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-
-  display: flex;
-  justify-content: center; /* Horizontally center */
-  align-items: center;     /* Vertically center */
+  height: 100%;
 }
