@@ -5,4 +5,8 @@ html, body, #root {
   padding: 0;
   width: 100%;
   height: 100%;
+  font-family: sans-serif;
+}
+input:invalid {
+  box-shadow: none; 
 }
