@@ -38,7 +38,7 @@ export default function Dashboard() {
 
             }
             catch (error) {
-                setError(error)
+                setError(error.message)
                 console.log(error.message)
                 if (error.message === 'Invalid token') {
                     navigate('/login');
