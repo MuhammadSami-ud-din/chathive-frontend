@@ -1,12 +1,13 @@
+const Api_URL = import.meta.env.VITE_API_URL;
 import { useEffect, useState } from "react"
 import { useNavigate , Outlet } from 'react-router-dom';
-const Api_URL = import.meta.env.VITE_API_URL;
 import DefaultView from "../Layouts/defaultView";
 import DM from "../Layouts/DM";
 
 export default function Dashboard() {
     const navigate = useNavigate();
     const [data, setData] = useState([]);
+    const [headerTitle, setHeaderTitle] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
@@ -62,7 +63,12 @@ export default function Dashboard() {
             <div className="flex flex-col h-screen bg-zinc-900">
 
                 {/*//navebar*/}
-                <div className="h-8 flex-none  px-4 flex items-center justify-end ">
+                <div className=" relative h-8 flex-none  px-4 flex items-center justify-end ">
+                  
+                    <p className="absolute text-neutral-200 text-sm right-1/2 -translate-x-1/2 ">{headerTitle}</p>
+                    
+                  
+                
 
                     <div className="flex flex-col items-center  gap-2">
                         <svg
@@ -198,7 +204,7 @@ export default function Dashboard() {
 
 
                    <div className="flex  flex-1">
-                    <Outlet />
+                       <Outlet context={{setHeaderTitle}} />
                    </div>
 
 
