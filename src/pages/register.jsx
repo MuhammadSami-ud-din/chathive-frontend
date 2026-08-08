@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {useNavigate , Link} from 'react-router-dom';
+const Api_URL = import.meta.env.VITE_API_URL;
 
 export default function RegisterUser(){
     const [message , setMessage] = useState({text : '' , type : ''  })
@@ -10,7 +11,7 @@ export default function RegisterUser(){
     const [plainPassword , setPassword] = useState('');
     const [loading , setLoading] = useState(false);
     const navigate = useNavigate();
-    const url = 'http://192.168.18.40:5000/register'
+    const url = `${Api_URL}/register`
 
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -175,12 +176,12 @@ export default function RegisterUser(){
 
                     <button type='button' onClick={()=> setShowpass(!showPass)} className="absolute right-3 top-[42px] flex items-center text-gray-300 hover:text-white transition-colors">
                 {showPass ? (
-                  <svg xmlns="http://w3.org" fill="none" viewBox="0 0 24 24" strokeWidth={1.75} stroke="currentColor" className="w-5 h-5">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.75} stroke="currentColor" className="w-5 h-5">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 12c2.75-4.2 6.75-6 9.5-6s6.75 1.8 9.5 6c-2.75 4.2-6.75 6-9.5 6s-6.75-1.75-9.5-6z" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 14.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" />
                   </svg>
                 ) : (
-                  <svg xmlns="http://w3.org" fill="none" viewBox="0 0 24 24" strokeWidth={1.75} stroke="currentColor" className="w-5 h-5">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.75} stroke="currentColor" className="w-5 h-5">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 10c2.5 3.5 6.5 5 9 5s6.5-1.5 9-5" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4 11.5L2.5 13.5M9 14.5v2.5M12 15v3M15 14.5v2.5M20 11.5l1.5 2" />
                   </svg>

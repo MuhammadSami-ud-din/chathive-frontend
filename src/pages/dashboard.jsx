@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate, Link } from 'react-router-dom';
+const Api_URL = import.meta.env.VITE_API_URL;
 
 const SKELETON_GROUPS = [
     { id: 'cat-1', items: ['w-32', 'w-40', 'w-24', 'w-36', 'w-28', 'w-20'] },
@@ -12,7 +13,7 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    const url = 'http://192.168.18.40:5000/servers'
+    const url = `${Api_URL}/servers/me`
 
 
     useEffect(() => {
@@ -67,7 +68,7 @@ export default function Dashboard() {
 
                     <div className="flex flex-col items-center  gap-2">
                         <svg
-                            xmlns="http://w3.org"
+                            xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 24 24"
                             fill="none"
                             stroke="currentColor"
@@ -84,7 +85,7 @@ export default function Dashboard() {
                     </div>
                     <div className="flex gap-2  ml-4 ">
                         <svg
-                            xmlns="http://w3.org"
+                            xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 24 24"
                             fill="none"
                             stroke="currentColor"
@@ -116,7 +117,7 @@ export default function Dashboard() {
                         {/*DM icon*/}
                         <div className=" relative  mb-2 pb-3  w-20 flex items-center justify-center ">
                             <span className="peer flex h-12 w-12 cursor-pointer mt-1 ml-1 items-center justify-center bg-zinc-800  text-white transition-all duration-200 ease-in-out rounded-2xl hover:bg-[#5865f2] ">
-                                <svg xmlns="http://w3.org" viewBox="0 0 128 128" className="w-12 h-12 fill-current">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" className="w-12 h-12 fill-current">
                                     <path d="M89.7 41.4c-4.9-3.6-10.4-5.9-16.1-6.7-.7 1.3-1.5 2.9-2.1 4.4-6.2-.9-12.3-.9-18.4 0-.6-1.5-1.4-3.1-2.1-4.4-5.8.8-11.2 3.1-16.1 6.7-9.8 14.6-12.4 28.8-11.1 42.7 6.5 4.8 12.6 7.7 18.6 9.6 1.5-2.1 2.9-4.3 4-6.7-2.2-.8-4.4-1.9-6.4-3.2.5-.4 1.1-.8 1.6-1.2 12.2 5.6 25.4 5.6 37.3 0 .5.4 1.1.8 1.6 1.2-2 1.3-4.2 2.3-6.4 3.2 1.2 2.4 2.5 4.6 4 6.7 6-1.9 12.1-4.8 18.6-9.6 1.5-16-.9-30-11.1-42.7zM50.4 72.8c-3.6 0-6.6-3.3-6.6-7.4s2.9-7.4 6.6-7.4c3.7 0 6.6 3.3 6.6 7.4s-2.9 7.4-6.6 7.4zm27.2 0c-3.6 0-6.6-3.3-6.6-7.4s2.9-7.4 6.6-7.4c3.7 0 6.6 3.3 6.6 7.4s-2.9 7.4-6.6 7.4z" />
                                 </svg>
 
@@ -165,7 +166,7 @@ export default function Dashboard() {
                         {/*add a Server*/}
                         <div className=" relative flex justify-center items-center  w-20">
                             <span className=" peer flex h-12 w-12 cursor-pointer mt-2 ml-1 items-center justify-center bg-zinc-800  text-white transition-all duration-200 ease-in-out rounded-2xl hover:bg-[#5865f2] ">
-                                <svg xmlns="http://w3.org" viewBox="0 0 24 24" className="w-6 h-6 cursor-pointer text-zinc-700 hover:text-zinc-900 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-6 h-6 cursor-pointer text-zinc-700 hover:text-zinc-900 transition-colors">
                                     <circle cx="12" cy="12" r="10" fill="#ffffff" />
                                     <path d="M12 8v8M8 12h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                 </svg>
@@ -194,11 +195,9 @@ export default function Dashboard() {
                             </div>
                         </div>
 
-
-
-
-
                     </div>
+
+
 
                     {/*channels list middlebar*/}
                     <div className="flex-none  w-73 p-4 flex flex-col space-y-6 rounded-xl border-t border-l border-zinc-800 ">
@@ -223,11 +222,11 @@ export default function Dashboard() {
                     {/*chat area  rightbar*/}
                     <div className="flex flex-col flex-1 items-center justify-center align-center ">
                         <svg viewBox="0 0 240 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-90 h-90 select-none">
-                            {/* Layer 1: Dark Pill Background Shapes */}
+                           
                             <rect x="20" y="42" width="185" height="32" rx="16" fill="#1E1F22" />
                             <rect x="15" y="125" width="190" height="42" rx="21" fill="#1E1F22" />
 
-                            {/* Layer 2: Top Outlined Speech Bubble */}
+                            
                             <g>
                                 <rect x="52" y="38" width="120" height="36" rx="6" stroke="#35363C" strokeWidth="1.5" fill="#18191C" />
                                 <path d="M 52 50 L 45 54 L 52 58" stroke="#35363C" strokeWidth="1.5" fill="#18191C" />

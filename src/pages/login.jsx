@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from 'react-router-dom';
+const Api_URL = import.meta.env.VITE_API_URL;
 
 export default function LoginUser(){
   const [submit, setSubmit] = useState(false);
@@ -9,7 +10,7 @@ export default function LoginUser(){
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
   const navigate = useNavigate();
-  const url = 'http://localhost:5000/login';
+   const url = `${Api_URL}/login`
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const isEmailInvalid = submit && (!email.trim() || !emailRegex.test(email));
