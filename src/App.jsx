@@ -3,6 +3,7 @@ import {BrowserRouter , Routes , Route , Navigate} from 'react-router-dom'
 import LoginUser from './pages/login.jsx'
 import RegisterUser from './pages/register.jsx'
 import Dashboard from './pages/dashboard.jsx'
+import DM from './Layouts/DM.jsx';
 
 
 function ProtectedRoute({children}){
@@ -28,7 +29,9 @@ return(
   <ProtectedRoute>
     <Dashboard />
   </ProtectedRoute>
-} />
+} >
+   <Route path = '@me' element={<DM />} />
+</Route>
 
 
 
