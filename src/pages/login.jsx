@@ -28,6 +28,7 @@ export default function LoginUser(){
     setLoading(true);
 
     try{
+        console.log("TARGET URL:", 'http://localhost:5000/login');
       const response = await fetch(url , {
         method : 'POST',
         headers : {
