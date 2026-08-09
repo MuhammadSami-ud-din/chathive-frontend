@@ -5,6 +5,7 @@ import RegisterUser from './pages/register.jsx'
 import Dashboard from './pages/dashboard.jsx'
 import DM from './Layouts/DM.jsx';
 import DefaultView  from './views/defaultView.jsx'
+import DMFriends from './views/DMFriends.jsx'
 
 
 
@@ -34,7 +35,7 @@ return(
 } >
   <Route index element={<DefaultView />} />
    <Route path = '@me' element={<DM />} >
-    {/* <Route index element = {<Friends />} /> */}
+    <Route index element = {<DMFriends />} />
    </Route>
 </Route>
 
