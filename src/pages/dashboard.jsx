@@ -64,7 +64,7 @@ export default function Dashboard() {
                 {/*//navebar*/}
                 <div className=" relative h-8 flex-none  px-4 flex items-center justify-end ">
 
-                    <p className="absolute text-neutral-200 text-sm right-1/2 -translate-x-1/2 ">{headerTitle}</p>
+                    <div className="absolute text-neutral-200 text-sm right-1/2 -translate-x-1/2 ">{headerTitle}</div>
 
 
 

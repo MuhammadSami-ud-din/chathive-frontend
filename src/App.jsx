@@ -7,6 +7,7 @@ import DM from './Layouts/DM.jsx';
 import DefaultView  from './views/defaultView.jsx'
 
 
+
 function ProtectedRoute({children}){
   const token = localStorage.getItem('authToken');
   return token? children : <Navigate to='/login' replace />
@@ -33,6 +34,7 @@ return(
 } >
   <Route index element={<DefaultView />} />
    <Route path = '@me' element={<DM />} >
+    {/* <Route index element = {<Friends />} /> */}
    </Route>
 </Route>
 
