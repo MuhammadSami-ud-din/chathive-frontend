@@ -1,8 +1,7 @@
 const Api_URL = import.meta.env.VITE_API_URL;
 import { useEffect, useState } from "react"
-import { useNavigate , Outlet } from 'react-router-dom';
-import DefaultView from "../Layouts/defaultView";
-import DM from "../Layouts/DM";
+import { useNavigate, Outlet, NavLink } from 'react-router-dom';
+
 
 export default function Dashboard() {
     const navigate = useNavigate();
@@ -17,7 +16,7 @@ export default function Dashboard() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-               
+
                 const response = await fetch(url, {
                     method: "GET",
                     headers: {
@@ -64,11 +63,11 @@ export default function Dashboard() {
 
                 {/*//navebar*/}
                 <div className=" relative h-8 flex-none  px-4 flex items-center justify-end ">
-                  
+
                     <p className="absolute text-neutral-200 text-sm right-1/2 -translate-x-1/2 ">{headerTitle}</p>
-                    
-                  
-                
+
+
+
 
                     <div className="flex flex-col items-center  gap-2">
                         <svg
@@ -119,20 +118,49 @@ export default function Dashboard() {
                     <div className="flex-none  w-20 flex flex-col  items-center  ">
 
                         {/*DM icon*/}
-                        <div className=" relative  mb-2 pb-3 cursor-pointer w-20 flex items-center justify-center " onClick={()=> navigate('@me')}>
-                            <span className="peer flex h-12 w-12  mt-1 ml-1 items-center justify-center bg-zinc-800  text-white transition-all duration-200 ease-in-out rounded-2xl hover:bg-[#5865f2] ">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" className="w-12 h-12 fill-current">
-                                    <path d="M89.7 41.4c-4.9-3.6-10.4-5.9-16.1-6.7-.7 1.3-1.5 2.9-2.1 4.4-6.2-.9-12.3-.9-18.4 0-.6-1.5-1.4-3.1-2.1-4.4-5.8.8-11.2 3.1-16.1 6.7-9.8 14.6-12.4 28.8-11.1 42.7 6.5 4.8 12.6 7.7 18.6 9.6 1.5-2.1 2.9-4.3 4-6.7-2.2-.8-4.4-1.9-6.4-3.2.5-.4 1.1-.8 1.6-1.2 12.2 5.6 25.4 5.6 37.3 0 .5.4 1.1.8 1.6 1.2-2 1.3-4.2 2.3-6.4 3.2 1.2 2.4 2.5 4.6 4 6.7 6-1.9 12.1-4.8 18.6-9.6 1.5-16-.9-30-11.1-42.7zM50.4 72.8c-3.6 0-6.6-3.3-6.6-7.4s2.9-7.4 6.6-7.4c3.7 0 6.6 3.3 6.6 7.4s-2.9 7.4-6.6 7.4zm27.2 0c-3.6 0-6.6-3.3-6.6-7.4s2.9-7.4 6.6-7.4c3.7 0 6.6 3.3 6.6 7.4s-2.9 7.4-6.6 7.4z" />
-                                </svg>
 
-                            </span>
-                            <div className="absolute left-0 w-1 bg-white h-0 rounded-r-full transition-all duration-300 peer-hover:h-7" />
-                            <div className="absolute w-10 h-0.5 bottom-0 bg-zinc-700"></div>
-                            <div className="absolute left-full z-50 py-1 px-3  bg-zinc-600 rounded-xl flex items-center justify-center opacity-0 font-black text-base pointer-events-none top-1/2 -translate-y-1/2 whitespace-nowrap transition-opacity peer-hover:opacity-100 " >Direct Messages
-                                <div className="absolute -left-2 h-0 w-0 border-y-[8px] rounded-sm  border-y-transparent border-r-[13px] border-r-zinc-600" />
 
-                            </div>
-                        </div>
+                        <NavLink
+                            to="@me"
+                            className="relative mb-2 pb-3 cursor-pointer w-20 flex items-center justify-center group"
+                        >
+                            {({ isActive }) => (
+                                <>
+                                   
+                                    <span
+                                        className={`flex h-12 w-12 items-center justify-center text-white transition-all duration-200 ease-in-out ${isActive
+                                                ? 'bg-[#5865f2] rounded-2xl'
+                                                : 'bg-zinc-800 rounded-[24px] hover:rounded-2xl hover:bg-[#5865f2]'
+                                            }`}
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 128 128"
+                                            className="w-10 h-10 fill-current"
+                                        >
+                                            <path d="M89.7 41.4c-4.9-3.6-10.4-5.9-16.1-6.7-.7 1.3-1.5 2.9-2.1 4.4-6.2-.9-12.3-.9-18.4 0-.6-1.5-1.4-3.1-2.1-4.4-5.8.8-11.2 3.1-16.1 6.7-9.8 14.6-12.4 28.8-11.1 42.7 6.5 4.8 12.6 7.7 18.6 9.6 1.5-2.1 2.9-4.3 4-6.7-2.2-.8-4.4-1.9-6.4-3.2.5-.4 1.1-.8 1.6-1.2 12.2 5.6 25.4 5.6 37.3 0 .5.4 1.1.8 1.6 1.2-2 1.3-4.2 2.3-6.4 3.2 1.2 2.4 2.5 4.6 4 6.7 6-1.9 12.1-4.8 18.6-9.6 1.5-16-.9-30-11.1-42.7zM50.4 72.8c-3.6 0-6.6-3.3-6.6-7.4s2.9-7.4 6.6-7.4c3.7 0 6.6 3.3 6.6 7.4s-2.9 7.4-6.6 7.4zm27.2 0c-3.6 0-6.6-3.3-6.6-7.4s2.9-7.4 6.6-7.4c3.7 0 6.6 3.3 6.6 7.4s-2.9 7.4-6.6 7.4z" />
+                                        </svg>
+                                    </span>
+
+                                  
+                                    <div
+                                        className={`absolute left-0 w-1 bg-white rounded-r-full transition-all duration-300 ${isActive
+                                                ? 'h-10' 
+                                                : 'h-0 group-hover:h-5' 
+                                            }`}
+                                    />
+
+                                  
+                                    <div className="absolute w-10 h-0.5 bottom-0 bg-zinc-700" />
+
+                             
+                                    <div className="absolute left-full z-50 py-1 px-3 bg-zinc-600 rounded-xl flex items-center justify-center opacity-0 font-black text-base pointer-events-none top-1/2 -translate-y-1/2 whitespace-nowrap transition-opacity group-hover:opacity-100">
+                                        Direct Messages
+                                        <div className="absolute -left-2 h-0 w-0 border-y-[8px] rounded-sm border-y-transparent border-r-[13px] border-r-zinc-600" />
+                                    </div>
+                                </>
+                            )}
+                        </NavLink>
 
                         {/*Personal Server*/}
                         <div className="relative flex justify-center items-center  w-20">
@@ -203,9 +231,9 @@ export default function Dashboard() {
 
 
 
-                   <div className="flex  flex-1">
-                       <Outlet context={{setHeaderTitle}} />
-                   </div>
+                    <div className="flex  flex-1">
+                        <Outlet context={{ setHeaderTitle }} />
+                    </div>
 
 
                 </div>

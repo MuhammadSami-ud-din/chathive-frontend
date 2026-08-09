@@ -4,7 +4,7 @@ import LoginUser from './pages/login.jsx'
 import RegisterUser from './pages/register.jsx'
 import Dashboard from './pages/dashboard.jsx'
 import DM from './Layouts/DM.jsx';
-import DefaultView  from './Layouts/defaultView.jsx'
+import DefaultView  from './views/defaultView.jsx'
 
 
 function ProtectedRoute({children}){
@@ -32,7 +32,8 @@ return(
   </ProtectedRoute>
 } >
   <Route index element={<DefaultView />} />
-   <Route path = '@me' element={<DM />} />
+   <Route path = '@me' element={<DM />} >
+   </Route>
 </Route>
 
 
