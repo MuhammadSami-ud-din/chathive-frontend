@@ -59,7 +59,7 @@ export default function Dashboard() {
 
     return (
         <>
-            <div className="flex flex-col h-screen bg-zinc-900">
+            <div className="flex flex-col w-screen h-screen bg-zinc-900 overflow-hidden">
 
                 {/*//navebar*/}
                 <div className=" relative h-8 flex-none  px-4 flex items-center justify-end ">
@@ -130,7 +130,7 @@ export default function Dashboard() {
                                     <span
                                         className={`flex h-12 w-12 items-center justify-center text-white transition-all duration-200 ease-in-out ${isActive
                                                 ? 'bg-[#5865f2] rounded-2xl'
-                                                : 'bg-zinc-800 rounded-[24px] hover:rounded-2xl hover:bg-[#5865f2]'
+                                                : 'bg-zinc-800 rounded-2xl hover:rounded-2xl hover:bg-[#5865f2]'
                                             }`}
                                     >
                                         <svg
@@ -231,8 +231,8 @@ export default function Dashboard() {
 
 
 
-                    <div className="flex  flex-1">
-                        <Outlet context={{ setHeaderTitle }} />
+                    <div className="flex  flex-1 overflow-hidden min-h-0">
+                        <Outlet context={{ setHeaderTitle }}  />
                     </div>
 
 

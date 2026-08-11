@@ -6,7 +6,10 @@ html, body, #root {
   width: 100%;
   height: 100%;
   font-family: sans-serif;
+ 
+  overflow: hidden;
 }
+
 input:invalid {
   box-shadow: none; 
 }
