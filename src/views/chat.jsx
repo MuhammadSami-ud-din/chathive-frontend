@@ -52,6 +52,16 @@ export default function ChatArea(){
     }, [id , navigate])
 
     return (
-        <p>{id}</p>
+       <>
+       <div className=" w-full border bottom-[0%]">type</div>
+       <div className=" flex w-full h-full">
+        <div className="w-[50%] border ">left </div>
+          <div className="w-[50%] border ">right</div>
+            
+
+       </div>
+       <div className=" w-full border bottom-[0%]">type</div>
+       
+       </>
     )
 }
