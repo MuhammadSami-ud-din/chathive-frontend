@@ -1,14 +1,22 @@
 
 import { useEffect, useState, useRef } from "react";
+import React from "react";
 import { useParams, useNavigate } from "react-router-dom"
 import { NavLink, Outlet, useOutletContext } from "react-router-dom"
 const Api_URL = import.meta.env.VITE_API_URL;
 
 
-const CleanDate = ({ date }) => {
+const CleanDate = (date) => {
     if (!date) return "";
-    const safeString = date.replace(' ', 'T');
-    return new Date(safeString).toLocaleDateString('en-US', {
+
+    const strDate = typeof date === 'string' ? date : String(date);
+    const safeString = strDate.replace(' ', 'T');
+    const parsed = new Date(safeString);
+
+
+    if (isNaN(parsed.getTime())) return "";
+
+    return parsed.toLocaleDateString('en-US', {
         month: 'long',
         day: 'numeric',
         year: 'numeric'
@@ -191,27 +199,45 @@ export default function ChatArea() {
                                     data.user?.username ? data.user.username.charAt(0).toUpperCase() : '?'
                                 )}</span>
 
-                                <span className="text-4xl text-zinc-500 font-bold">{data.user?.username}</span>
+                                <span className="text-4xl text-zinc-500 font-bold text-center">{data.user?.username}</span>
                                 <span className="text-zinc-500 ">{data.user?.email}</span>
-                                <div className="p-1 px-3 mt-10 flex  rounded-3xl  bg-zinc-800  text-sm text-yellow-200/50 ">This is the Beginning of Direct messages history with  " {data.user?.username} "</div>
+                                <div className="p-1 px-3 mt-10 flex  rounded-3xl  bg-zinc-800  text-sm text-yellow-200/50 text-center ">This is the Beginning of Direct messages history with  " {data.user?.username} "</div>
                             </div>
 
 
                             {data.data.map((msg, index) => {
+
                                 const isMe = msg.sender_id === data.my_id
+                                const prevMsg_date = index > 0 ? CleanDate(data.data[index - 1].created_at) : null;
+
+                                const currentDate = CleanDate(msg.created_at);
+                               
+                                const isSame = prevMsg_date === currentDate;
+
 
                                 return (
 
-                                    <div key={msg._id || msg.message_id || `msg-${index}`} className={`flex w-full  items-start ${isMe ? 'justify-end ' : 'justify-start '} `} >
+                                    <React.Fragment key={msg.id || index}>
+                                       {!isSame && ( 
+                                        <div className=' flex justify-center items-center my-5 p-2'>
+                                            <span className='rounded-3xl font-semibold text-sm text-shadow-mist-700/50 bg-teal-900/50  p-1 px-3 text-center '> {currentDate} </span>
+                                            </div>) }
+                                       
 
-                                        <div className={` px-3 py-1  rounded-2xl text-sm flex-none max-w-[70%]  break-words shadow-sm leading-relaxed ${isMe ? 'bg-green-700/50 ' : 'bg-zinc-500/50 '} `}>{msg.content}</div>
-                                    </div>
+                                        <div className={`flex w-full  items-start ${isMe ? 'justify-end ' : 'justify-start '} `} >
+
+                                            <div className={` px-3 py-1  rounded-2xl text-sm flex-none max-w-[70%]  break-words shadow-sm leading-relaxed ${isMe ? 'bg-green-700/50 ' : 'bg-zinc-500/50 '} `}>{msg.content}</div>
+                                        </div>
+
+
+                                    </React.Fragment>
 
 
                                 )
 
                             }
                             )}
+
                             <div ref={messageEndRef} />
                         </div>
 
@@ -252,7 +278,7 @@ export default function ChatArea() {
                             <p className="text-sm text-zinc-500">{data.user.email}</p>
                             <p className="text-xm text-zinc-400 mt-5">Member Since:</p>
                             <p className="text-sm text-zinc-500 ">
-                                {<CleanDate date={data.user.created_at} />}
+                               { CleanDate(data.user.created_at)}
                             </p>
 
 
