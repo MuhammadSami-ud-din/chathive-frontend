@@ -25,10 +25,14 @@ const CleanDate = (date) => {
 };
 
 
-const CleanTime = ({ date }) => {
+const CleanTime = (date) => {
     if (!date) return "";
-    const safeString = date.replace(' ', 'T');
-    return new Date(safeString).toLocaleTimeString('en-US', {
+    const strTIme = typeof date === 'string' ? date : String(date);
+    const safeString = strTIme.replace(' ', 'T');
+    const parse = new Date(safeString)
+    if (isNaN(parse.getTime())) return "";
+
+    return parse.toLocaleTimeString('en-US', {
         hour: 'numeric',
         minute: '2-digit',
         hour12: true
@@ -55,45 +59,45 @@ export default function ChatArea() {
 
     const conversationId = data.conversation_id || (data.data.length > 0 ? data.data[0].conversation_id : null);
 
-   useEffect(() => {
-    if (!conversationId) return;
+    useEffect(() => {
+        if (!conversationId) return;
 
-    socket.emit('join_conversation', conversationId);
-
-    const handleReconnect = () => {
         socket.emit('join_conversation', conversationId);
-    };
 
-    socket.on('connect', handleReconnect);
+        const handleReconnect = () => {
+            socket.emit('join_conversation', conversationId);
+        };
 
-    return () => {
-        socket.off('connect', handleReconnect);
-    };
-}, [conversationId]);
+        socket.on('connect', handleReconnect);
+
+        return () => {
+            socket.off('connect', handleReconnect);
+        };
+    }, [conversationId]);
 
 
     useEffect(() => {
-    const handleNewMessage = (msg) => {
-        if (msg.conversation_id === conversationId) {
-            setData((prev) => ({
-                ...prev,
-                data: [...prev.data, msg]
-            }));
-        }
-    };
+        const handleNewMessage = (msg) => {
+            if (msg.conversation_id === conversationId) {
+                setData((prev) => ({
+                    ...prev,
+                    data: [...prev.data, msg]
+                }));
+            }
+        };
 
-    const handleError = (err) => {
-        console.log('socket error:', err.message);
-    };
+        const handleError = (err) => {
+            console.log('socket error:', err.message);
+        };
 
-    socket.on('DMmessage', handleNewMessage);
-    socket.on('new_error', handleError);
+        socket.on('DMmessage', handleNewMessage);
+        socket.on('new_error', handleError);
 
-    return () => {
-        socket.off('DMmessage', handleNewMessage);
-        socket.off('new_error', handleError);
-    };
-}, [conversationId]);
+        return () => {
+            socket.off('DMmessage', handleNewMessage);
+            socket.off('new_error', handleError);
+        };
+    }, [conversationId]);
 
 
 
@@ -163,7 +167,7 @@ export default function ChatArea() {
 
             console.log(result.message)
 
-            
+
 
             setMessage('')
 
@@ -261,9 +265,14 @@ export default function ChatArea() {
 
                                         <div className={`flex w-full  items-start ${isMe ? 'justify-end ' : 'justify-start '} `} >
 
-                                            <div className={` px-3 py-1  rounded-2xl text-sm flex-none max-w-[70%]  break-words shadow-sm leading-relaxed ${isMe ? 'bg-green-700/50 ' : 'bg-zinc-500/50 '} `}>{msg.content}</div>
+                                            <div className={` px-3 py-1  rounded-2xl text-sm flex-none max-w-[70%]  break-words shadow-sm leading-relaxed ${isMe ? 'bg-green-700/50 ' : 'bg-zinc-500/50 '} `}>{msg.content}
+                                              <span className="float-right ml-2 mt-3 text-[10px] text-zinc-300 opacity-70 select-none leading-none">
+                                                    {CleanTime(msg.created_at)}
+                                                </span>
+                                                </div>
                                         </div>
-
+                                       
+                                        
 
                                     </React.Fragment>
 
