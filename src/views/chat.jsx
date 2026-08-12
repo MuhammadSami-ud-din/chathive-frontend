@@ -4,6 +4,7 @@ import React from "react";
 import { useParams, useNavigate } from "react-router-dom"
 import { NavLink, Outlet, useOutletContext } from "react-router-dom"
 const Api_URL = import.meta.env.VITE_API_URL;
+import { socket } from "../socket.js";
 
 
 const CleanDate = (date) => {
@@ -52,7 +53,47 @@ export default function ChatArea() {
         scrollToBottom()
     }, [data.data])
 
+    const conversationId = data.conversation_id || (data.data.length > 0 ? data.data[0].conversation_id : null);
 
+   useEffect(() => {
+    if (!conversationId) return;
+
+    socket.emit('join_conversation', conversationId);
+
+    const handleReconnect = () => {
+        socket.emit('join_conversation', conversationId);
+    };
+
+    socket.on('connect', handleReconnect);
+
+    return () => {
+        socket.off('connect', handleReconnect);
+    };
+}, [conversationId]);
+
+
+    useEffect(() => {
+    const handleNewMessage = (msg) => {
+        if (msg.conversation_id === conversationId) {
+            setData((prev) => ({
+                ...prev,
+                data: [...prev.data, msg]
+            }));
+        }
+    };
+
+    const handleError = (err) => {
+        console.log('socket error:', err.message);
+    };
+
+    socket.on('DMmessage', handleNewMessage);
+    socket.on('new_error', handleError);
+
+    return () => {
+        socket.off('DMmessage', handleNewMessage);
+        socket.off('new_error', handleError);
+    };
+}, [conversationId]);
 
 
 
@@ -98,7 +139,6 @@ export default function ChatArea() {
     }, [id, navigate])
 
 
-
     async function SendMsg() {
 
 
@@ -123,12 +163,7 @@ export default function ChatArea() {
 
             console.log(result.message)
 
-            if (result.data) {
-                setData((prev) => ({
-                    ...prev,
-                    data: [...prev.data, result.data]
-                }))
-            }
+            
 
             setMessage('')
 
@@ -211,18 +246,18 @@ export default function ChatArea() {
                                 const prevMsg_date = index > 0 ? CleanDate(data.data[index - 1].created_at) : null;
 
                                 const currentDate = CleanDate(msg.created_at);
-                               
+
                                 const isSame = prevMsg_date === currentDate;
 
 
                                 return (
 
-                                    <React.Fragment key={msg.id || index}>
-                                       {!isSame && ( 
-                                        <div className=' flex justify-center items-center my-5 p-2'>
-                                            <span className='rounded-3xl font-semibold text-sm text-shadow-mist-700/50 bg-teal-900/50  p-1 px-3 text-center '> {currentDate} </span>
-                                            </div>) }
-                                       
+                                    <React.Fragment key={msg._id || index}>
+                                        {!isSame && (
+                                            <div className=' flex justify-center items-center my-5 p-2'>
+                                                <span className='rounded-3xl font-semibold text-sm text-shadow-mist-700/50 bg-teal-900/50  p-1 px-3 text-center '> {currentDate} </span>
+                                            </div>)}
+
 
                                         <div className={`flex w-full  items-start ${isMe ? 'justify-end ' : 'justify-start '} `} >
 
@@ -278,7 +313,7 @@ export default function ChatArea() {
                             <p className="text-sm text-zinc-500">{data.user.email}</p>
                             <p className="text-xm text-zinc-400 mt-5">Member Since:</p>
                             <p className="text-sm text-zinc-500 ">
-                               { CleanDate(data.user.created_at)}
+                                {CleanDate(data.user.created_at)}
                             </p>
 
 
