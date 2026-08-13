@@ -18,7 +18,7 @@ export default function ServersListing() {
          if (!container) return;
 
         const handleScroll = () => {
-            if (container.scrollTop > 20) {
+            if (container.scrollTop > 5) {
                 setIsScrolled(true)
                 
             } else {
@@ -126,7 +126,7 @@ export default function ServersListing() {
             <div className={`relative  bg-[#151518] border-t border-t-zinc-800 flex-1 flex flex-col min-w-0 overflow-hidden  `}>
 
                 {/* upper bar to select the type of servers u wanna see */}
-                <div className={`absolute flex items-center border-b border-b-neutral-800 h-13 pl-3 text-sm gap-x-3 shrink-0 w-full transition-colors duration-400 ${isScrolled
+                <div className={`absolute flex items-center border-b border-b-zinc-800/50 h-13 pl-3 text-sm gap-x-3 shrink-0 w-full transition-colors duration-300 ${isScrolled
                     ? 'bg-zinc-900 shadow-md '
                     : 'bg-transparent '
                     }`}>
@@ -147,9 +147,9 @@ export default function ServersListing() {
                 <div ref={scrolableContainer} className="overflow-y-auto w-full h-full ">
 
                     {/* Servers Dicover */}
-                    <div className="border-b border-b-neutral-800 bg-gradient-to-r from-cyan-900 via-blue-950 to-neutral-950 min-h-100 w-full flex flex-col justify-center p-4 md:p-6 shrink-0">
-                      <p className="font-extrabold text-6xl w-[70%]">Find Your Community on ChatHive</p>
-                      <p className="text-xl text-zinc-200/50 ">From gaming, to music, to learning, there's a place for you</p>
+                    <div className="border-b border-b-neutral-800 bg-gradient-to-r from-cyan-900 via-blue-950 to-neutral-950 min-h-90 w-full flex flex-col justify-center p-4 md:p-6 shrink-0">
+                      <p className="font-extrabold text-5xl w-[55%] mt-20">Find Your Community on ChatHive</p>
+                      <p className="text-xl text-zinc-200/50 mt-3 ">From gaming, to music, to learning, there's a place for you</p>
                          
                     </div>
                     <div className="mt-4 ml-6 text-xl font-semibold">Featured Servers</div>
