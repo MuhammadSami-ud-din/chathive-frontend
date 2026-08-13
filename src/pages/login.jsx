@@ -28,7 +28,7 @@ export default function LoginUser(){
     setLoading(true);
 
     try{
-        console.log("TARGET URL:", 'http://localhost:5000/login');
+       
       const response = await fetch(url , {
         method : 'POST',
         headers : {
@@ -48,7 +48,7 @@ export default function LoginUser(){
       console.log('login successful');
       
       setTimeout(() => {
-        navigate('/Dashboard');
+        navigate('/');
       }, 1000);
     }
     catch(error){

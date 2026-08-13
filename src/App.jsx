@@ -7,6 +7,7 @@ import DM from './Layouts/DM.jsx';
 import DefaultView from './views/defaultView.jsx'
 import DMFriends from './views/DMFriends.jsx'
 import ChatArea from './views/chat.jsx'
+import ServersListing from './views/server.jsx'
 
 
 
@@ -29,17 +30,19 @@ function App() {
         <Route path='/register' element={<RegisterUser />} />
 
 
-        <Route path='/dashboard' element={
+        <Route  element={
           <ProtectedRoute>
             <Dashboard />
           </ProtectedRoute>
         } >
           <Route index element={<DefaultView />} />
-          <Route path='@me' element={<DM />} >
+          <Route path='/discovery/servers' element={<ServersListing />} />
+          <Route path='/@me' element={<DM />} >
             <Route index element={<DMFriends />} />
             <Route path=":id" element={<ChatArea />} />
 
           </Route>
+          
         </Route>
 
 

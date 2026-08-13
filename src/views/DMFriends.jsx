@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState  } from "react";
+import { NavLink } from "react-router-dom";
 export default function DMFriends(){
      const [isFocused, setIsFocused] = useState(false);
  return(
@@ -96,7 +97,9 @@ export default function DMFriends(){
                     </p>
 
 
-                    <div className="relative flex items-center border border-zinc-700 h-14 w-full max-w-sm pr-12 rounded-xl mt-6 hover:bg-zinc-800/50 cursor-pointer group transition-colors">
+                    <NavLink
+                    to = '/discovery/servers'
+                    className="relative flex items-center border border-zinc-700 h-14 w-full max-w-sm pr-12 rounded-xl mt-6 hover:bg-zinc-800/50 cursor-pointer group transition-colors">
                         <div className="flex items-center justify-center w-14 h-14 shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" className="w-10 h-10">
                                 <rect x="10" y="10" width="80" height="80" rx="24" fill="#3A9E5D" />
@@ -115,7 +118,8 @@ export default function DMFriends(){
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                             </svg>
                         </span>
-                    </div>
+                    </NavLink>
+
                 </div>
             </div>
 

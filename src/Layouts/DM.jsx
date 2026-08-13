@@ -92,7 +92,7 @@ return () => {
                  className="h-17 flex items-center justify-center border-b border-b-neutral-800 mt-1  ">
 
                     <NavLink 
-                    to="/Dashboard/@me"
+                    to="/@me"
                     end
                     className={({isActive})=> ` flex  gap-x-3 pl-1 p-2 w-72 h-10 text-zinc-200 font-semibold   rounded-xl   transition-colors   ${ isActive ? "bg-zinc-100/10" : " bg-neutral-800 hover:bg-zinc-100/10" }`} >
                     
@@ -126,7 +126,7 @@ return () => {
                          </div> :
                        data.data.map((user) => (
                             <NavLink
-                            to = {`/Dashboard/@me/${user.id}`}
+                            to = {`/@me/${user.id}`}
                             key={user.id} 
                             className={({ isActive }) => `
         w-full flex items-center p-2 space-x-1 rounded-xl mb-2 mt-2 transition-all duration-150 group

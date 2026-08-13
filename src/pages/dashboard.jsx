@@ -214,7 +214,9 @@ export default function Dashboard() {
 
 
                         {/*Discover*/}
-                        <div className=" relative flex justify-center items-center  w-20">
+                        <NavLink 
+                        to='/discovery/servers'
+                        className=" relative flex justify-center items-center  w-20">
                             <span className=" peer flex h-12 w-12 cursor-pointer mt-2 ml-1 items-center justify-center bg-zinc-800  text-white transition-all duration-200 ease-in-out rounded-2xl hover:bg-[#5865f2] ">
                                 <svg xmlns="www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
                                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm2.19 12.19L6 18l3.81-8.19L18 6l-3.81 8.19zM12 10.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5z" />
@@ -225,7 +227,7 @@ export default function Dashboard() {
                                 <div className="absolute -left-2 h-0 w-0 border-y-[8px] rounded-sm  border-y-transparent border-r-[13px] border-r-zinc-600" />
 
                             </div>
-                        </div>
+                        </NavLink>
 
                     </div>
 
