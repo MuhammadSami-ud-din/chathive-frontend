@@ -174,6 +174,7 @@ export default function ChatArea() {
         }
         catch (error) {
             console.log(error.message);
+            
 
 
         }

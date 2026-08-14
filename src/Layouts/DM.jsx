@@ -1,12 +1,13 @@
 const Api_URL = import.meta.env.VITE_API_URL;
 
 import { useEffect, useState } from "react";
-import { NavLink, Outlet, useOutletContext } from "react-router-dom"
+import { NavLink, Outlet, useOutletContext , useNavigate } from "react-router-dom"
 
 
 export default function DM() {
     const { setHeaderTitle } = useOutletContext() || {};
     const [data, setData] = useState({success : false , data : []});
+    const navigate = useNavigate()
     const url = `${Api_URL}/messages/dm`
     
   
@@ -69,6 +70,9 @@ return () => {
             }
             catch (error) {
                 console.log(error.message)
+                if (error.message === 'Invalid token') {
+                    navigate('/login');
+                }
                
             }
            
@@ -76,7 +80,7 @@ return () => {
         fetchDM()
 
  // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, [navigate])
 
 
 
