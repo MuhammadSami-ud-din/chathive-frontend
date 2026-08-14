@@ -9,7 +9,7 @@ export default function ServerPage(){
 
 
       useEffect(() => {
-            const url = `${Api_URL}/servers/${server_id}`
+            const url = `${Api_URL}/channels/${server_id}`
             const fetchData = async () => {
                 try {
     
