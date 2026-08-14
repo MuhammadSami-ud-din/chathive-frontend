@@ -9,7 +9,7 @@ import DMFriends from './views/DMFriends.jsx'
 import ChatArea from './views/chat.jsx'
 import ServersListing from './views/server.jsx'
 import ServerPage from './views/ServerPage.jsx'
-
+import ChannelChat from './views/channelChat.jsx'
 
 
 function ProtectedRoute({ children }) {
@@ -38,7 +38,9 @@ function App() {
         } >
           <Route index element={<DefaultView />} />
           <Route path='/discovery/servers' element={<ServersListing />} />
-          <Route path='/channels/:server_id' element={<ServerPage />} />
+          <Route path='/channels/:server_id' element={<ServerPage />} >
+          <Route path=':channel_id' element={<ChannelChat />} />
+          </Route>
 
           <Route path='/@me' element={<DM />} >
             <Route index element={<DMFriends />} />

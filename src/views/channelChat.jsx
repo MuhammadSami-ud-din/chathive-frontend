@@ -41,10 +41,10 @@ const CleanTime = (date) => {
 
 
 
-export default function ChatArea() {
+export default function ChannelChat() {
 
-    const { id } = useParams();
-    const [data, setData] = useState({ success: false, data: [], my_id: '', user: {} });
+    const { channel_id } = useParams();
+    const [data, setData] = useState({ success: false, data: [], my_id: ''});
     const [message, setMessage] = useState('')
     const navigate = useNavigate();
     const [isFocused, setIsFocused] = useState(false);
@@ -57,15 +57,15 @@ export default function ChatArea() {
         scrollToBottom()
     }, [data.data])
 
-    const conversationId = data.conversation_id || (data.data.length > 0 ? data.data[0].conversation_id : null);
+    
 
     useEffect(() => {
-        if (!conversationId) return;
+       
 
-        socket.emit('join_conversation', conversationId);
+        socket.emit('join_channel', channel_id);
 
         const handleReconnect = () => {
-            socket.emit('join_conversation', conversationId);
+            socket.emit('join_channel', channel_id);
         };
 
         socket.on('connect', handleReconnect);
@@ -73,12 +73,14 @@ export default function ChatArea() {
         return () => {
             socket.off('connect', handleReconnect);
         };
-    }, [conversationId]);
+    }, [channel_id]);
 
 
     useEffect(() => {
         const handleNewMessage = (msg) => {
-            if ((msg.conversation_id) === conversationId) {
+            console.log('hello', msg)
+            console.log(String(msg.channel_id) === String(channel_id))
+            if (String(msg.channel_id) === String(channel_id)) {
                 setData((prev) => ({
                     ...prev,
                     data: [...prev.data, msg]
@@ -90,19 +92,19 @@ export default function ChatArea() {
             console.log('socket error:', err.message);
         };
 
-        socket.on('DMmessage', handleNewMessage);
+        socket.on('newMessage', handleNewMessage);
         socket.on('new_error', handleError);
 
         return () => {
-            socket.off('DMmessage', handleNewMessage);
+            socket.off('newMessage', handleNewMessage);
             socket.off('new_error', handleError);
         };
-    }, [conversationId]);
+    }, [channel_id]);
 
 
 
     useEffect(() => {
-        const url = `${Api_URL}/messages/dm/${id} `
+        const url = `${Api_URL}/channels/${channel_id}/messages`
         const fetchData = async () => {
             try {
 
@@ -137,17 +139,17 @@ export default function ChatArea() {
             }
 
         }
-        if (id) fetchData()
+        if (channel_id) fetchData()
 
 
-    }, [id, navigate])
+    }, [channel_id, navigate])
 
 
     async function SendMsg() {
 
 
 
-        const url = `${Api_URL}/messages/dm/${id} `
+        const url = `${Api_URL}/channels/${channel_id}/messages `
 
         try {
             const response = await fetch(url, {
@@ -214,12 +216,7 @@ export default function ChatArea() {
 
                 {/* upper bar to show Friend name */}
                 <div className="flex items-center border-b border-b-neutral-800 h-13 pl-3 text-sm gap-x-3 shrink-0">
-                    <span className="h-8 w-8 rounded-full bg-zinc-700/50 flex justify-center items-center text-lg text-yellow-200/50">{data.user?.avatar ? (
-                        <img src={data.user.avatar} alt="avatar" className="h-full w-full object-cover rounded-full" />
-                    ) : (
-                        data.user?.username ? data.user.username.charAt(0).toUpperCase() : '?'
-                    )}</span>
-                    <span className="text-zinc-100">{data.user.username}</span>
+                    <span className="text-zinc-100">channel name</span>
                 </div>
 
 
@@ -232,7 +229,7 @@ export default function ChatArea() {
                         {/* scrollable chat area */}
                         <div className=" flex flex-col  w-full min-h-0 flex-1 overflow-y-auto overflow-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden min-w-50 p-2 mb-2 space-y-3 ">
 
-                            <div className=" h-100 shrink-0 flex flex-col justify-center items-center  ">
+                            {/* <div className=" h-100 shrink-0 flex flex-col justify-center items-center  ">
                                 <span className="h-25 w-25 rounded-full border-5  border-zinc-800 bg-zinc-900 flex justify-center items-center text-6xl text-yellow-200/50 mb-4">{data.user?.avatar ? (
                                     <img src={data.user.avatar} alt="avatar" className="h-full w-full object-cover rounded-full" />
                                 ) : (
@@ -242,15 +239,15 @@ export default function ChatArea() {
                                 <span className="text-4xl text-zinc-500 font-bold text-center">{data.user?.username}</span>
                                 <span className="text-zinc-500 ">{data.user?.email}</span>
                                 <div className="p-1 px-3 mt-10 flex  rounded-3xl  bg-zinc-800  text-sm text-yellow-200/50 text-center ">This is the Beginning of Direct messages history with  " {data.user?.username} "</div>
-                            </div>
+                            </div> */}
 
 
                             {data.data.map((msg, index) => {
 
                                 const isMe = msg.sender_id === data.my_id
-                                const prevMsg_date = index > 0 ? CleanDate(data.data[index - 1].created_at) : null;
+                                const prevMsg_date = index > 0 ? CleanDate(data.data[index - 1].Date) : null;
 
-                                const currentDate = CleanDate(msg.created_at);
+                                const currentDate = CleanDate(msg.Date);
 
                                 const isSame = prevMsg_date === currentDate;
 
@@ -268,7 +265,7 @@ export default function ChatArea() {
 
                                             <div className={` px-3 py-1  rounded-2xl text-sm flex-none max-w-[70%]  break-words shadow-sm leading-relaxed ${isMe ? 'bg-green-700/50 ' : 'bg-zinc-500/50 '} `}>{msg.content}
                                               <span className="float-right ml-2 mt-3 text-[10px] text-zinc-300 opacity-70 select-none leading-none">
-                                                    {CleanTime(msg.created_at)}
+                                                    {CleanTime(msg.Date)}
                                                 </span>
                                                 </div>
                                         </div>
@@ -307,7 +304,7 @@ export default function ChatArea() {
                     </div>
 
                     {/* Friends information profile */}
-                    <div className="flex border border-zinc-700/50 flex-col m-2  rounded-2xl w-80 shrink-0  overflow-y-auto">
+                    {/* <div className="flex border border-zinc-700/50 flex-col m-2  rounded-2xl w-80 shrink-0  overflow-y-auto">
                         <div className=" relative  flex-1 w-full bg-gradient-to-r from-black-300  to-emerald-900 p-4">
                             <span className="absolute peer rounded-full border-4 border-zinc-800 h-20 w-20 -bottom-[23%] bg-zinc-900 flex justify-center items-center text-4xl text-yellow-100/50">
                                 {data.user?.avatar ? (
@@ -333,7 +330,7 @@ export default function ChatArea() {
 
 
 
-                    </div>
+                    </div> */}
 
 
 
