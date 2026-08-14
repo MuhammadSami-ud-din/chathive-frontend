@@ -8,6 +8,7 @@ import DefaultView from './views/defaultView.jsx'
 import DMFriends from './views/DMFriends.jsx'
 import ChatArea from './views/chat.jsx'
 import ServersListing from './views/server.jsx'
+import ServerPage from './views/ServerPage.jsx'
 
 
 
@@ -37,6 +38,8 @@ function App() {
         } >
           <Route index element={<DefaultView />} />
           <Route path='/discovery/servers' element={<ServersListing />} />
+          <Route path='/channels/:server_id' element={<ServerPage />} />
+
           <Route path='/@me' element={<DM />} >
             <Route index element={<DMFriends />} />
             <Route path=":id" element={<ChatArea />} />

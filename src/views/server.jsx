@@ -158,18 +158,24 @@ export default function ServersListing() {
                     <div className=" flex-1 flex w-full flex-wrap gap-3 py-5 px-5">
                         {Data.map((server) => {
                             return (
-                                <div key={server.server_id} className=" flex flex-col border border-zinc-700/50 min-w-48 w-[300px] min-h-[340px]  rounded-xl gap-4 transiton-all duration-300 hover:border-zinc-300/50 " >
-                                    <div className="h-37  w-full rounded-t-xl bg-gradient-to-r from-cyan-800 to-neutral-950"></div>
-                                    <div className="flex flex-col gap-1 ml-4 text-zinc-400">
-                                        <span className="text-xl font-semibold  ">{server.server_name}</span>
-                                    <span className="test-xs ">{server.server_description}</span>
+                                <NavLink 
+                                to= {`/channels/${server.server_id}`}
+                                key={server.server_id} 
+                                className=" flex flex-col  border border-zinc-700/50 min-w-48 w-[300px] min-h-[340px]  rounded-xl gap-4 transiton-all duration-300 hover:border-zinc-300/50 " >
+                                    <div className="h-37 w-full rounded-t-xl bg-gradient-to-r from-cyan-800 to-neutral-950"></div>
+                                    <div className="flex flex-col justify-between flex-1 gap-1 ml-4 text-zinc-400">
+                                        <div className="flex flex-col">
+                                            <span className="text-xl font-semibold  ">{server.server_name}</span>
+                                     <span className="test-xs ">{server.server_description}</span>
+                                        </div>
+                                    <div className="text-xs  mb-2 float-left text-zinc-100/50">6694508 Members</div>
+
                                     </div>
-                                    <div className="text-xs ml-3 mb-2 mt-13 text-zinc-100/50">6694508 Members</div>
 
 
 
 
-                                </div>
+                                </NavLink>
                             )
 
 
