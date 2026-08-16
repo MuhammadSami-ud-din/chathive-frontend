@@ -42,7 +42,7 @@ export default function ServerPage() {
 
 
 
-    
+
 
 
 
@@ -280,17 +280,15 @@ export default function ServerPage() {
                                         <div className="transition-all  group-hover:text-white mx-1 text-sm">Welcome & Info</div>
                                         <div className=" inline w-8 h-0  border border-zinc-400 transition-all  group-hover:border-white "></div>
                                     </div>
-                                {isAuthorized && (
-    <div className="relative text-2xl mr-5 pb-1 group hover:text-white cursor-pointer select-none"> 
-        +
-        {/* Simple, standard CSS div tooltip */}
-        <div className="absolute z-50 right-full top-1/2 -translate-y-1/2 mr-2 font-medium p-2 text-sm w-max bg-zinc-700 text-white rounded-xl pointer-events-none opacity-0 scale-90 transition-all duration-150 ease-out group-hover:opacity-100 group-hover:scale-100 shadow-xl">
-            Add Channel
-            {/* Tiny arrow pointing right towards the + button */}
-            <div className="absolute top-1/2 -translate-y-1/2 left-full h-0 w-0 border-y-6 border-y-transparent border-l-6 border-l-zinc-700" />
-        </div>
-    </div>
-)}
+                                    {isAuthorized && (
+                                        <div className="relative text-2xl mr-5 pb-1 group hover:text-white cursor-pointer select-none">
+                                            +
+                                            <div className="absolute z-50 right-full top-1/2 -translate-y-1/2 mr-2 font-medium p-2 text-sm w-max bg-zinc-700 text-white rounded-xl pointer-events-none opacity-0 scale-90 transition-all duration-150 ease-out group-hover:opacity-100 group-hover:scale-100 shadow-xl">
+                                                Add Channel
+                                                <div className="absolute top-1/2 -translate-y-1/2 left-full h-0 w-0 border-y-6 border-y-transparent border-l-6 border-l-zinc-700" />
+                                            </div>
+                                        </div>
+                                    )}
 
 
 
@@ -336,7 +334,7 @@ export default function ServerPage() {
                             {showMessage.message}
                         </div>
                     )}
-                    <Outlet />
+                    <Outlet context={data.Channels}/>
                 </div>
 
             </div>

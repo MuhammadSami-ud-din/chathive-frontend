@@ -1,7 +1,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import React from "react";
-import { useParams, useNavigate } from "react-router-dom"
+import { useParams, useNavigate, useOutletContext } from "react-router-dom"
 
 const Api_URL = import.meta.env.VITE_API_URL;
 import { socket } from "../socket.js";
@@ -48,8 +48,15 @@ export default function ChannelChat() {
     const [message, setMessage] = useState('')
     const navigate = useNavigate();
     const [isFocused, setIsFocused] = useState(false);
-     const [showMessage, setShowMessage] = useState({ text: '', type: '' });
+    const [showMessage, setShowMessage] = useState({ text: '', type: '' });
+    const channels = useOutletContext();
     const messageEndRef = useRef(null)
+
+
+    const ChannelInfo = channels.find((channel) => Number(channel.channel_id) === Number(channel_id));
+
+
+
 
     const scrollToBottom = () => {
         messageEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -125,7 +132,7 @@ export default function ChannelChat() {
                 }
 
                 console.log(result)
-                 setShowMessage({ text: result.message || 'Fetch Successful', type: 'success' });
+                setShowMessage({ text: result.message || 'Fetch Successful', type: 'success' });
                 setData(result)
 
 
@@ -134,7 +141,7 @@ export default function ChannelChat() {
             catch (error) {
 
                 console.log(error.message)
-                 setShowMessage({ text: error.message || 'Not Authorized', type: 'error' });
+                setShowMessage({ text: error.message || 'Not Authorized', type: 'error' });
                 if (error.message === 'Invalid token') {
                     navigate('/login');
                 }
@@ -179,7 +186,7 @@ export default function ChannelChat() {
         }
         catch (error) {
             console.log(error.message);
-               setShowMessage({ text: error.message || 'Not Authorized', type: 'error' });
+            setShowMessage({ text: error.message || 'Not Authorized', type: 'error' });
 
 
         }
@@ -208,20 +215,25 @@ export default function ChannelChat() {
             <div className="flex flex-col overflow-hidden w-full h-full">
 
                 {/* upper bar to show Channel name and search bar to search the chats in the channel whcih will IA come later  */}
-                <div className="relative flex items-center border-b border-b-neutral-800 h-13 pl-3 text-sm gap-x-3 shrink-0">
-                    <span className="text-zinc-100">channel name</span>
+                <div className="flex items-center border-b border-b-neutral-800 h-13 pl-3 text-sm gap-x-3 shrink-0">
+                    <span className="h-8 w-8 rounded-full bg-zinc-700/50 flex justify-center items-center text-lg text-yellow-200/50">{ChannelInfo?.avatar ? (
+                        <img src={ChannelInfo.avatar} alt="avatar" className="h-full w-full object-cover rounded-full" />
+                    ) : (
+                        ChannelInfo?.channel_name ? ChannelInfo.channel_name.charAt(0).toUpperCase() : '?'
+                    )}</span>
+                    <span className="text-zinc-100">{ChannelInfo?.channel_name}</span>
+
                     {showMessage.text && (
-                            
-              <div className={`absolute right-4 animate-auto-glide p-2 text-center text-sm font-medium rounded-xl transition-all duration-500 ease-in-out transform ${
-                showMessage.type === 'success' 
-                  ? 'bg-emerald-500/20 border border-emerald-500 text-emerald-200 translate-x-0 opacity-100 pointer-events-auto' 
-                  : 'bg-red-500/20 border border-red-500 text-red-200 '
-              }`}
-              onAnimationEnd={() =>  setShowMessage({ text: '' , type: '' })}>
-                {showMessage.text}
-              </div>
-             )}
-  
+
+                        <div className={`absolute right-4 animate-auto-glide p-2 text-center text-sm font-medium rounded-xl transition-all duration-500 ease-in-out transform ${showMessage.type === 'success'
+                            ? 'bg-emerald-500/20 border border-emerald-500 text-emerald-200 translate-x-0 opacity-100 pointer-events-auto'
+                            : 'bg-red-500/20 border border-red-500 text-red-200 '
+                            }`}
+                            onAnimationEnd={() => setShowMessage({ text: '', type: '' })}>
+                            {showMessage.text}
+                        </div>
+                    )}
+
 
 
 
@@ -237,18 +249,19 @@ export default function ChannelChat() {
                         {/* scrollable chat area */}
                         <div className=" flex flex-col  w-full min-h-0 flex-1 overflow-y-auto overflow-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden min-w-50 p-2 mb-2 space-y-3 ">
 
-                            {/* <div className=" h-100 shrink-0 flex flex-col justify-center items-center  ">
-                                <span className="h-25 w-25 rounded-full border-5  border-zinc-800 bg-zinc-900 flex justify-center items-center text-6xl text-yellow-200/50 mb-4">{data.user?.avatar ? (
+                            <div className=" h-100 shrink-0 flex flex-col justify-center items-center  ">
+                                <span className="h-25 w-25 rounded-full border-5  border-zinc-800 bg-zinc-900 flex justify-center items-center text-6xl text-yellow-200/50 mb-4">{ChannelInfo?.avatar ? (
                                     <img src={data.user.avatar} alt="avatar" className="h-full w-full object-cover rounded-full" />
                                 ) : (
-                                    data.user?.username ? data.user.username.charAt(0).toUpperCase() : '?'
+                                    ChannelInfo?.channel_name ? ChannelInfo.channel_name.charAt(0).toUpperCase() : '?'
                                 )}</span>
 
-                                <span className="text-4xl text-zinc-500 font-bold text-center">{data.user?.username}</span>
-                                <span className="text-zinc-500 ">{data.user?.email}</span>
-                                <div className="p-1 px-3 mt-10 flex  rounded-3xl  bg-zinc-800  text-sm text-yellow-200/50 text-center ">This is the Beginning of Direct messages history with  " {data.user?.username} "</div>
-                            </div> */}
+                                <span className="text-4xl text-zinc-500 font-bold text-center">{ChannelInfo?.channel_name }</span>
+                                <span className="text-zinc-500 ">{ChannelInfo?.description}</span>
+                                <div className="p-1 px-3 mt-10 flex  rounded-3xl  bg-zinc-800  text-sm text-yellow-200/50 text-center ">This is the Beginning of messages history In  " {ChannelInfo.channel_name } "</div>
+                            </div>
 
+                               
 
                             {data.data.map((msg, index) => {
 
