@@ -1,5 +1,5 @@
 import { useEffect, useState, } from "react"
-import { useParams, useNavigate, Outlet, NavLink } from "react-router-dom"
+import { useParams, useNavigate, Outlet, NavLink  , useOutletContext} from "react-router-dom"
 const Api_URL = import.meta.env.VITE_API_URL
 
 export default function ServerPage() {
@@ -8,6 +8,7 @@ export default function ServerPage() {
     const [isMember, setIsMember] = useState({ ismember: false })
     const [joining, setJoining] = useState(false)
       const [showMessage, setShowMessage] = useState({ message: '', type: '' });
+      const {AddJoinedServers} = useOutletContext()
 
     const navigate = useNavigate()
 
@@ -155,7 +156,12 @@ export default function ServerPage() {
 
 
            setShowMessage({ message: result.message || 'Server Join Successfull', type: 'success' });
-            console.log(result.message)
+
+            console.log(result.serverInfo)
+
+            if(result?.serverInfo && AddJoinedServers){
+                AddJoinedServers(result.serverInfo)
+            }
 
 
 
@@ -302,7 +308,7 @@ export default function ServerPage() {
             <div className={`relative  bg-[#151518] border-t border-t-zinc-800 flex-1 flex flex-col min-w-0 overflow-hidden  `}>
                  {showMessage.message && (
                             
-              <div className={`absolute top-0 right-0 animate-auto-glide p-3 text-center text-sm font-medium rounded-xl transition-all duration-500 ease-in-out transform ${
+              <div className={`absolute top-0 right-1 animate-auto-glide p-2 text-center text-sm font-medium rounded-xl transition-all duration-500 ease-in-out transform ${
                 showMessage.type === 'success' 
                   ? 'bg-emerald-500/20 border border-emerald-500 text-emerald-200 translate-x-0 opacity-100 pointer-events-auto' 
                   : 'bg-red-500/20 border border-red-500 text-red-200  translate-x-0 opacity-100 pointer-events-auto '

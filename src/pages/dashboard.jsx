@@ -53,6 +53,14 @@ export default function Dashboard() {
     }, [navigate])
 
 
+    const AddJoinedServers = (newServer)=>{
+        setData((prev)=>{
+            if (prev.some((s)=> s.server_id === newServer.server_id)) return prev 
+            return[...prev , newServer]
+        })
+    }
+
+
 
 
 
@@ -234,7 +242,7 @@ export default function Dashboard() {
 
 
                     <div className="flex  flex-1 overflow-hidden min-h-0">
-                        <Outlet context={{ setHeaderTitle }}  />
+                        <Outlet context={{ setHeaderTitle , AddJoinedServers}}  />
                     </div>
 
 

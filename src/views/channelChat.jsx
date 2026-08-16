@@ -212,7 +212,7 @@ export default function ChannelChat() {
                     <span className="text-zinc-100">channel name</span>
                     {showMessage.text && (
                             
-              <div className={`absolute right-0 animate-auto-glide p-3 text-center text-sm font-medium rounded-xl transition-all duration-500 ease-in-out transform ${
+              <div className={`absolute right-4 animate-auto-glide p-2 text-center text-sm font-medium rounded-xl transition-all duration-500 ease-in-out transform ${
                 showMessage.type === 'success' 
                   ? 'bg-emerald-500/20 border border-emerald-500 text-emerald-200 translate-x-0 opacity-100 pointer-events-auto' 
                   : 'bg-red-500/20 border border-red-500 text-red-200 '
