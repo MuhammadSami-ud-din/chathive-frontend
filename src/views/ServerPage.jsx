@@ -15,7 +15,7 @@ export default function ServerPage() {
 
     const isAuthorized = (data?.role?.length > 0)
     console.log(isAuthorized)
-
+console.log(data.Channels)
 
 
 

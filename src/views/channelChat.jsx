@@ -56,7 +56,7 @@ export default function ChannelChat() {
     const ChannelInfo = channels.find((channel) => Number(channel.channel_id) === Number(channel_id));
 
 
-
+console.log(ChannelInfo)
 
     const scrollToBottom = () => {
         messageEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -249,6 +249,8 @@ export default function ChannelChat() {
                         {/* scrollable chat area */}
                         <div className=" flex flex-col  w-full min-h-0 flex-1 overflow-y-auto overflow-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden min-w-50 p-2 mb-2 space-y-3 ">
 
+
+                            {/* {Server Info at the begining} */}
                             <div className=" h-100 shrink-0 flex flex-col justify-center items-center  ">
                                 <span className="h-25 w-25 rounded-full border-5  border-zinc-800 bg-zinc-900 flex justify-center items-center text-6xl text-yellow-200/50 mb-4">{ChannelInfo?.avatar ? (
                                     <img src={data.user.avatar} alt="avatar" className="h-full w-full object-cover rounded-full" />
@@ -256,12 +258,13 @@ export default function ChannelChat() {
                                     ChannelInfo?.channel_name ? ChannelInfo.channel_name.charAt(0).toUpperCase() : '?'
                                 )}</span>
 
-                                <span className="text-4xl text-zinc-500 font-bold text-center">{ChannelInfo?.channel_name }</span>
+                                <span className="text-4xl text-zinc-500 font-bold text-center">{ChannelInfo?.channel_name}</span>
                                 <span className="text-zinc-500 ">{ChannelInfo?.description}</span>
-                                <div className="p-1 px-3 mt-10 flex  rounded-3xl  bg-zinc-800  text-sm text-yellow-200/50 text-center ">This is the Beginning of messages history In  " {ChannelInfo.channel_name } "</div>
+                                 <span className="text-zinc-500 ">Channel Created on: {CleanDate(ChannelInfo?.created_at)}</span>
+                                <div className="p-1 px-3 mt-10 flex  rounded-3xl  bg-zinc-800  text-sm text-yellow-200/50 text-center ">This is the Beginning of messages history In  " {ChannelInfo?.channel_name} "</div>
                             </div>
 
-                               
+
 
                             {data.data.map((msg, index) => {
 
