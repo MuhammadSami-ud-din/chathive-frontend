@@ -129,53 +129,53 @@ export default function ServerPage() {
 
 
 
-   async function HandleServerJoin(){
-    if (joining) return
-    setJoining(true)
+    async function HandleServerJoin() {
+        if (joining) return
+        setJoining(true)
         const url = `${Api_URL}/server_join/${server_id}`
-       
-            try {
 
-                const response = await fetch(url, {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
-                        "Content-Type": "application/json"
-                    }
-                });
+        try {
 
-                const result = await response.json();
-                console.log("SERVER RETURNED:", result);
-
-                if (!response.ok) {
-                    throw new Error(result.error || 'no servers found')
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
+                    "Content-Type": "application/json"
                 }
+            });
 
+            const result = await response.json();
+            console.log("SERVER RETURNED:", result);
 
-
-                console.log(result)
-             
-
-
-
-
-            }
-            catch (error) {
-
-                console.log(error.message)
-                if (error.message === 'Invalid token') {
-                    navigate('/login');
-                }
-
-            }
-            finally{
-                   setJoining(false)
+            if (!response.ok) {
+                throw new Error(result.error || 'no servers found')
             }
 
-       
 
-    
-   }
+
+            console.log(result)
+
+
+
+
+
+        }
+        catch (error) {
+
+            console.log(error.message)
+            if (error.message === 'Invalid token') {
+                navigate('/login');
+            }
+
+        }
+        finally {
+            setJoining(false)
+        }
+
+
+
+
+    }
 
 
 
@@ -192,19 +192,33 @@ export default function ServerPage() {
 
     return (
         <>
-            <div className="flex-none relative  w-80 h-full flex flex-col overflow-hidden  rounded-l-xl border-t border-l border-zinc-800 ">
+            <div className="flex-none relative  w-80 h-full flex flex-col  rounded-l-xl border-t border-l border-zinc-800 ">
                 <div
                     style={{
 
                         backgroundColor: `rgba(24, 24, 27, ${navOpacity})`,
                     }}
-                    className={`absolute top-0 left-0 z-49 flex items-center text-white justify-between font-bold text-xl border-b h-13 pl-4 text-sm gap-x-3 shrink-0 w-full transition-all hover:!bg-zinc-950/50  ${navOpacity > 0.8 ? 'border-b-zinc-800/50 shadow-md' : 'border-b-transparent'
+                    className={`absolute top-0 left-0 z-49 flex flex items-center text-white justify-between font-bold text-xl border-b h-13 pl-4 text-sm gap-x-3 shrink-0 w-full transition-all hover:!bg-zinc-950/50  ${navOpacity > 0.8 ? 'border-b-zinc-800/50 shadow-md' : 'border-b-transparent'
                         }`}
                 >
                     {data?.Serverinfo?.[0]?.server_name}
 
-                    {!isMember.ismember && (
-                        <button onClick={HandleServerJoin} className="bg-green-400/50 text-sm p-1.5 rounded-xl mr-3 transition-all hover:bg-green-700">Join Server</button>
+                    {isMember.ismember &&(
+                         <div className="relative w-12 h-12 text-sm p-1.5 rounded-xl mr-3 transition-all group ">
+                               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+
+                                <g>
+                                    <circle cx="56" cy="40" r="10" fill="#FFFFFF" />
+                                    <path d="M56,53 C46,53 38,59 38,68 L74,68 C74,59 66,53 56,53 Z" fill="#FFFFFF" />
+                                    <circle cx="42" cy="48" r="12" fill="#FFFFFF" />
+                                    <path d="M42,63 C30,63 20,70 20,80 L64,80 C64,70 54,63 42,63 Z" fill="#FFFFFF" />
+                                    <path d="M66,74 L74,74 L74,66 L78,66 L78,74 L86,74 L86,78 L78,78 L78,86 L74,86 L74,78 L66,78 Z" fill="#FFFFFF" />
+                                </g>
+                            </svg>
+                            <div className="absolute z-10 p-1 px-2 mt-2 w-max bg-black rounded-xl pointer-events-none opacity-0 transition-all group-hover:opacity-100    ">Invite link</div>
+                            </div>
+                             
+                           
                     )}
 
                 </div>
