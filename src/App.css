@@ -12,3 +12,26 @@ html, body, #root {
 input:invalid {
   box-shadow: none; 
 }
+
+@keyframes autoGlide {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  20% {
+    transform: translateX(0);
+    opacity: 1; 
+  }
+  80% {
+    transform: translateX(0);
+    opacity: 1; 
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0; 
+  }
+}
+
+.animate-auto-glide {
+  animation: autoGlide 4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}

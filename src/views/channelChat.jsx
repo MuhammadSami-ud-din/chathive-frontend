@@ -44,10 +44,11 @@ const CleanTime = (date) => {
 export default function ChannelChat() {
 
     const { channel_id } = useParams();
-    const [data, setData] = useState({ success: false, data: [], my_id: ''});
+    const [data, setData] = useState({ success: false, data: [], my_id: '' });
     const [message, setMessage] = useState('')
     const navigate = useNavigate();
     const [isFocused, setIsFocused] = useState(false);
+     const [showMessage, setShowMessage] = useState({ text: '', type: '' });
     const messageEndRef = useRef(null)
 
     const scrollToBottom = () => {
@@ -57,10 +58,10 @@ export default function ChannelChat() {
         scrollToBottom()
     }, [data.data])
 
-    
+
 
     useEffect(() => {
-       
+
 
         socket.emit('join_channel', channel_id);
 
@@ -78,7 +79,7 @@ export default function ChannelChat() {
 
     useEffect(() => {
         const handleNewMessage = (msg) => {
-            console.log('hello', msg)
+
             console.log(String(msg.channel_id) === String(channel_id))
             if (String(msg.channel_id) === String(channel_id)) {
                 setData((prev) => ({
@@ -124,6 +125,7 @@ export default function ChannelChat() {
                 }
 
                 console.log(result)
+                 setShowMessage({ text: result.message || 'Fetch Successful', type: 'success' });
                 setData(result)
 
 
@@ -132,6 +134,7 @@ export default function ChannelChat() {
             catch (error) {
 
                 console.log(error.message)
+                 setShowMessage({ text: error.message || 'Not Authorized', type: 'error' });
                 if (error.message === 'Invalid token') {
                     navigate('/login');
                 }
@@ -149,7 +152,7 @@ export default function ChannelChat() {
 
 
 
-        const url = `${Api_URL}/channels/${channel_id}/messages `
+        const url = `${Api_URL}/channels/${channel_id}/messages`
 
         try {
             const response = await fetch(url, {
@@ -176,7 +179,7 @@ export default function ChannelChat() {
         }
         catch (error) {
             console.log(error.message);
-            
+               setShowMessage({ text: error.message || 'Not Authorized', type: 'error' });
 
 
         }
@@ -190,20 +193,10 @@ export default function ChannelChat() {
             e.preventDefault();
 
             if (message.trim()) {
-                SendMsg(e);
+                SendMsg();
             }
         }
     };
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -214,9 +207,24 @@ export default function ChannelChat() {
         <>
             <div className="flex flex-col overflow-hidden w-full h-full">
 
-                {/* upper bar to show Friend name */}
-                <div className="flex items-center border-b border-b-neutral-800 h-13 pl-3 text-sm gap-x-3 shrink-0">
+                {/* upper bar to show Channel name and search bar to search the chats in the channel whcih will IA come later  */}
+                <div className="relative flex items-center border-b border-b-neutral-800 h-13 pl-3 text-sm gap-x-3 shrink-0">
                     <span className="text-zinc-100">channel name</span>
+                    {showMessage.text && (
+                            
+              <div className={`absolute right-0 animate-auto-glide p-3 text-center text-sm font-medium rounded-xl transition-all duration-500 ease-in-out transform ${
+                showMessage.type === 'success' 
+                  ? 'bg-emerald-500/20 border border-emerald-500 text-emerald-200 translate-x-0 opacity-100 pointer-events-auto' 
+                  : 'bg-red-500/20 border border-red-500 text-red-200 '
+              }`}
+              onAnimationEnd={() =>  setShowMessage({ text: '' , type: '' })}>
+                {showMessage.text}
+              </div>
+             )}
+  
+
+
+
                 </div>
 
 
@@ -264,13 +272,13 @@ export default function ChannelChat() {
                                         <div className={`flex w-full  items-start ${isMe ? 'justify-end ' : 'justify-start '} `} >
 
                                             <div className={` px-3 py-1  rounded-2xl text-sm flex-none max-w-[70%]  break-words shadow-sm leading-relaxed ${isMe ? 'bg-green-700/50 ' : 'bg-zinc-500/50 '} `}>{msg.content}
-                                              <span className="float-right ml-2 mt-3 text-[10px] text-zinc-300 opacity-70 select-none leading-none">
+                                                <span className="float-right ml-2 mt-3 text-[10px] text-zinc-300 opacity-70 select-none leading-none">
                                                     {CleanTime(msg.Date)}
                                                 </span>
-                                                </div>
+                                            </div>
                                         </div>
-                                       
-                                        
+
+
 
                                     </React.Fragment>
 
