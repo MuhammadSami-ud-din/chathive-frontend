@@ -7,6 +7,7 @@ export default function ServerPage() {
     const [data, setData] = useState({ Channels: [], Serverinfo: [] })
     const [isMember, setIsMember] = useState({ ismember: false })
     const [joining, setJoining] = useState(false)
+      const [showMessage, setShowMessage] = useState({ message: '', type: '' });
 
     const navigate = useNavigate()
 
@@ -131,6 +132,7 @@ export default function ServerPage() {
 
     async function HandleServerJoin() {
         if (joining) return
+        setIsMember({ ismember: true });
         setJoining(true)
         const url = `${Api_URL}/server_join/${server_id}`
 
@@ -152,8 +154,9 @@ export default function ServerPage() {
             }
 
 
+           setShowMessage({ message: result.message || 'Server Join Successfull', type: 'success' });
+            console.log(result.message)
 
-            console.log(result)
 
 
 
@@ -163,6 +166,8 @@ export default function ServerPage() {
         catch (error) {
 
             console.log(error.message)
+            setIsMember({ ismember: false });
+            setShowMessage({ message: error.message || 'Already a Member', type: 'error' });
             if (error.message === 'Invalid token') {
                 navigate('/login');
             }
@@ -192,19 +197,23 @@ export default function ServerPage() {
 
     return (
         <>
-            <div className="flex-none relative  w-80 h-full flex flex-col  rounded-l-xl border-t border-l border-zinc-800 ">
+           <div className="flex w-full relative">
+           
+
+             <div className="flex-none relative  w-80 h-full flex flex-col  rounded-l-xl border-t border-l border-zinc-800 ">
                 <div
                     style={{
 
                         backgroundColor: `rgba(24, 24, 27, ${navOpacity})`,
                     }}
-                    className={`absolute top-0 left-0 z-49 flex flex items-center text-white justify-between font-bold text-xl border-b h-13 pl-4 text-sm gap-x-3 shrink-0 w-full transition-all hover:!bg-zinc-950/50  ${navOpacity > 0.8 ? 'border-b-zinc-800/50 shadow-md' : 'border-b-transparent'
+                    className={`absolute top-0 left-0 z-49 flex flex items-center text-white justify-between font-bold text-xl border-b h-13 pl-4 text-sm gap-x-3 shrink-0 w-full transition-all  ${navOpacity > 0.8 ? 'border-b-zinc-800/50 shadow-md' : 'border-b-transparent hover:!bg-zinc-950/50 '
                         }`}
                 >
                     {data?.Serverinfo?.[0]?.server_name}
 
-                    {isMember.ismember &&(
-                         <div className="relative w-12 h-12 text-sm p-1.5 rounded-xl mr-3 transition-all group ">
+                    {
+                         isMember.ismember? 
+                         (<div className="relative w-12 h-12 text-sm p-1.5 rounded-xl mr-3 transition-all group ">
                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
 
                                 <g>
@@ -215,11 +224,15 @@ export default function ServerPage() {
                                     <path d="M66,74 L74,74 L74,66 L78,66 L78,74 L86,74 L86,78 L78,78 L78,86 L74,86 L74,78 L66,78 Z" fill="#FFFFFF" />
                                 </g>
                             </svg>
-                            <div className="absolute z-10 p-1 px-2 mt-2 w-max bg-black rounded-xl pointer-events-none opacity-0 transition-all group-hover:opacity-100    ">Invite link</div>
+
+                            <div className="absolute z-10 font-medium  p-2 mt-7 text-sm w-max bg-zinc-600 rounded-xl pointer-events-none opacity-0  left-1/2  -translate-1/2 scale-0 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:scale-100     ">Invite to Server
+                                   <div className="absolute bottom-full  left-[45%] h-0 w-0 border-x-8   border-x-transparent border-b-8 border-b-zinc-600" />
                             </div>
-                             
+                            </div>
+                             ) :
+                             (<button onClick={HandleServerJoin} className="relativep-2 bg-green-500/50 text-sm p-1.5 rounded-xl mr-3 transition-all hover:bg-green-700/50 ">Join Server</button>)
                            
-                    )}
+                    }
 
                 </div>
 
@@ -287,9 +300,21 @@ export default function ServerPage() {
 
             {/* {Right Side} */}
             <div className={`relative  bg-[#151518] border-t border-t-zinc-800 flex-1 flex flex-col min-w-0 overflow-hidden  `}>
+                 {showMessage.message && (
+                            
+              <div className={`absolute top-0 right-0 animate-auto-glide p-3 text-center text-sm font-medium rounded-xl transition-all duration-500 ease-in-out transform ${
+                showMessage.type === 'success' 
+                  ? 'bg-emerald-500/20 border border-emerald-500 text-emerald-200 translate-x-0 opacity-100 pointer-events-auto' 
+                  : 'bg-red-500/20 border border-red-500 text-red-200  translate-x-0 opacity-100 pointer-events-auto '
+              }`}
+              onAnimationEnd={() =>  setShowMessage({ message: '' , type: '' })}>
+                {showMessage.message}
+              </div>
+             )}
                 <Outlet />
             </div>
 
+           </div>
 
 
 
