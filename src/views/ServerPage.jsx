@@ -1,12 +1,16 @@
 import { useEffect, useState, } from "react"
-import { useParams, useNavigate , Outlet , NavLink} from "react-router-dom"
+import { useParams, useNavigate, Outlet, NavLink } from "react-router-dom"
 const Api_URL = import.meta.env.VITE_API_URL
 
 export default function ServerPage() {
     const { server_id } = useParams()
     const [data, setData] = useState({ Channels: [], Serverinfo: [] })
+    const [isMember, setIsMember] = useState({ ismember: false })
+    const [joining, setJoining] = useState(false)
+
     const navigate = useNavigate()
-   
+
+
 
 
     const [navOpacity, setNavOpacity] = useState(0);
@@ -79,6 +83,107 @@ export default function ServerPage() {
 
 
 
+    useEffect(() => {
+        const url = `${Api_URL}/server_join/${server_id}`
+        const fetchData = async () => {
+            try {
+
+                const response = await fetch(url, {
+                    method: "GET",
+                    headers: {
+                        "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
+                        "Content-Type": "application/json"
+                    }
+                });
+
+                const result = await response.json();
+                console.log("SERVER DATA RETURNED channels:", result);
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'no servers found')
+                }
+
+
+                setIsMember(result)
+                console.log(result)
+
+
+
+
+            }
+            catch (error) {
+
+                console.log(error.message)
+                if (error.message === 'Invalid token') {
+                    navigate('/login');
+                }
+
+            }
+
+        }
+        fetchData()
+
+
+    }, [navigate, server_id])
+
+
+
+
+   async function HandleServerJoin(){
+    if (joining) return
+    setJoining(true)
+        const url = `${Api_URL}/server_join/${server_id}`
+       
+            try {
+
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
+                        "Content-Type": "application/json"
+                    }
+                });
+
+                const result = await response.json();
+                console.log("SERVER RETURNED:", result);
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'no servers found')
+                }
+
+
+
+                console.log(result)
+             
+
+
+
+
+            }
+            catch (error) {
+
+                console.log(error.message)
+                if (error.message === 'Invalid token') {
+                    navigate('/login');
+                }
+
+            }
+            finally{
+                   setJoining(false)
+            }
+
+       
+
+    
+   }
+
+
+
+
+
+
+
+
 
 
 
@@ -93,10 +198,15 @@ export default function ServerPage() {
 
                         backgroundColor: `rgba(24, 24, 27, ${navOpacity})`,
                     }}
-                    className={`absolute top-0 left-0 z-50 flex items-center text-white font-bold text-xl border-b h-13 pl-4 text-sm gap-x-3 shrink-0 w-full ${navOpacity > 0.8 ? 'border-b-zinc-800/50 shadow-md' : 'border-b-transparent'
+                    className={`absolute top-0 left-0 z-49 flex items-center text-white justify-between font-bold text-xl border-b h-13 pl-4 text-sm gap-x-3 shrink-0 w-full transition-all hover:!bg-zinc-950/50  ${navOpacity > 0.8 ? 'border-b-zinc-800/50 shadow-md' : 'border-b-transparent'
                         }`}
                 >
                     {data?.Serverinfo?.[0]?.server_name}
+
+                    {!isMember.ismember && (
+                        <button onClick={HandleServerJoin} className="bg-green-400/50 text-sm p-1.5 rounded-xl mr-3 transition-all hover:bg-green-700">Join Server</button>
+                    )}
+
                 </div>
 
 
@@ -109,7 +219,7 @@ export default function ServerPage() {
                     <div className="h-[1000px] bg-zinc-900 w-full ">
                         <div className="w-full border-b border-b-zinc-700/50 h-15 flex items-center group ">
                             <div className=" flex items-center g-x-3 m-2 w-full  rounded-xl transition-all text-zinc-400 hover:bg-zinc-500/50  group-hover:text-white ">
-                                
+
                                 <svg xmlns="http://w3.org" viewBox="0 0 100 100" className="w-10 h-10 ">
                                     <g transform="translate(10, 10) scale(0.8)">
                                         <rect className="fill-[#7D7D84] transition-colors duration-200 group-hover:fill-white" x="46" y="20" width="8" height="60" rx="2" />
@@ -125,21 +235,21 @@ export default function ServerPage() {
 
                         <div className="w-full flex flex-col ">
 
-                           <div className="flex items-center  pl-7 text-zinc-400 transition-all group my-3"> 
-                           <div className=" inline w-10 h-0 border border-zinc-400 transition-all  group-hover:border-white "></div>
-                           <div className="transition-all  group-hover:text-white mx-1 text-sm">Welcome & Info</div>
-                           <div className=" inline w-8 h-0 border border-zinc-400 transition-all  group-hover:border-white "></div>
-                           
-                           
-                           </div>
+                            <div className="flex items-center  pl-7 text-zinc-400 transition-all group my-3">
+                                <div className=" inline w-10 h-0 border border-zinc-400 transition-all  group-hover:border-white "></div>
+                                <div className="transition-all  group-hover:text-white mx-1 text-sm">Welcome & Info</div>
+                                <div className=" inline w-8 h-0 border border-zinc-400 transition-all  group-hover:border-white "></div>
+
+
+                            </div>
 
                             {
                                 data?.Channels?.map((channel) => {
 
                                     return (
                                         <NavLink
-                                        to={`${channel.channel_id}`}
-                                        key={channel.channel_id} className="w-full flex  "> 
+                                            to={`${channel.channel_id}`}
+                                            key={channel.channel_id} className="w-full flex  ">
                                             <span className=" w-full mx-2 py-1 pl-2 rounded-xl transition-all text-zinc-400 hover:bg-zinc-500/50 ">{channel.channel_name}</span>
                                         </NavLink>
                                     )
@@ -163,7 +273,7 @@ export default function ServerPage() {
 
             {/* {Right Side} */}
             <div className={`relative  bg-[#151518] border-t border-t-zinc-800 flex-1 flex flex-col min-w-0 overflow-hidden  `}>
-              <Outlet />
+                <Outlet />
             </div>
 
 

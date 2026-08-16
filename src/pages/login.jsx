@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from 'react-router-dom';
+import { socket } from "../socket";
 const Api_URL = import.meta.env.VITE_API_URL;
 
 export default function LoginUser(){
@@ -44,6 +45,11 @@ export default function LoginUser(){
       }
 
       localStorage.setItem('authToken' , result.token);
+      if (socket.connected) {
+      socket.disconnect().connect();
+    } else {
+      socket.connect();
+    }
       setMessage({ text: result.message || 'Login Successful!', type: 'success' });
       console.log('login successful');
       
