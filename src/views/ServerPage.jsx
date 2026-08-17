@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react"
 import { useParams, useNavigate, Outlet, NavLink, useOutletContext } from "react-router-dom"
-import { createPortal } from "react-dom"
+import ChannelChat from "./channelChat"
+import CreateChannel from "./CreateChannel"
 
 const Api_URL = import.meta.env.VITE_API_URL
 
@@ -9,13 +10,14 @@ export default function ServerPage() {
     const [data, setData] = useState({ Channels: [], Serverinfo: [], role: [] })
     const [isMember, setIsMember] = useState({ ismember: false })
     const [joining, setJoining] = useState(false)
+    const [isOpen, setIsOpen] = useState(false)
     const [showMessage, setShowMessage] = useState({ message: '', type: '' });
     const { AddJoinedServers } = useOutletContext()
     const navigate = useNavigate()
 
     const isAuthorized = (data?.role?.length > 0)
-    console.log(isAuthorized)
-console.log(data.Channels)
+    
+
 
 
 
@@ -196,6 +198,10 @@ console.log(data.Channels)
 
 
 
+    
+
+
+
 
 
 
@@ -281,7 +287,9 @@ console.log(data.Channels)
                                         <div className=" inline w-8 h-0  border border-zinc-400 transition-all  group-hover:border-white "></div>
                                     </div>
                                     {isAuthorized && (
-                                        <div className="relative text-2xl mr-5 pb-1 group hover:text-white cursor-pointer select-none">
+                                        <div
+                                        onClick={()=> setIsOpen(true)}
+                                        className=" relative text-2xl mr-5 pb-1 group hover:text-white cursor-pointer select-none">
                                             +
                                             <div className="absolute z-50 right-full top-1/2 -translate-y-1/2 mr-2 font-medium p-2 text-sm w-max bg-zinc-700 text-white rounded-xl pointer-events-none opacity-0 scale-90 transition-all duration-150 ease-out group-hover:opacity-100 group-hover:scale-100 shadow-xl">
                                                 Add Channel
@@ -339,6 +347,11 @@ console.log(data.Channels)
 
             </div>
 
+
+            {isOpen && <CreateChannel 
+            server_id = { server_id} 
+            isOpen
+            onclose = {()=> setIsOpen(false)}/>}
 
 
         </>

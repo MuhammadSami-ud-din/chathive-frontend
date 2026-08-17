@@ -290,8 +290,10 @@ export default function ChannelChat() {
 
                                             <div className={`  pb-1 px-1 flex flex-col rounded-xl text-sm flex-none  max-w-[70%] shrink-0 break-words shadow-sm leading-relaxed ${isMe ? 'bg-green-700/50 ' : 'bg-zinc-700/70 '} `}>
                                               
-                                                <div className=" rounded-t-xl pl-2 pt-1 pr-7 text-amber-200 font-bold">{msg?.sender?.username}</div>
-                                                <div className="px-2">
+                                               {!isMe &&(
+                                                 <div className={`rounded-t-xl pl-2 pt-1 pr-7  font-bold  text-amber-200 `}>{msg?.sender?.username}</div>
+                                               )}
+                                                <div className="px-2 pt-1 text-sm flex-none  shrink-0 break-words shadow-sm leading-relaxed">
                                                 {msg.content}
                                                 <span className="float-right ml-2 mt-3 text-[10px] text-zinc-300 opacity-70 select-none leading-none">
                                                     {CleanTime(msg.Date)}
