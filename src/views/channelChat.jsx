@@ -56,7 +56,7 @@ export default function ChannelChat() {
     const ChannelInfo = channels.find((channel) => Number(channel.channel_id) === Number(channel_id));
 
 
-console.log(ChannelInfo)
+
 
     const scrollToBottom = () => {
         messageEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -87,7 +87,7 @@ console.log(ChannelInfo)
     useEffect(() => {
         const handleNewMessage = (msg) => {
 
-            console.log(String(msg.channel_id) === String(channel_id))
+
             if (String(msg.channel_id) === String(channel_id)) {
                 setData((prev) => ({
                     ...prev,
@@ -260,7 +260,7 @@ console.log(ChannelInfo)
 
                                 <span className="text-4xl text-zinc-500 font-bold text-center">{ChannelInfo?.channel_name}</span>
                                 <span className="text-zinc-500 ">{ChannelInfo?.description}</span>
-                                 <span className="text-zinc-500 ">Channel Created on: {CleanDate(ChannelInfo?.created_at)}</span>
+                                <span className="text-zinc-500 ">Channel Created on: {CleanDate(ChannelInfo?.created_at)}</span>
                                 <div className="p-1 px-3 mt-10 flex  rounded-3xl  bg-zinc-800  text-sm text-yellow-200/50 text-center ">This is the Beginning of messages history In  " {ChannelInfo?.channel_name} "</div>
                             </div>
 
@@ -285,12 +285,19 @@ console.log(ChannelInfo)
                                             </div>)}
 
 
-                                        <div className={`flex w-full  items-start ${isMe ? 'justify-end ' : 'justify-start '} `} >
+                                        <div className={`flex  w-full  items-start ${isMe ? 'justify-end ' : 'justify-start '} `} >
+                                           
 
-                                            <div className={` px-3 py-1  rounded-2xl text-sm flex-none max-w-[70%] shrink-0 break-words shadow-sm leading-relaxed ${isMe ? 'bg-green-700/50 ' : 'bg-zinc-500/50 '} `}>{msg.content}
+                                            <div className={`  pb-1 px-1 flex flex-col rounded-xl text-sm flex-none  max-w-[70%] shrink-0 break-words shadow-sm leading-relaxed ${isMe ? 'bg-green-700/50 ' : 'bg-zinc-700/70 '} `}>
+                                              
+                                                <div className=" rounded-t-xl pl-2 pt-1 pr-7 text-amber-200 font-bold">{msg?.sender?.username}</div>
+                                                <div className="px-2">
+                                                {msg.content}
                                                 <span className="float-right ml-2 mt-3 text-[10px] text-zinc-300 opacity-70 select-none leading-none">
                                                     {CleanTime(msg.Date)}
                                                 </span>
+                                                </div>
+
                                             </div>
                                         </div>
 
