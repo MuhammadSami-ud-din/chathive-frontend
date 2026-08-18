@@ -16,7 +16,7 @@ export default function ServerPage() {
     const navigate = useNavigate()
 
     const isAuthorized = (data?.role?.length > 0)
-    
+
 
 
 
@@ -196,9 +196,14 @@ export default function ServerPage() {
 
     }
 
+    const HandleNewChannel = (channel) => {
+        setData((prev) => ({
+            ...prev, Channels: [...prev.Channels, channel]
+        }))
+    }
 
 
-    
+
 
 
 
@@ -278,7 +283,7 @@ export default function ServerPage() {
                                     Server Guide</div>
                             </div>
 
-                            <div className="w-full flex flex-col ">
+                            <div className="w-full flex flex-col px-2 ">
 
                                 <div className="flex items-center  justify-between  pl-7 text-zinc-400 transition-all my-3">
                                     <div className="flex items-center group">
@@ -288,8 +293,8 @@ export default function ServerPage() {
                                     </div>
                                     {isAuthorized && (
                                         <div
-                                        onClick={()=> setIsOpen(true)}
-                                        className=" relative text-2xl mr-5 pb-1 group hover:text-white cursor-pointer select-none">
+                                            onClick={() => setIsOpen(true)}
+                                            className=" relative text-2xl mr-2 pb-1 group hover:text-white cursor-pointer select-none">
                                             +
                                             <div className="absolute z-50 right-full top-1/2 -translate-y-1/2 mr-2 font-medium p-2 text-sm w-max bg-zinc-700 text-white rounded-xl pointer-events-none opacity-0 scale-90 transition-all duration-150 ease-out group-hover:opacity-100 group-hover:scale-100 shadow-xl">
                                                 Add Channel
@@ -308,8 +313,13 @@ export default function ServerPage() {
                                         return (
                                             <NavLink
                                                 to={`${channel.channel_id}`}
-                                                key={channel.channel_id} className="w-full flex  ">
-                                                <span className=" w-full mx-2 py-1 pl-2 rounded-xl transition-all text-zinc-400 hover:bg-zinc-500/50 ">{channel.channel_name}</span>
+                                                key={channel.channel_id}
+                                                className={({ isActive }) =>
+                                                    `w-full  py-1 pl-2 rounded-xl transition-all text-zinc-400 ${isActive ? 'bg-zinc-700/70 text-white font-medium' : 'hover:bg-zinc-500/30'
+                                                    }`
+                                                }
+                                            >
+                                                <span># {channel.channel_name}</span>
                                             </NavLink>
                                         )
                                     })
@@ -342,16 +352,17 @@ export default function ServerPage() {
                             {showMessage.message}
                         </div>
                     )}
-                    <Outlet context={data.Channels}/>
+                    <Outlet context={data.Channels} />
                 </div>
 
             </div>
 
 
-            {isOpen && <CreateChannel 
-            server_id = { server_id} 
-            isOpen
-            onclose = {()=> setIsOpen(false)}/>}
+            {isOpen && <CreateChannel
+                server_id={server_id}
+                isOpen
+                onclose={() => setIsOpen(false)}
+                onChannelCreated={HandleNewChannel} />}
 
 
         </>

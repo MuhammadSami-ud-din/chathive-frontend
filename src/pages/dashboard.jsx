@@ -53,10 +53,10 @@ export default function Dashboard() {
     }, [navigate])
 
 
-    const AddJoinedServers = (newServer)=>{
-        setData((prev)=>{
-            if (prev.some((s)=> s.server_id === newServer.server_id)) return prev 
-            return[...prev , newServer]
+    const AddJoinedServers = (newServer) => {
+        setData((prev) => {
+            if (prev.some((s) => s.server_id === newServer.server_id)) return prev
+            return [...prev, newServer]
         })
     }
 
@@ -134,11 +134,11 @@ export default function Dashboard() {
                         >
                             {({ isActive }) => (
                                 <>
-                                   
+
                                     <span
                                         className={`flex h-12 w-12 items-center justify-center text-white transition-all duration-200 ease-in-out ${isActive
-                                                ? 'bg-[#5865f2] rounded-2xl'
-                                                : 'bg-zinc-800 rounded-2xl hover:rounded-2xl hover:bg-[#5865f2]'
+                                            ? 'bg-[#5865f2] rounded-2xl'
+                                            : 'bg-zinc-800 rounded-2xl hover:rounded-2xl hover:bg-[#5865f2]'
                                             }`}
                                     >
                                         <svg
@@ -150,18 +150,18 @@ export default function Dashboard() {
                                         </svg>
                                     </span>
 
-                                  
+
                                     <div
                                         className={`absolute left-0 w-1 bg-white rounded-r-full transition-all duration-300 ${isActive
-                                                ? 'h-10' 
-                                                : 'h-0 group-hover:h-5' 
+                                            ? 'h-10'
+                                            : 'h-0 group-hover:h-5'
                                             }`}
                                     />
 
-                                  
+
                                     <div className="absolute w-10 h-0.5 bottom-0 bg-zinc-700" />
 
-                             
+
                                     <div className="absolute left-full z-50 py-1 px-3 bg-zinc-600 rounded-xl flex items-center justify-center opacity-0 font-black text-base pointer-events-none top-1/2 -translate-y-1/2 whitespace-nowrap transition-opacity group-hover:opacity-100">
                                         Direct Messages
                                         <div className="absolute -left-2 h-0 w-0 border-y-[8px] rounded-sm border-y-transparent border-r-[13px] border-r-zinc-600" />
@@ -184,23 +184,27 @@ export default function Dashboard() {
 
                         {/*Joined server list*/}
                         {data.map((item) => (
-                            <div
+                            <NavLink
+                                to={`/channels/${item.server_id}`}
                                 key={item.server_id || item._id}
-                                className="relative h-12 w-20 mt-1 flex justify-center items-center">
+                                className={"relative h-12 w-20 mt-1 flex justify-center items-center"}>
+                                {({ isActive }) => (
+                                    <>
+                                        <span className={`peer relative flex h-12 w-12 items-center justify-center  text-white transition-all duration-300 ease-in-out rounded-2xl hover:bg-[#5865f2] ${isActive ? 'bg-[#5865f2]' : 'bg-zinc-800'} cursor-pointer text-xs font-semibold text-center truncate select-none px-1`}>
 
-                                <span className="peer relative flex h-12 w-12 items-center justify-center bg-zinc-800 text-white transition-all duration-300 ease-in-out rounded-2xl hover:bg-[#5865f2] cursor-pointer text-xs font-semibold text-center truncate select-none px-1">
+                                            {item.server_name ? item.server_name.charAt(0).toUpperCase() : '?'}
 
-                                    {item.server_name ? item.server_name.charAt(0).toUpperCase() : '?'}
+                                        </span>
 
-                                </span>
+                                        <div className={`absolute left-0 w-1 bg-white rounded-r-full transition-all duration-300  ${isActive ? 'h-10 ' : 'h-3 peer-hover:h-5 '}`} />
+                                        <div className="absolute left-full z-50 py-1 px-3  bg-zinc-600 rounded-xl flex items-center justify-center opacity-0 font-black text-base pointer-events-none top-1/2 -translate-y-1/2 whitespace-nowrap transition-opacity peer-hover:opacity-100 " >{item.server_name}
+                                            <div className="absolute -left-2 h-0 w-0 border-y-[8px] rounded-sm  border-y-transparent border-r-[13px] border-r-zinc-600" />
 
-                                <div className="absolute left-0 w-1 bg-white h-3 rounded-r-full transition-all duration-300 peer-hover:h-7" />
-                                <div className="absolute left-full z-50 py-1 px-3  bg-zinc-600 rounded-xl flex items-center justify-center opacity-0 font-black text-base pointer-events-none top-1/2 -translate-y-1/2 whitespace-nowrap transition-opacity peer-hover:opacity-100 " >{item.server_name}
-                                    <div className="absolute -left-2 h-0 w-0 border-y-[8px] rounded-sm  border-y-transparent border-r-[13px] border-r-zinc-600" />
+                                        </div>
+                                    </>
+                                )}
 
-                                </div>
-
-                            </div>
+                            </NavLink>
                         ))}
 
                         {/*add a Server*/}
@@ -222,19 +226,42 @@ export default function Dashboard() {
 
 
                         {/*Discover*/}
-                        <NavLink 
-                        to='/discovery/servers'
-                        className=" relative flex justify-center items-center  w-20">
-                            <span className=" peer flex h-12 w-12 cursor-pointer mt-2 ml-1 items-center justify-center bg-zinc-800  text-white transition-all duration-200 ease-in-out rounded-2xl hover:bg-[#5865f2] ">
-                                <svg xmlns="www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm2.19 12.19L6 18l3.81-8.19L18 6l-3.81 8.19zM12 10.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5z" />
-                                </svg>
-                            </span>
-                            <div className="absolute left-0 w-1 bg-white h-0 rounded-r-full transition-all duration-300 peer-hover:h-7" />
-                            <div className="absolute left-full z-50 py-1 px-3  bg-zinc-600 rounded-xl flex items-center justify-center opacity-0 font-black text-base pointer-events-none top-1/2 -translate-y-1/2 whitespace-nowrap transition-opacity peer-hover:opacity-100 " >Discover
-                                <div className="absolute -left-2 h-0 w-0 border-y-[8px] rounded-sm  border-y-transparent border-r-[13px] border-r-zinc-600" />
+                        <NavLink
+                            to="/discovery/servers"
+                            className="relative flex justify-center items-center w-20 py-1"
+                        >
+                            {({ isActive }) => (
+                                <>
+                                    {/* Icon Container */}
+                                    <span
+                                        className={`peer flex h-12 w-12 cursor-pointer items-center justify-center text-white transition-all duration-300 ease-in-out ${isActive
+                                                ? 'bg-[#5865f2] rounded-xl'
+                                                : 'bg-zinc-800 rounded-2xl hover:bg-[#5865f2] hover:rounded-xl'
+                                            }`}
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 24 24"
+                                            fill="currentColor"
+                                            className="w-6 h-6"
+                                        >
+                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm2.19 12.19L6 18l3.81-8.19L18 6l-3.81 8.19zM12 10.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5z" />
+                                        </svg>
+                                    </span>
 
-                            </div>
+                                    {/* Discord Left Active / Hover Indicator Pill */}
+                                    <div
+                                        className={`absolute left-0 w-1 bg-white rounded-r-full transition-all duration-300 ${isActive ? 'h-10' : 'h-0 peer-hover:h-5'
+                                            }`}
+                                    />
+
+                                    {/* Tooltip on Hover */}
+                                    <div className="absolute left-full ml-2 z-50 py-1 px-3 bg-zinc-800 text-white text-xs font-semibold rounded-lg opacity-0 pointer-events-none top-1/2 -translate-y-1/2 whitespace-nowrap transition-opacity duration-200 peer-hover:opacity-100 shadow-md">
+                                        Discover
+                                        <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 h-0 w-0 border-y-[6px] border-y-transparent border-r-[8px] border-r-zinc-800" />
+                                    </div>
+                                </>
+                            )}
                         </NavLink>
 
                     </div>
@@ -242,7 +269,7 @@ export default function Dashboard() {
 
 
                     <div className="flex  flex-1 overflow-hidden min-h-0">
-                        <Outlet context={{ setHeaderTitle , AddJoinedServers}}  />
+                        <Outlet context={{ setHeaderTitle, AddJoinedServers }} />
                     </div>
 
 
