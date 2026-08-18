@@ -1,10 +1,12 @@
 const Api_URL = import.meta.env.VITE_API_URL;
 import { useEffect, useState } from "react"
 import { useNavigate, Outlet, NavLink } from 'react-router-dom';
+import AddServer from "../views/AddAServer";
 
 
 export default function Dashboard() {
     const navigate = useNavigate();
+    const [isOpen , setIsOpen] = useState(false);
     const [data, setData] = useState([]);
     const [headerTitle, setHeaderTitle] = useState('');
     const [loading, setLoading] = useState(true);
@@ -12,6 +14,7 @@ export default function Dashboard() {
 
     const url = `${Api_URL}/servers/me`
 
+    console.log(data?.userInfo)
 
     useEffect(() => {
         const fetchData = async () => {
@@ -182,8 +185,8 @@ export default function Dashboard() {
                             </div>
                         </div>
 
-                        {/*Joined server list*/}
-                        {data.map((item) => (
+                       <div> {/*Joined server list*/}
+                        {data?.servers?.map((item) => (
                             <NavLink
                                 to={`/channels/${item.server_id}`}
                                 key={item.server_id || item._id}
@@ -206,10 +209,10 @@ export default function Dashboard() {
 
                             </NavLink>
                         ))}
-
+</div>
                         {/*add a Server*/}
-                        <div className=" relative flex justify-center items-center  w-20">
-                            <span className=" peer flex h-12 w-12 cursor-pointer mt-2 ml-1 items-center justify-center bg-zinc-800  text-white transition-all duration-200 ease-in-out rounded-2xl hover:bg-[#5865f2] ">
+                        <div className=" relative flex justify-center items-center  w-20 ">
+                            <span onClick={()=> setIsOpen(true)} className=" peer flex h-12 w-12 cursor-pointer mt-2 ml-1 items-center justify-center bg-zinc-800  text-white transition-all duration-200 ease-in-out rounded-2xl hover:bg-[#5865f2] ">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-6 h-6 cursor-pointer text-zinc-700 hover:text-zinc-900 transition-colors">
                                     <circle cx="12" cy="12" r="10" fill="#ffffff" />
                                     <path d="M12 8v8M8 12h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -228,7 +231,7 @@ export default function Dashboard() {
                         {/*Discover*/}
                         <NavLink
                             to="/discovery/servers"
-                            className="relative flex justify-center items-center w-20 py-1"
+                            className="relative flex justify-center items-center w-20 mt-2 py-1"
                         >
                             {({ isActive }) => (
                                 <>
@@ -276,6 +279,11 @@ export default function Dashboard() {
                 </div>
 
             </div>
+
+            {isOpen && < AddServer 
+            isOpen
+            onClose = {()=> setIsOpen(false)}
+            userInfo = {data.userInfo} />}
 
 
         </>

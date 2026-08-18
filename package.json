@@ -4,13 +4,14 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-     "dev": "vite --host",
+    "dev": "vite --host",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
+    "framer-motion": "^13.1.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.2",
@@ -32,6 +33,7 @@
     "tailwindcss@4.3.3": true,
     "@tailwindcss/vite@4.3.3": true,
     "react-router-dom@7.18.2": true,
-    "socket.io-client@4.8.3": true
+    "socket.io-client@4.8.3": true,
+    "framer-motion@13.1.0": true
   }
 }
