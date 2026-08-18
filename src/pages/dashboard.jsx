@@ -6,7 +6,7 @@ import AddServer from "../views/AddAServer";
 
 export default function Dashboard() {
     const navigate = useNavigate();
-    const [isOpen , setIsOpen] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
     const [data, setData] = useState([]);
     const [headerTitle, setHeaderTitle] = useState('');
     const [loading, setLoading] = useState(true);
@@ -126,7 +126,7 @@ export default function Dashboard() {
                 <div className=" flex-1 min-h-0 flex     text-white">
 
                     {/*servers list sidebar*/}
-                    <div className="flex-none  w-20 flex flex-col  items-center  ">
+                    <div className="flex-none  w-20 flex flex-col  items-center ">
 
                         {/*DM icon*/}
 
@@ -185,34 +185,35 @@ export default function Dashboard() {
                             </div>
                         </div>
 
-                       <div> {/*Joined server list*/}
-                        {data?.servers?.map((item) => (
-                            <NavLink
-                                to={`/channels/${item.server_id}`}
-                                key={item.server_id || item._id}
-                                className={"relative h-12 w-20 mt-1 flex justify-center items-center"}>
-                                {({ isActive }) => (
-                                    <>
-                                        <span className={`peer relative flex h-12 w-12 items-center justify-center  text-white transition-all duration-300 ease-in-out rounded-2xl hover:bg-[#5865f2] ${isActive ? 'bg-[#5865f2]' : 'bg-zinc-800'} cursor-pointer text-xs font-semibold text-center truncate select-none px-1`}>
+                        
+                            {/*Joined server list*/}
+                            {data?.servers?.map((item) => (
+                                <NavLink
+                                    to={`/channels/${item.server_id}`}
+                                    key={item.server_id || item._id}
+                                    className={"relative h-12 min-h-8 w-20 min-w-14 mt-1 flex justify-center items-center"}>
+                                    {({ isActive }) => (
+                                        <>
+                                            <span className={`peer relative flex h-12 w-12 items-center justify-center  text-white transition-all duration-300 ease-in-out rounded-2xl hover:bg-[#5865f2] ${isActive ? 'bg-[#5865f2]' : 'bg-zinc-800'} cursor-pointer text-xs font-semibold text-center truncate select-none px-1`}>
 
-                                            {item.server_name ? item.server_name.charAt(0).toUpperCase() : '?'}
+                                                {item.server_name ? item.server_name.charAt(0).toUpperCase() : '?'}
 
-                                        </span>
+                                            </span>
 
-                                        <div className={`absolute left-0 w-1 bg-white rounded-r-full transition-all duration-300  ${isActive ? 'h-10 ' : 'h-3 peer-hover:h-5 '}`} />
-                                        <div className="absolute left-full z-50 py-1 px-3  bg-zinc-600 rounded-xl flex items-center justify-center opacity-0 font-black text-base pointer-events-none top-1/2 -translate-y-1/2 whitespace-nowrap transition-opacity peer-hover:opacity-100 " >{item.server_name}
-                                            <div className="absolute -left-2 h-0 w-0 border-y-[8px] rounded-sm  border-y-transparent border-r-[13px] border-r-zinc-600" />
+                                            <div className={`absolute left-0 w-1 bg-white rounded-r-full transition-all duration-300  ${isActive ? 'h-10 ' : 'h-3 peer-hover:h-5 '}`} />
+                                            <div className="absolute left-full z-50 py-1 px-3  bg-zinc-600 rounded-xl flex items-center justify-center opacity-0 font-black text-base pointer-events-none top-1/2 -translate-y-1/2 whitespace-nowrap transition-opacity peer-hover:opacity-100 " >{item.server_name}
+                                                <div className="absolute -left-2 h-0 w-0 border-y-[8px] rounded-sm  border-y-transparent border-r-[13px] border-r-zinc-600" />
 
-                                        </div>
-                                    </>
-                                )}
+                                            </div>
+                                        </>
+                                    )}
 
-                            </NavLink>
-                        ))}
-</div>
+                                </NavLink>
+                            ))}
+                       
                         {/*add a Server*/}
                         <div className=" relative flex justify-center items-center  w-20 ">
-                            <span onClick={()=> setIsOpen(true)} className=" peer flex h-12 w-12 cursor-pointer mt-2 ml-1 items-center justify-center bg-zinc-800  text-white transition-all duration-200 ease-in-out rounded-2xl hover:bg-[#5865f2] ">
+                            <span onClick={() => setIsOpen(true)} className=" peer flex h-12 w-12 cursor-pointer mt-2 ml-1 items-center justify-center bg-zinc-800  text-white transition-all duration-200 ease-in-out rounded-2xl hover:bg-[#5865f2] ">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-6 h-6 cursor-pointer text-zinc-700 hover:text-zinc-900 transition-colors">
                                     <circle cx="12" cy="12" r="10" fill="#ffffff" />
                                     <path d="M12 8v8M8 12h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -238,8 +239,8 @@ export default function Dashboard() {
                                     {/* Icon Container */}
                                     <span
                                         className={`peer flex h-12 w-12 cursor-pointer items-center justify-center text-white transition-all duration-300 ease-in-out ${isActive
-                                                ? 'bg-[#5865f2] rounded-xl'
-                                                : 'bg-zinc-800 rounded-2xl hover:bg-[#5865f2] hover:rounded-xl'
+                                            ? 'bg-[#5865f2] rounded-xl'
+                                            : 'bg-zinc-800 rounded-2xl hover:bg-[#5865f2] hover:rounded-xl'
                                             }`}
                                     >
                                         <svg
@@ -280,10 +281,10 @@ export default function Dashboard() {
 
             </div>
 
-            {isOpen && < AddServer 
-            isOpen
-            onClose = {()=> setIsOpen(false)}
-            userInfo = {data.userInfo} />}
+            {isOpen && < AddServer
+                isOpen
+                onClose={() => setIsOpen(false)}
+                userInfo={data.userInfo} />}
 
 
         </>
