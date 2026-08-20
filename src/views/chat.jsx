@@ -1,8 +1,8 @@
 
 import { useEffect, useState, useRef } from "react";
 import React from "react";
-import { useParams, useNavigate } from "react-router-dom"
-import { NavLink, Outlet, useOutletContext } from "react-router-dom"
+import { useParams, useNavigate, useOutletContext } from "react-router-dom"
+
 const Api_URL = import.meta.env.VITE_API_URL;
 import { socket } from "../socket.js";
 
@@ -49,6 +49,8 @@ export default function ChatArea() {
     const navigate = useNavigate();
     const [isFocused, setIsFocused] = useState(false);
     const messageEndRef = useRef(null)
+    const { conversationId, setConversationId } = useOutletContext() || {};
+    const conversationIdRef = useRef(conversationId);
 
     const scrollToBottom = () => {
         messageEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -57,7 +59,10 @@ export default function ChatArea() {
         scrollToBottom()
     }, [data.data])
 
-    const conversationId = data.conversation_id || (data.data.length > 0 ? data.data[0].conversation_id : null);
+    useEffect(() => {
+        conversationIdRef.current = conversationId;
+    }, [conversationId]);
+
 
     useEffect(() => {
         if (!conversationId) return;
@@ -78,7 +83,8 @@ export default function ChatArea() {
 
     useEffect(() => {
         const handleNewMessage = (msg) => {
-            if ((msg.conversation_id) === conversationId) {
+
+            if (String(msg.conversation_id) === String(conversationIdRef.current)) {
                 setData((prev) => ({
                     ...prev,
                     data: [...prev.data, msg]
@@ -93,16 +99,17 @@ export default function ChatArea() {
         socket.on('DMmessage', handleNewMessage);
         socket.on('new_error', handleError);
 
+
         return () => {
             socket.off('DMmessage', handleNewMessage);
             socket.off('new_error', handleError);
         };
-    }, [conversationId]);
+    }, []);
 
 
 
     useEffect(() => {
-        const url = `${Api_URL}/messages/dm/${id} `
+        const url = `${Api_URL}/messages/dm/${id}`
         const fetchData = async () => {
             try {
 
@@ -118,11 +125,17 @@ export default function ChatArea() {
                 console.log("SERVER DATA RETURNED:", result);
 
                 if (!response.ok) {
-                    throw new Error(result.error || 'no servers found')
+                    throw new Error(result.error || 'no Chat found')
                 }
 
                 console.log(result)
                 setData(result)
+                const activeConvId = result?.data?.[0]?.conversation_id
+               
+
+                if (activeConvId && setConversationId) {
+                    setConversationId(activeConvId);
+                }
 
 
 
@@ -156,7 +169,7 @@ export default function ChatArea() {
                     "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ 'msg_content': message })
+                body: JSON.stringify({ 'msg_content': message, conversation_id: conversationId })
             })
 
             const result = await response.json();
@@ -174,7 +187,7 @@ export default function ChatArea() {
         }
         catch (error) {
             console.log(error.message);
-            
+
 
 
         }
@@ -247,7 +260,7 @@ export default function ChatArea() {
 
                             {data.data.map((msg, index) => {
 
-                                const isMe = msg.sender_id === data.my_id
+                                const isMe = String(msg.sender_id) === String(data.my_id)
                                 const prevMsg_date = index > 0 ? CleanDate(data.data[index - 1].created_at) : null;
 
                                 const currentDate = CleanDate(msg.created_at);
@@ -267,13 +280,13 @@ export default function ChatArea() {
                                         <div className={`flex w-full  items-start ${isMe ? 'justify-end ' : 'justify-start '} `} >
 
                                             <div className={` px-3 py-1  rounded-2xl text-sm flex-none max-w-[70%]  break-words shadow-sm leading-relaxed ${isMe ? 'bg-green-700/50 ' : 'bg-zinc-500/50 '} `}>{msg.content}
-                                              <span className="float-right ml-2 mt-3 text-[10px] text-zinc-300 opacity-70 select-none leading-none">
+                                                <span className="float-right ml-2 mt-3 text-[10px] text-zinc-300 opacity-70 select-none leading-none">
                                                     {CleanTime(msg.created_at)}
                                                 </span>
-                                                </div>
+                                            </div>
                                         </div>
-                                       
-                                        
+
+
 
                                     </React.Fragment>
 
@@ -292,8 +305,8 @@ export default function ChatArea() {
                             <textarea
                                 onFocus={() => setIsFocused(true)}
                                 onBlur={() => setIsFocused(false)}
-                                rows={'2'}
-                                className="flex-1 h-6 border-none outline-none resize-none bg-transparent w-full overflow-hidden ml-2"
+                                rows={1}
+                                className="flex-1 py-1 border-none outline-none resize-none bg-transparent w-full overflow-hidden ml-2"
                                 onKeyDown={handleKeyDown}
                                 value={message}
 
