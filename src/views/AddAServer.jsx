@@ -19,8 +19,8 @@ const slideVariants = {
     }),
 };
 
-export default function AddServer({ isOpen, onClose, userInfo }) {
-    const [FormData, setFormData] = useState({ serverName: userInfo?.username ? `${userInfo.username}'s Server` : "", serverDescription: '', serverDest: '' });
+export default function AddServer({ isOpen, onClose, userInfo ,  setData }) {
+    const [FormData, setFormData] = useState({ serverName: userInfo?.username ? `${userInfo?.username}'s Server` : "", serverDescription: '', serverDest: '' });
     const [message, setMessage] = useState({ text: '', type: '' });
     const [[step, direction], setStepWithDirection] = useState([1, 0]);
     const navigate = useNavigate();
@@ -30,7 +30,7 @@ export default function AddServer({ isOpen, onClose, userInfo }) {
         setStepWithDirection([nextStep, newDirection]);
     };
 
-
+console.log(userInfo , 'jlrflnelfv')
 
     if (!isOpen) return null;
   
@@ -60,12 +60,17 @@ export default function AddServer({ isOpen, onClose, userInfo }) {
                 throw new Error(result.error || 'Cannot Create ');
             }
 
+            console.log(result.newServer)
 
+           setData((prev )=>({
+            ...prev , 
+            servers : [...prev.servers , result.newServer]
+           }))
 
             setMessage({ text: result.message || 'Server Created Successfully!', type: 'success' });
 
 
-            setFormData('');
+            setFormData({serverName: '' , serverDescription: '', serverDest: ''});
 
 
             setTimeout(() => {
@@ -106,6 +111,17 @@ export default function AddServer({ isOpen, onClose, userInfo }) {
 
     return (
         <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
+
+            {message.text && (
+
+                        <div className={`absolute right-4  top-10 animate-auto-glide p-2 text-center text-sm font-medium rounded-xl transition-all duration-500 ease-in-out transform ${message.type === 'success'
+                            ? 'bg-emerald-500/20 border border-emerald-500 text-emerald-200 translate-x-0 opacity-100 pointer-events-auto'
+                            : 'bg-red-500/20 border border-red-500 text-red-200 '
+                            }`}
+                            onAnimationEnd={() => setMessage({ text: '', type: '' })}>
+                            {message.text}
+                        </div>
+                     )} 
 
             {/* Modal Wrapper with fixed dimensions and hidden overflow */}
             <div className="relative w-full max-w-md overflow-hidden rounded-2xl bg-zinc-900 border border-neutral-800/50 p-6 text-white min-h-[360px] flex flex-col justify-center">

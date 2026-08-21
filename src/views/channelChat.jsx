@@ -88,7 +88,7 @@ export default function ChannelChat() {
     const handleNewMessage = (msg) => {
         if (String(msg.channel_id) === String(channel_id)) {
             setData((prev) => {
-                const alreadyExists = prev.data.some((m) => m._id === msg._id);
+                const alreadyExists = prev.data.some((m) => String(m._id) === String(msg._id));
                 if (alreadyExists) return prev;
                 return { ...prev, data: [...prev.data, msg] };
             });
@@ -179,10 +179,14 @@ export default function ChannelChat() {
             throw new Error(result.error || 'Error');
         }
 
-        setData((prev) => ({
-            ...prev,
-            data: [...prev.data, result.data]
-        }));
+       setData((prev) => {
+            const alreadyExists = prev.data.some((m) => String(m._id) === String(result.data._id));
+            if (alreadyExists) return prev;   // socket already isse add kar chuka hai
+            return {
+                ...prev,
+                data: [...prev.data, result.data]
+            };
+        });
 
         setMessage('');
 

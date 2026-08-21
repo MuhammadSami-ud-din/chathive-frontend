@@ -136,8 +136,8 @@ export default function DMFriends() {
                                             }}
                                             className={`
                                                 w-full flex items-center p-2 space-x-3 rounded-xl mb-1 transition-all duration-150 group cursor-pointer
-                                                bg-gradient-to-r from-zinc-900 via-teal-950/40 to-emerald-950/40 border-1 border-transparent
-                                                hover:opacity-100  hover:border-emerald-500/30
+                                                 border-1 border-transparent bg-zinc-500/20
+                                                hover:opacity-100  hover:border-zinc-500/30
                                                 ${isActive ? 'opacity-100 ring-1 ring-emerald-500/50' : 'opacity-80'}
                                             `}
                                         >

@@ -14,7 +14,7 @@ export default function Dashboard() {
 
     const url = `${Api_URL}/servers/me`
 
-    console.log(data?.userInfo)
+    console.log(data?.userInfo , 'ji')
 
     useEffect(() => {
         const fetchData = async () => {
@@ -34,6 +34,7 @@ export default function Dashboard() {
                 if (!response.ok) {
                     throw new Error(result.error || 'no servers found')
                 }
+                console.log(result)
                 setData(result)
 
 
@@ -284,7 +285,10 @@ export default function Dashboard() {
             {isOpen && < AddServer
                 isOpen
                 onClose={() => setIsOpen(false)}
-                userInfo={data.userInfo} />}
+                userInfo = {data?.userInfo}
+                setData = {setData}
+                
+                 />}
 
 
         </>
