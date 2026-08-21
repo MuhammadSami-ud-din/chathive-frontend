@@ -80,132 +80,114 @@ export default function ChatArea() {
         };
     }, [conversationId]);
 
+    useEffect(() => {
+        const handleNewMessage = (msg) => {
+            if (String(msg.conversation_id) === String(conversationIdRef.current)) {
+                setData((prev) => {
+                    const alreadyExists = prev.data.some((m) => String(m._id) === String(msg._id));
+                    if (alreadyExists) return prev;
+                    return {
+                        ...prev,
+                        data: [...prev.data, msg]
+                    };
+                });
+            }
+        };
 
-   useEffect(() => {
-    const handleNewMessage = (msg) => {
-        if (String(msg.conversation_id) === String(conversationIdRef.current)) {
-            setData((prev) => {
-                // agar ye real message already temp se replace ho chuka hai, to skip
-                const alreadyExists = prev.data.some((m) => m.id === msg.id);
-                if (alreadyExists) return prev;
+        const handleError = (err) => {
+            console.log('socket error:', err.message);
+        };
 
-                return {
-                    ...prev,
-                    data: [...prev.data, msg]
-                };
-            });
-        }
-    };
+        socket.on('DMmessage', handleNewMessage);
+        socket.on('new_error', handleError);
 
-    const handleError = (err) => {
-        console.log('socket error:', err.message);
-    };
+        return () => {
+            socket.off('DMmessage', handleNewMessage);
+            socket.off('new_error', handleError);
+        };
+    }, []);
 
-    socket.on('DMmessage', handleNewMessage);
-    socket.on('new_error', handleError);
+    useEffect(() => {
+        let ignore = false;
+        const url = `${Api_URL}/messages/dm/${id}`;
 
-    return () => {
-        socket.off('DMmessage', handleNewMessage);
-        socket.off('new_error', handleError);
-    };
-}, []);
+        const fetchData = async () => {
+            try {
+                const response = await fetch(url, {
+                    method: "GET",
+                    headers: {
+                        "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
+                        "Content-Type": "application/json"
+                    }
+                });
 
+                const result = await response.json();
+                console.log("SERVER DATA RETURNED:", result);
 
-   useEffect(() => {
-    let ignore = false;
-    const url = `${Api_URL}/messages/dm/${id}`;
-
-    const fetchData = async () => {
-        try {
-            const response = await fetch(url, {
-                method: "GET",
-                headers: {
-                    "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
-                    "Content-Type": "application/json"
+                if (!response.ok) {
+                    throw new Error(result.error || 'no Chat found');
                 }
-            });
 
-            const result = await response.json();
-            console.log("SERVER DATA RETURNED:", result);
+                if (ignore) return; // stale response, id already changed -> ignore it
 
-            if (!response.ok) {
-                throw new Error(result.error || 'no Chat found');
+                setData(result);
+                const activeConvId = result?.data?.[0]?.conversation_id;
+
+                if (activeConvId && setConversationId) {
+                    setConversationId(activeConvId);
+                }
+
+            } catch (error) {
+                console.log(error.message);
+                if (error.message === 'Invalid token') {
+                    navigate('/login');
+                }
             }
+        };
 
-            if (ignore) return; // stale response, id already changed -> ignore it
+        if (id) fetchData();
 
-            setData(result);
-            const activeConvId = result?.data?.[0]?.conversation_id;
-
-            if (activeConvId && setConversationId) {
-                setConversationId(activeConvId);
-            }
-
-        } catch (error) {
-            console.log(error.message);
-            if (error.message === 'Invalid token') {
-                navigate('/login');
-            }
-        }
-    };
-
-    if (id) fetchData();
-
-    return () => {
-        ignore = true; // cleanup: cancel this fetch's effect if id changes/unmounts
-    };
-}, [id, navigate]);
+        return () => {
+            ignore = true; // cleanup: cancel this fetch's effect if id changes/unmounts
+        };
+    }, [id, navigate]);
 
 
     async function SendMsg() {
-    const url = `${Api_URL}/messages/dm/${id}`;   // <-- FIXED: removed trailing space before backtick
-    const tempId = `temp-${Date.now()}`;
-    const optimisticMsg = {
-        _id: tempId,
-        conversation_id: conversationId,
-        sender_id: data.my_id,
-        content: message,
-        created_at: new Date().toISOString()
-    };
+        const url = `${Api_URL}/messages/dm/${id}`;
 
-    // show it immediately
-    setData((prev) => ({
-        ...prev,
-        data: [...prev.data, optimisticMsg]
-    }));
-    setMessage('');
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ 'msg_content': message, conversation_id: conversationId })
+            });
 
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ 'msg_content': optimisticMsg.content, conversation_id: conversationId })
-        });
+            const result = await response.json();
 
-        const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.error || 'Error');
+            }
 
-        if (!response.ok) {
-            throw new Error(result.error || 'Error');
+
+            setData((prev) => {
+                const alreadyExists = prev.data.some((m) => String(m._id) === String(result.data._id));
+                if (alreadyExists) return prev;
+                return {
+                    ...prev,
+                    data: [...prev.data, result.data]
+                };
+            });
+
+            setMessage('');
+
+        } catch (error) {
+            console.log(error.message);
         }
-
-        // replace the temp message with the real saved one (real _id from server)
-        setData((prev) => ({
-            ...prev,
-            data: prev.data.map((m) => (m._id === tempId ? result.data : m))
-        }));
-
-    } catch (error) {
-        console.log(error.message);
-        // sending failed -> remove the optimistic message
-        setData((prev) => ({
-            ...prev,
-            data: prev.data.filter((m) => m._id !== tempId)
-        }));
     }
-}
 
 
     const handleKeyDown = (e) => {
@@ -271,6 +253,8 @@ export default function ChatArea() {
                             </div>
 
 
+                         
+
                             {data.data.map((msg, index) => {
 
                                 const isMe = String(msg.sender_id) === String(data.my_id)
@@ -292,10 +276,11 @@ export default function ChatArea() {
 
                                         <div className={`flex w-full  items-start ${isMe ? 'justify-end ' : 'justify-start '} `} >
 
-                                            <div className={` px-3 py-1  rounded-2xl text-sm flex-none max-w-[70%]  break-words shadow-sm leading-relaxed ${isMe ? 'bg-green-700/50 ' : 'bg-zinc-500/50 '} `}>{msg.content}
+                                            <div className={` px-3 py-2   rounded-2xl text-sm flex-none max-w-[70%] md:max-w-[420]  break-words shadow-sm leading-relaxed ${isMe ? 'bg-green-700/50 ' : 'bg-zinc-500/50 '} `}>
+                                            {msg.content}
                                                 <span className="float-right ml-2 mt-3 text-[10px] text-zinc-300 opacity-70 select-none leading-none">
                                                     {CleanTime(msg.created_at)}
-                                                </span>
+                                                </span> 
                                             </div>
                                         </div>
 
@@ -308,6 +293,7 @@ export default function ChatArea() {
 
                             }
                             )}
+
 
                             <div ref={messageEndRef} />
                         </div>

@@ -14,7 +14,7 @@ export default function Dashboard() {
 
     const url = `${Api_URL}/servers/me`
 
-    console.log(data?.userInfo , 'ji')
+   
 
     useEffect(() => {
         const fetchData = async () => {
@@ -59,8 +59,13 @@ export default function Dashboard() {
 
     const AddJoinedServers = (newServer) => {
         setData((prev) => {
-            if (prev.some((s) => s.server_id === newServer.server_id)) return prev
-            return [...prev, newServer]
+           
+            if (prev.servers.some((s) => s.server_id === newServer.server_id)) return prev;
+            
+            return {
+                ...prev , 
+            servers : [...prev.servers, newServer]
+            }
         })
     }
 

@@ -232,7 +232,7 @@ export default function ServerPage() {
 
                             backgroundColor: `rgba(24, 24, 27, ${navOpacity})`,
                         }}
-                        className={`absolute top-0 left-0 z-49 flex flex items-center text-white justify-between font-bold text-xl border-b h-13 pl-4 text-sm gap-x-3 shrink-0 w-full transition-all  ${navOpacity > 0.8 ? 'border-b-zinc-800/50 shadow-md' : 'border-b-transparent hover:!bg-zinc-950/50 '
+                        className={`absolute top-0 left-0 z-49 flex flex items-center text-white justify-between font-bold  border-b h-13 pl-4 text-lg gap-x-3 shrink-0 w-full transition-all  ${navOpacity > 0.8 ? 'border-b-zinc-800/50 shadow-md' : 'border-b-transparent hover:!bg-zinc-950/50 '
                             }`}
                     >
                         {data?.Serverinfo?.[0]?.server_name}
@@ -259,7 +259,7 @@ export default function ServerPage() {
                                 isMember === null ? (
        
         <div className="w-12 h-12 mr-3" />  
-    ) : (<button onClick={HandleServerJoin} className="relativep-2 bg-green-500/50 text-sm p-1.5 rounded-xl mr-3 transition-all hover:bg-green-700/50 ">Join Server</button>)                          
+    ) : (<button onClick={HandleServerJoin} className="relativep-2 bg-green-500/50 text-sm p-1.5 rounded-xl mr-3 transition-all shrink-0 hover:bg-green-700/50 ">Join Server</button>)                          
 
                         }
 
