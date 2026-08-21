@@ -84,35 +84,35 @@ export default function ChannelChat() {
     }, [channel_id]);
 
 
-    useEffect(() => {
-        const handleNewMessage = (msg) => {
+  useEffect(() => {
+    const handleNewMessage = (msg) => {
+        if (String(msg.channel_id) === String(channel_id)) {
+            setData((prev) => {
+                const alreadyExists = prev.data.some((m) => m._id === msg._id);
+                if (alreadyExists) return prev;
+                return { ...prev, data: [...prev.data, msg] };
+            });
+        }
+    };
 
+    const handleError = (err) => {
+        console.log('socket error:', err.message);
+    };
 
-            if (String(msg.channel_id) === String(channel_id)) {
-                setData((prev) => ({
-                    ...prev,
-                    data: [...prev.data, msg]
-                }));
-            }
-        };
+    socket.on('newMessage', handleNewMessage);
+    socket.on('new_error', handleError);
 
-        const handleError = (err) => {
-            console.log('socket error:', err.message);
-        };
-
-        socket.on('newMessage', handleNewMessage);
-        socket.on('new_error', handleError);
-
-        return () => {
-            socket.off('newMessage', handleNewMessage);
-            socket.off('new_error', handleError);
-        };
-    }, [channel_id]);
+    return () => {
+        socket.off('newMessage', handleNewMessage);
+        socket.off('new_error', handleError);
+    };
+}, [channel_id]);
 
 
 
     useEffect(() => {
         const url = `${Api_URL}/channels/${channel_id}/messages`
+        let ignore = false;
         const fetchData = async () => {
             try {
 
@@ -130,6 +130,7 @@ export default function ChannelChat() {
                 if (!response.ok) {
                     throw new Error(result.error || 'no servers found')
                 }
+                if (ignore) return;
 
                 console.log(result)
                 setShowMessage({ text: result.message || 'Fetch Successful', type: 'success' });
@@ -152,46 +153,44 @@ export default function ChannelChat() {
         if (channel_id) fetchData()
 
 
+            return () => {
+        ignore = true;
+    }; 
+
     }, [channel_id, navigate])
 
 
     async function SendMsg() {
+    const url = `${Api_URL}/channels/${channel_id}/messages`;
 
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ 'msg_content': message })
+        });
 
+        const result = await response.json();
 
-        const url = `${Api_URL}/channels/${channel_id}/messages`
-
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ 'msg_content': message })
-            })
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.error || 'Error');
-            }
-
-            console.log(result.message)
-
-
-
-            setMessage('')
-
-        }
-        catch (error) {
-            console.log(error.message);
-            setShowMessage({ text: error.message || 'Not Authorized', type: 'error' });
-
-
+        if (!response.ok) {
+            throw new Error(result.error || 'Error');
         }
 
+        setData((prev) => ({
+            ...prev,
+            data: [...prev.data, result.data]
+        }));
+
+        setMessage('');
+
+    } catch (error) {
+        console.log(error.message);
+        setShowMessage({ text: error.message || 'Not Authorized', type: 'error' });
     }
+}
 
 
     const handleKeyDown = (e) => {
@@ -253,7 +252,7 @@ export default function ChannelChat() {
                             {/* {Server Info at the begining} */}
                             <div className=" h-100 shrink-0 flex flex-col justify-center items-center  ">
                                 <span className="h-25 w-25 rounded-full border-5  border-zinc-800 bg-zinc-900 flex justify-center items-center text-6xl text-yellow-200/50 mb-4">{ChannelInfo?.avatar ? (
-                                    <img src={data.user.avatar} alt="avatar" className="h-full w-full object-cover rounded-full" />
+                                    <img src={ChannelInfo?.avatar} alt="avatar" className="h-full w-full object-cover rounded-full" />
                                 ) : (
                                     ChannelInfo?.channel_name ? ChannelInfo.channel_name.charAt(0).toUpperCase() : '?'
                                 )}</span>
@@ -268,7 +267,7 @@ export default function ChannelChat() {
 
                             {data.data.map((msg, index) => {
 
-                                const isMe = msg.sender_id === data.my_id
+                                const isMe = String(msg.sender_id) === String(data.my_id)
                                 const prevMsg_date = index > 0 ? CleanDate(data.data[index - 1].Date) : null;
 
                                 const currentDate = CleanDate(msg.Date);
