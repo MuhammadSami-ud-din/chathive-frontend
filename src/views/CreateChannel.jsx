@@ -85,9 +85,11 @@ export default function CreateChannel({ server_id, isOpen, onclose , onChannelCr
         <>
             <div className="fixed inset-0 bg-black/60 z-60 flex justify-center items-center cursor-pointer ">
 
-                <form onSubmit={HandleSubmit} className="relative bg-white/10 backdrop-blur-md border border-white/20 shadow-lg   px-4 rounded-2xl flex flex-col items-center" >
-                    <p className="text-2xl font-bold mt-6 ">Create A Channel </p>
-                     <div onClick={onclose} className="absolute right-[5%] top-[2%] text-3xl rotate-45 ml-12 text-zinc-500 hover:text-white  cursor-pointer ">+</div>
+                <form onSubmit={HandleSubmit} className="relative bg-zinc-900 shadow-lg   px-8 rounded-2xl flex flex-col items-center" >
+                   <p className="text-2xl font-bold mt-10 mx-5  ">Tell Us More About Your Channel </p>
+                     <p className="text-sm text-zinc-400  ">What You Channel is About: fun, announcements, general etc... </p>
+                 
+                     <div onClick={onclose} className="absolute right-[3%] top-1 text-4xl rotate-45  text-zinc-500 hover:text-white  cursor-pointer ">+</div>
 
                     {message.text && (
               <div className={`w-full p-3 text-center text-sm font-medium rounded-xl transition-all mt-6 ${
@@ -99,28 +101,28 @@ export default function CreateChannel({ server_id, isOpen, onclose , onChannelCr
               </div>
             )}
 
-                    <div className="w-full  mt-4 ">
-                        <label className="font-bold text-lg">Channel Name</label>
+                    <div className="w-full  mt-6 ">
+                        <label className="uppercase tracking-wider text-zinc-300 text-sm">Channel Name</label>
                         <input 
                          onChange={(e)=> {
                   setChannelName(e.target.value)
                   if(message.text) setMessage({ text: '', type: '' });
                 }}
-                        className="w-full  bg-zinc-900/80 rounded-xl mt-2 p-2 px-3 outline-none  " 
+                        className="w-full  bg-zinc-950/80 rounded-xl mt-2 p-2 px-3 outline-none  " 
                         />
                     </div>
                     <div className="w-full  mt-3 overflow-hidden  ">
-                        <label className="font-bold text-lg">Channel Description</label>
+                        <label className="uppercase tracking-wider text-zinc-300 text-sm">Channel Description</label>
                         <textarea 
                            onChange={(e)=> {
                   setChannelDesc(e.target.value)
                   if(message.text) setMessage({ text: '', type: '' });
                 }}
-                        className="w-full h-80 resize-none bg-zinc-900/80 overflow-y-auto outline-none   rounded-xl mt-2 p-2 px-3  " 
+                        className="w-full h-50 resize-none bg-zinc-950/80 overflow-y-auto outline-none   rounded-xl mt-2 p-2 px-3  " 
                         />
                     </div>
 
-                    <div className="w-full  mt-4 mb-5">
+                    <div className="w-full  mt-5 mb-5">
                         <button type="submit" className=" w-full py-2 bg-green-700 rounded-xl ">Create Channel</button>
                     </div>
 
