@@ -122,7 +122,7 @@ export default function ChatArea() {
                 });
 
                 const result = await response.json();
-                console.log("SERVER DATA RETURNED:", result);
+                
 
                 if (!response.ok) {
                     throw new Error(result.error || 'no Chat found');
@@ -276,7 +276,7 @@ export default function ChatArea() {
 
                                         <div className={`flex w-full  items-start ${isMe ? 'justify-end ' : 'justify-start '} `} >
 
-                                            <div className={` px-3 py-2   rounded-2xl text-sm flex-none max-w-[70%] md:max-w-[420]  break-words shadow-sm leading-relaxed ${isMe ? 'bg-green-700/50 ' : 'bg-zinc-500/50 '} `}>
+                                            <div className={` px-3 py-2   rounded-2xl text-sm flex-none max-w-[70%] md:max-w-[520]  break-words shadow-sm leading-relaxed ${isMe ? 'bg-green-700/50 ' : 'bg-zinc-500/50 '} `}>
                                             {msg.content}
                                                 <span className="float-right ml-2 mt-3 text-[10px] text-zinc-300 opacity-70 select-none leading-none">
                                                     {CleanTime(msg.created_at)}
