@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef } from "react";
 import React from "react";
 import { useParams, useNavigate, useOutletContext } from "react-router-dom"
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const Api_URL = import.meta.env.VITE_API_URL;
 import { socket } from "../socket.js";
@@ -41,17 +42,62 @@ const CleanTime = (date) => {
 
 
 
+const ChannelFetch = async (channel_id) => {
+    const url = `${Api_URL}/channels/${channel_id}/messages`
+
+    const response = await fetch(url, {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
+            "Content-Type": "application/json"
+        }
+    });
+
+    const result = await response.json();
+
+
+    if (!response.ok) {
+        throw new Error(result.error || 'no servers found')
+    }
+    
+
+
+    
+    return result
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
 export default function ChannelChat() {
 
     const { channel_id } = useParams();
-    const [data, setData] = useState({ success: false, data: [], my_id: '' });
+    
     const [message, setMessage] = useState('')
     const navigate = useNavigate();
     const [isFocused, setIsFocused] = useState(false);
     const [showMessage, setShowMessage] = useState({ text: '', type: '' });
     const channels = useOutletContext();
     const messageEndRef = useRef(null)
+    const queryClient = useQueryClient();
 
+
+    const {data = { success: false, data: [], my_id: '' } , error , isSuccess} = useQuery({
+        queryKey : ['ChannelFetch' , channel_id],
+        queryFn : ()=> ChannelFetch(channel_id)
+    })
+
+  
 
     const ChannelInfo = channels.find((channel) => Number(channel.channel_id) === Number(channel_id));
 
@@ -84,117 +130,93 @@ export default function ChannelChat() {
     }, [channel_id]);
 
 
-  useEffect(() => {
-    const handleNewMessage = (msg) => {
-        if (String(msg.channel_id) === String(channel_id)) {
-            setData((prev) => {
-                const alreadyExists = prev.data.some((m) => String(m._id) === String(msg._id));
-                if (alreadyExists) return prev;
-                return { ...prev, data: [...prev.data, msg] };
-            });
-        }
-    };
-
-    const handleError = (err) => {
-        console.log('socket error:', err.message);
-    };
-
-    socket.on('newMessage', handleNewMessage);
-    socket.on('new_error', handleError);
-
-    return () => {
-        socket.off('newMessage', handleNewMessage);
-        socket.off('new_error', handleError);
-    };
-}, [channel_id]);
-
-
-
     useEffect(() => {
-        const url = `${Api_URL}/channels/${channel_id}/messages`
-        let ignore = false;
-        const fetchData = async () => {
-            try {
-
-                const response = await fetch(url, {
-                    method: "GET",
-                    headers: {
-                        "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
-                        "Content-Type": "application/json"
-                    }
+        const handleNewMessage = (msg) => {
+            if (String(msg.channel_id) === String(channel_id)) {
+                queryClient.setQueryData(['ChannelFetch' , channel_id ] , (prev) => {
+                    const alreadyExists = prev.data.some((m) => String(m._id) === String(msg._id));
+                    if (alreadyExists) return prev;
+                    return { ...prev, data: [...prev.data, msg] };
                 });
-
-                const result = await response.json();
-                console.log("SERVER DATA RETURNED:", result);
-
-                if (!response.ok) {
-                    throw new Error(result.error || 'no servers found')
-                }
-                if (ignore) return;
-
-                console.log(result)
-                setShowMessage({ text: result.message || 'Fetch Successful', type: 'success' });
-                setData(result)
-
-
-
             }
-            catch (error) {
+        };
 
-                console.log(error.message)
-                setShowMessage({ text: error.message || 'Not Authorized', type: 'error' });
-                if (error.message === 'Invalid token') {
-                    navigate('/login');
-                }
+        const handleError = (err) => {
+            console.log('socket error:', err.message);
+        };
 
-            }
+        socket.on('newMessage', handleNewMessage);
+        socket.on('new_error', handleError);
 
+        return () => {
+            socket.off('newMessage', handleNewMessage);
+            socket.off('new_error', handleError);
+        };
+    }, [channel_id]);
+
+
+
+
+
+useEffect(() => {
+    if (isSuccess) {
+        const timer = setTimeout(() => {
+            setShowMessage({ text: 'Fetch Successful', type: 'success' });
+        }, 0);
+        return () => clearTimeout(timer);
+    }
+}, [isSuccess]);
+
+useEffect(() => {
+    if (error) {
+        const timer = setTimeout(() => {
+            setShowMessage({ text: error?.message || 'Not Authorized', type: 'error' });
+        }, 0);
+        
+        if (error?.message === 'Invalid token') {
+            navigate('/login');
         }
-        if (channel_id) fetchData()
-
-
-            return () => {
-        ignore = true;
-    }; 
-
-    }, [channel_id, navigate])
+        
+        return () => clearTimeout(timer);
+    }
+}, [error, navigate]);
 
 
     async function SendMsg() {
-    const url = `${Api_URL}/channels/${channel_id}/messages`;
+        const url = `${Api_URL}/channels/${channel_id}/messages`;
 
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ 'msg_content': message })
-        });
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ 'msg_content': message })
+            });
 
-        const result = await response.json();
+            const result = await response.json();
 
-        if (!response.ok) {
-            throw new Error(result.error || 'Error');
+            if (!response.ok) {
+                throw new Error(result.error || 'Error');
+            }
+
+            queryClient.setQueryData(['ChannelFetch' , channel_id] , (prev) => {
+                const alreadyExists = prev.data.some((m) => String(m._id) === String(result.data._id));
+                if (alreadyExists) return prev;
+                return {
+                    ...prev,
+                    data: [...prev.data, result.data]
+                }
+            });
+
+            setMessage('');
+
+        } catch (error) {
+            console.log(error?.message);
+            setShowMessage({ text: error?.message || 'Not Authorized', type: 'error' });
         }
-
-       setData((prev) => {
-            const alreadyExists = prev.data.some((m) => String(m._id) === String(result.data._id));
-            if (alreadyExists) return prev;   // socket already isse add kar chuka hai
-            return {
-                ...prev,
-                data: [...prev.data, result.data]
-            };
-        });
-
-        setMessage('');
-
-    } catch (error) {
-        console.log(error.message);
-        setShowMessage({ text: error.message || 'Not Authorized', type: 'error' });
     }
-}
 
 
     const handleKeyDown = (e) => {
@@ -289,18 +311,18 @@ export default function ChannelChat() {
 
 
                                         <div className={`flex  w-full  items-start ${isMe ? 'justify-end ' : 'justify-start '} `} >
-                                           
+
 
                                             <div className={`  pb-1 px-1 flex flex-col rounded-xl text-sm flex-none  max-w-[70%] shrink-0 break-words shadow-sm leading-relaxed ${isMe ? 'bg-green-700/50 ' : 'bg-zinc-700/70 '} `}>
-                                              
-                                               {!isMe &&(
-                                                 <div className={`rounded-t-xl pl-2 pt-1 pr-7  font-bold  text-amber-200 `}>{msg?.sender?.username}</div>
-                                               )}
+
+                                                {!isMe && (
+                                                    <div className={`rounded-t-xl pl-2 pt-1 pr-7  font-bold  text-amber-200 `}>{msg?.sender?.username}</div>
+                                                )}
                                                 <div className="px-2 pt-1 text-sm flex-none  shrink-0 break-words shadow-sm leading-relaxed">
-                                                {msg.content}
-                                                <span className="float-right ml-2 mt-3 text-[10px] text-zinc-300 opacity-70 select-none leading-none">
-                                                    {CleanTime(msg.Date)}
-                                                </span>
+                                                    {msg.content}
+                                                    <span className="float-right ml-2 mt-3 text-[10px] text-zinc-300 opacity-70 select-none leading-none">
+                                                        {CleanTime(msg.Date)}
+                                                    </span>
                                                 </div>
 
                                             </div>
