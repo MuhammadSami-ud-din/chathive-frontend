@@ -50,13 +50,13 @@ export default function ServersListing() {
                 });
 
                 const result = await response.json();
-                console.log("SERVER DATA RETURNED servers:", result);
+      
 
                 if (!response.ok) {
                     throw new Error(result.error || 'no servers found')
                 }
 
-                console.log(result)
+              
                 setData(result)
 
 
