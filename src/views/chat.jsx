@@ -2,9 +2,12 @@
 import { useEffect, useState, useRef } from "react";
 import React from "react";
 import { useParams, useNavigate, useOutletContext } from "react-router-dom"
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const Api_URL = import.meta.env.VITE_API_URL;
 import { socket } from "../socket.js";
+
+  
 
 
 const CleanDate = (date) => {
@@ -41,16 +44,57 @@ const CleanTime = (date) => {
 
 
 
+
+
+
+const DMmessages = async (id) => {
+  
+    const url = `${Api_URL}/messages/dm/${id}`;
+
+    const response = await fetch(url, {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
+            "Content-Type": "application/json"
+        }
+    });
+
+    const result = await response.json();
+
+
+    if (!response.ok) {
+        throw new Error(result.error || 'no Chat found');
+    }
+
+
+    return result ;
+   
+
+
+};
+
+
+
 export default function ChatArea() {
 
     const { id } = useParams();
-    const [data, setData] = useState({ success: false, data: [], my_id: '', user: {} });
+   const { conversationId, setConversationId } = useOutletContext() || {};
     const [message, setMessage] = useState('')
     const navigate = useNavigate();
     const [isFocused, setIsFocused] = useState(false);
     const messageEndRef = useRef(null)
-    const { conversationId, setConversationId } = useOutletContext() || {};
+   
     const conversationIdRef = useRef(conversationId);
+    const queryClient = useQueryClient();
+
+
+   const { data = { success: false, data: [], my_id: '', user: {} } , error} = useQuery({
+    queryKey : ['DMmessages' , id],
+    queryFn : () => DMmessages(id),
+    enabled : !!id
+   })
+
+
 
     const scrollToBottom = () => {
         messageEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -78,12 +122,12 @@ export default function ChatArea() {
         return () => {
             socket.off('connect', handleReconnect);
         };
-    }, [conversationId]);
+    }, [conversationId ]);
 
     useEffect(() => {
         const handleNewMessage = (msg) => {
             if (String(msg.conversation_id) === String(conversationIdRef.current)) {
-                setData((prev) => {
+                queryClient.setQueryData(['DMmessages', id], (prev) => {
                     const alreadyExists = prev.data.some((m) => String(m._id) === String(msg._id));
                     if (alreadyExists) return prev;
                     return {
@@ -107,50 +151,23 @@ export default function ChatArea() {
         };
     }, []);
 
+    
+
     useEffect(() => {
-        let ignore = false;
-        const url = `${Api_URL}/messages/dm/${id}`;
+        if (error?.message === 'Invalid token') {
+            navigate('/login');
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [error, navigate])
 
-        const fetchData = async () => {
-            try {
-                const response = await fetch(url, {
-                    method: "GET",
-                    headers: {
-                        "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
-                        "Content-Type": "application/json"
-                    }
-                });
+    useEffect(()=>{
+         const activeConvId = data?.data?.[0]?.conversation_id;
 
-                const result = await response.json();
-                
-
-                if (!response.ok) {
-                    throw new Error(result.error || 'no Chat found');
-                }
-
-                if (ignore) return; // stale response, id already changed -> ignore it
-
-                setData(result);
-                const activeConvId = result?.data?.[0]?.conversation_id;
-
-                if (activeConvId && setConversationId) {
-                    setConversationId(activeConvId);
-                }
-
-            } catch (error) {
-                console.log(error.message);
-                if (error.message === 'Invalid token') {
-                    navigate('/login');
-                }
-            }
-        };
-
-        if (id) fetchData();
-
-        return () => {
-            ignore = true; // cleanup: cancel this fetch's effect if id changes/unmounts
-        };
-    }, [id, navigate]);
+    if (activeConvId && setConversationId) {
+        setConversationId(activeConvId);
+    }
+     // eslint-disable-next-line react-hooks/exhaustive-deps
+    } , [conversationId , data , setConversationId])
 
 
     async function SendMsg() {
@@ -173,7 +190,7 @@ export default function ChatArea() {
             }
 
 
-            setData((prev) => {
+            queryClient.setQueryData(['DMmessages', id], (prev) => {
                 const alreadyExists = prev.data.some((m) => String(m._id) === String(result.data._id));
                 if (alreadyExists) return prev;
                 return {
@@ -253,7 +270,7 @@ export default function ChatArea() {
                             </div>
 
 
-                         
+
 
                             {data.data.map((msg, index) => {
 
@@ -277,10 +294,10 @@ export default function ChatArea() {
                                         <div className={`flex w-full  items-start ${isMe ? 'justify-end ' : 'justify-start '} `} >
 
                                             <div className={` px-3 py-2   rounded-2xl text-sm flex-none max-w-[70%] md:max-w-[600px]  break-words shadow-sm leading-relaxed ${isMe ? 'bg-green-700/50 ' : 'bg-zinc-500/50 '} `}>
-                                            {msg.content}
+                                                {msg.content}
                                                 <span className="float-right ml-2 mt-3 text-[10px] text-zinc-300 opacity-70 select-none leading-none">
                                                     {CleanTime(msg.created_at)}
-                                                </span> 
+                                                </span>
                                             </div>
                                         </div>
 
