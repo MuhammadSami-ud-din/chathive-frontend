@@ -24,7 +24,7 @@ const FetchServers = async () => {
     if (!response.ok) {
         throw new Error(result.error || 'no servers found')
     }
-console.log(result , 'heelo')
+
 
     return result;
 
@@ -80,7 +80,7 @@ export default function ServersListing() {
 
     useEffect(() => {
 
-        console.log(error?.message)
+       
         if (error?.message === 'Invalid token') {
             navigate('/login');
         }

@@ -2,23 +2,62 @@ import { useEffect, useState, useRef } from "react"
 import { useParams, useNavigate, Outlet, NavLink, useOutletContext } from "react-router-dom"
 import ChannelChat from "./channelChat"
 import CreateChannel from "./CreateChannel"
-
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 const Api_URL = import.meta.env.VITE_API_URL
+
+
+
+
+const FetchChannels = async (server_id) => {
+
+    const url = `${Api_URL}/channels/${server_id}`
+
+    const response = await fetch(url, {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
+            "Content-Type": "application/json"
+        }
+    });
+
+    const result = await response.json();
+
+
+    if (!response.ok) {
+        throw new Error(result.error || 'no servers found')
+    }
+
+
+    return result
+
+
+
+
+
+}
+
+
 
 export default function ServerPage() {
     const { server_id } = useParams()
-    const [data, setData] = useState({ Channels: [], Serverinfo: [], role: [] })
+
     const [isMember, setIsMember] = useState(null)
     const [joining, setJoining] = useState(false)
     const [isOpen, setIsOpen] = useState(false)
     const [showMessage, setShowMessage] = useState({ message: '', type: '' });
     const { AddJoinedServers } = useOutletContext()
     const navigate = useNavigate()
-
-    const isAuthorized = (data?.role?.length > 0)
-
+    const queryClient = useQueryClient();
 
 
+
+    const { data = { Channels: [], Serverinfo: [], role: [] }, error } = useQuery({
+        queryKey: ['FetchChannels', server_id],
+        queryFn: () => FetchChannels(server_id)
+    })
+
+
+    const isAuthorized = Boolean(Array.isArray(data?.role) && data.role.length > 0)
 
 
 
@@ -49,50 +88,13 @@ export default function ServerPage() {
 
 
     useEffect(() => {
-        const url = `${Api_URL}/channels/${server_id}`
-        let ignore = false;
-        const fetchData = async () => {
-            try {
-
-                const response = await fetch(url, {
-                    method: "GET",
-                    headers: {
-                        "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
-                        "Content-Type": "application/json"
-                    }
-                });
-
-                const result = await response.json();
-                console.log("SERVER DATA RETURNED channels:", result);
-
-                if (!response.ok) {
-                    throw new Error(result.error || 'no servers found')
-                }
-
-               if(ignore) return ;
-                setData(result)
-                console.log(result.role)
 
 
-
-
-            }
-            catch (error) {
-
-                console.log(error.message)
-                if (error.message === 'Invalid token') {
-                    navigate('/login');
-                }
-
-            }
-
+        if (error?.message === 'Invalid token') {
+            navigate('/login');
         }
-        fetchData()
-      return ()=> {
-        ignore = true;
-      }
 
-    }, [navigate, server_id])
+    }, [navigate, error])
 
 
 
@@ -110,22 +112,22 @@ export default function ServerPage() {
                 });
 
                 const result = await response.json();
-                console.log("SERVER DATA RETURNED channels:", result);
+
 
                 if (!response.ok) {
                     throw new Error(result.error || 'no servers found')
                 }
 
 
-                setIsMember(result)
-                console.log(result)
+                setIsMember(result.ismember)
+
 
 
 
 
             }
             catch (error) {
-
+                setIsMember(false)
                 console.log(error.message)
                 if (error.message === 'Invalid token') {
                     navigate('/login');
@@ -144,7 +146,7 @@ export default function ServerPage() {
 
     async function HandleServerJoin() {
         if (joining) return
-        setIsMember({ ismember: true });
+
         setJoining(true)
         const url = `${Api_URL}/server_join/${server_id}`
 
@@ -159,7 +161,7 @@ export default function ServerPage() {
             });
 
             const result = await response.json();
-            console.log("SERVER RETURNED:", result);
+
 
             if (!response.ok) {
                 throw new Error(result.error || 'no servers found')
@@ -168,12 +170,13 @@ export default function ServerPage() {
 
             setShowMessage({ message: result.message || 'Server Join Successfull', type: 'success' });
 
-            console.log(result.serverInfo)
+
 
             if (result?.serverInfo && AddJoinedServers) {
                 AddJoinedServers(result.serverInfo)
             }
 
+            setIsMember(true);
 
 
 
@@ -183,7 +186,7 @@ export default function ServerPage() {
         catch (error) {
 
             console.log(error.message)
-            setIsMember({ ismember: false });
+            setIsMember(false);
             setShowMessage({ message: error.message || 'Already a Member', type: 'error' });
             if (error.message === 'Invalid token') {
                 navigate('/login');
@@ -199,10 +202,15 @@ export default function ServerPage() {
 
     }
 
+
     const HandleNewChannel = (channel) => {
-        setData((prev) => ({
-            ...prev, Channels: [...prev.Channels, channel]
-        }))
+        queryClient.setQueryData(['FetchChannels', server_id], (prev) => {
+            if (!prev) return prev;
+            return {
+                ...prev,
+                Channels: [...(prev.Channels || []), channel]
+            }
+        })
     }
 
 
@@ -238,7 +246,7 @@ export default function ServerPage() {
                         {data?.Serverinfo?.[0]?.server_name}
 
                         {
-                            isMember?.ismember ?
+                            isMember ?
                                 (<div className="relative w-12 h-12 text-sm p-1.5 rounded-xl mr-3 transition-all group ">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
 
@@ -257,9 +265,9 @@ export default function ServerPage() {
                                 </div>
                                 ) :
                                 isMember === null ? (
-       
-        <div className="w-12 h-12 mr-3" />  
-    ) : (<button onClick={HandleServerJoin} className="relativep-2 bg-green-500/50 text-sm p-1.5 rounded-xl mr-3 transition-all shrink-0 hover:bg-green-700/50 ">Join Server</button>)                          
+
+                                    <div className="w-12 h-12 mr-3" />
+                                ) : (<button onClick={HandleServerJoin} className="relative p-2 bg-green-500/50 text-sm p-1.5 rounded-xl mr-3 transition-all shrink-0 hover:bg-green-700/50 ">Join Server</button>)
 
                         }
 
