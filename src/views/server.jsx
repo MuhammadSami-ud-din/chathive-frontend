@@ -1,6 +1,39 @@
 const Api_URL = import.meta.env.VITE_API_URL
 import { useState, useEffect, useRef } from "react"
 import { NavLink, useNavigate } from "react-router-dom"
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+
+
+
+
+const url = `${Api_URL}/servers`
+const FetchServers = async () => {
+
+
+    const response = await fetch(url, {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
+            "Content-Type": "application/json"
+        }
+    });
+
+    const result = await response.json();
+
+
+    if (!response.ok) {
+        throw new Error(result.error || 'no servers found')
+    }
+console.log(result , 'heelo')
+
+    return result;
+
+
+
+}
+
+
+
 
 
 
@@ -9,73 +42,52 @@ import { NavLink, useNavigate } from "react-router-dom"
 
 export default function ServersListing() {
     const [isScrolled, setIsScrolled] = useState(false);
-    const [Data, setData] = useState([]);
+
     const navigate = useNavigate()
     const scrolableContainer = useRef(null)
 
     useEffect(() => {
         const container = scrolableContainer.current
-         if (!container) return;
+        if (!container) return;
 
         const handleScroll = () => {
             if (container.scrollTop > 5) {
                 setIsScrolled(true)
-                
+
             } else {
                 setIsScrolled(false)
             }
         }
-         
+
 
 
         container.addEventListener('scroll', handleScroll)
 
-        return () =>  container.removeEventListener('scroll', handleScroll)
-        
+        return () => container.removeEventListener('scroll', handleScroll)
+
 
     }, []);
 
+    const { data :  Data = [] , error } = useQuery({
+        queryKey: ['FetchServers'],
+        queryFn: FetchServers
+    })
+  
+
+
+
+
 
     useEffect(() => {
-        const url = `${Api_URL}/servers`
-        const fetchData = async () => {
-            try {
 
-                const response = await fetch(url, {
-                    method: "GET",
-                    headers: {
-                        "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
-                        "Content-Type": "application/json"
-                    }
-                });
-
-                const result = await response.json();
-      
-
-                if (!response.ok) {
-                    throw new Error(result.error || 'no servers found')
-                }
-
-              
-                setData(result)
-
-
-
-            }
-            catch (error) {
-
-                console.log(error.message)
-                if (error.message === 'Invalid token') {
-                    navigate('/login');
-                }
-
-            }
-
+        console.log(error?.message)
+        if (error?.message === 'Invalid token') {
+            navigate('/login');
         }
-        fetchData()
 
 
-    }, [navigate])
+
+    }, [error, navigate])
 
 
 
@@ -148,9 +160,9 @@ export default function ServersListing() {
 
                     {/* Servers Dicover */}
                     <div className="border-b border-b-neutral-800 bg-gradient-to-r from-cyan-900 via-blue-950 to-neutral-950 min-h-90 w-full flex flex-col justify-center p-4 md:p-6 shrink-0">
-                      <p className="font-extrabold text-5xl w-[55%] mt-20">Find Your Community on ChatHive</p>
-                      <p className="text-xl text-zinc-200/50 mt-3 ">From gaming, to music, to learning, there's a place for you</p>
-                         
+                        <p className="font-extrabold text-5xl w-[55%] mt-20">Find Your Community on ChatHive</p>
+                        <p className="text-xl text-zinc-200/50 mt-3 ">From gaming, to music, to learning, there's a place for you</p>
+
                     </div>
                     <div className="mt-4 ml-6 text-xl font-semibold">Featured Servers</div>
 
@@ -158,17 +170,17 @@ export default function ServersListing() {
                     <div className=" flex-1 flex w-full flex-wrap gap-3 py-5 px-5">
                         {Data.map((server) => {
                             return (
-                                <NavLink 
-                                to= {`/channels/${server.server_id}`}
-                                key={server.server_id} 
-                                className=" flex flex-col  border border-zinc-700/50 min-w-48 w-[300px] min-h-[340px]  rounded-xl gap-4 transiton-all duration-300 hover:border-zinc-300/50 " >
+                                <NavLink
+                                    to={`/channels/${server.server_id}`}
+                                    key={server.server_id}
+                                    className=" flex flex-col  border border-zinc-700/50 min-w-48 w-[300px] min-h-[340px]  rounded-xl gap-4 transiton-all duration-300 hover:border-zinc-300/50 " >
                                     <div className="h-37 w-full rounded-t-xl bg-gradient-to-r from-cyan-800 to-neutral-950"></div>
                                     <div className="flex flex-col justify-between flex-1 gap-1 ml-4 text-zinc-400">
                                         <div className="flex flex-col">
                                             <span className="text-xl font-semibold  ">{server.server_name}</span>
-                                     <span className="test-xs ">{server.server_description}</span>
+                                            <span className="test-xs ">{server.server_description}</span>
                                         </div>
-                                    <div className="text-xs  mb-2 float-left text-zinc-100/50">6694508 Members</div>
+                                        <div className="text-xs  mb-2 float-left text-zinc-100/50">6694508 Members</div>
 
                                     </div>
 
