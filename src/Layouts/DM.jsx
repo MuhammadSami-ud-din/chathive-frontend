@@ -188,7 +188,13 @@ return (
         hover:shadow-[0_0_20px_-10px_rgba(34,197,94,0.4)] hover:opacity-100
         ${isActive ? 'opacity-100 ring-1 ring-emerald-500/30' : 'opacity-50'}
     `}>
-                            <div className="h-8 w-8 bg-zinc-700 rounded-full flex-shrink-0" >{(user.avatar === null) ? ' ' : user.avatar}</div>
+                            <div className="h-8 w-8 bg-zinc-700 rounded-full flex-shrink-0 flex justify-center items-center" >{user?.avatar  ? 
+                            (
+                        <img src={data.user.avatar} alt="avatar" className="h-full w-full object-cover rounded-full" />
+                    ) : (
+                        user?.username ? user?.username.charAt(0).toUpperCase() : '?'
+                    ) 
+                    }</div>
                             <div className="h-8 w-full  flex flex-1 items-center p-2 text-zinc-300 group-hover:text-neutral-100" >{user.username}</div>
                         </NavLink>
                     ))
@@ -203,6 +209,10 @@ return (
 
 
         </div>
+
+
+
+        
 
 
 

@@ -49,6 +49,9 @@ export default function ServerPage() {
     const { AddJoinedServers } = useOutletContext()
     const navigate = useNavigate()
     const queryClient = useQueryClient();
+    const inputClick = useRef(null)
+    const [serverAvatar, setServerAvatar] = useState(null)
+
 
 
 
@@ -215,6 +218,24 @@ export default function ServerPage() {
     }
 
 
+    const HandleThePPChange= ()=>{
+        if(inputClick.current){
+            inputClick.current.click()
+        }
+    }
+
+    const HandleThePPChangePost = (e)=>{
+        const file = e.target.files[0];
+
+        if (file){
+            const url = URL.createObjectURL(file);
+            setServerAvatar(url)
+        }
+
+        console.log('Hi My firend');
+    }
+
+
 
 
 
@@ -235,7 +256,32 @@ export default function ServerPage() {
                         className={`absolute top-0 left-0 z-49 flex flex items-center text-white justify-between font-bold  border-b h-13 pl-4 text-lg gap-x-3 shrink-0 w-full transition-all  ${navOpacity > 0.8 ? 'border-b-zinc-800/50 shadow-md' : 'border-b-transparent hover:!bg-zinc-950/50 '
                             }`}
                     >
+
+                     <div className="flex gap-x-2 justify-center items-center"> 
+
+
+                        {/* the server PP   */}
+                        <div className="h-8 w-8 bg-zinc-700 rounded-full flex-shrink-0 flex justify-center items-center text-yellow-500" onClick={HandleThePPChange} >{serverAvatar || data?.Serverinfo?.[0]?.avatar ?
+                            (<>
+                                <img src={serverAvatar || data?.Serverinfo?.[0]?.avatar} alt="avatar" className="h-full w-full object-cover rounded-full"  />
+                               
+                            </>    
+                            ) : (
+                                data?.Serverinfo?.[0]?.server_name ? data?.Serverinfo?.[0]?.server_name.charAt(0).toUpperCase() : '?'
+                            )
+                        }
+                        
+                         
+                         </div>
+                         
+
+
+
+
                         {data?.Serverinfo?.[0]?.server_name}
+
+                        </div>
+                         <input type="file" ref={inputClick}  className="hidden" onChange={(e)=>HandleThePPChangePost(e)} accept="image/*" />
 
                         {
                             isMember ?
@@ -265,11 +311,11 @@ export default function ServerPage() {
 
                     </div>
 
-                  
-                        <div className="w-full min-h-40 bg-blue-300 rounded-tl-xl absolute top-0  left-0 flex items-center justify-center" />
 
-                         
-                    
+                    <div className="w-full min-h-40 bg-blue-300 rounded-tl-xl absolute top-0  left-0 flex items-center justify-center" />
+
+
+
 
 
                     <div
