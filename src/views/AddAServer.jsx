@@ -30,7 +30,7 @@ export default function AddServer({ isOpen, onClose, userInfo ,  setData }) {
         setStepWithDirection([nextStep, newDirection]);
     };
 
-console.log(userInfo , 'jlrflnelfv')
+
 
     if (!isOpen) return null;
   
@@ -60,7 +60,7 @@ console.log(userInfo , 'jlrflnelfv')
                 throw new Error(result.error || 'Cannot Create ');
             }
 
-            console.log(result.newServer)
+            
 
            setData((prev )=>({
             ...prev , 

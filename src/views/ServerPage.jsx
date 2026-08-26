@@ -391,10 +391,10 @@ export default function ServerPage() {
 
                     <div className="w-full min-h-40 bg-blue-300 rounded-tl-xl absolute top-0  left-0 flex items-center justify-center" >
                         {currentImg && (
-                            <img src={currentImg || data?.Serverinfo?.[0]?.server_img} alt="avatar" className="h-40 w-full object-cover " />
+                            <img src={currentImg || data?.Serverinfo?.[0]?.server_img} alt="avatar" className="h-40 w-full object-cover rounded-tl-xl " />
                         )}
 
-                        {/* {isAuthorized && ( */}
+                        {isAuthorized && (
                         <button
                             onClick={() => ImgInputClick?.current?.click()}
                             className={`absolute bottom-3 right-3 z-30 p-2 bg-black/60 hover:bg-black/80 backdrop-blur-md text-white rounded-lg transition-all duration-200 border border-white/20 shadow-lg ${navOpacity > 0.05
@@ -408,7 +408,7 @@ export default function ServerPage() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                         </button>
-                        {/* )} */}
+                         )}
 
 
 
