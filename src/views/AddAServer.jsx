@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from 'framer-motion';
+
 
 const Api_URL = import.meta.env.VITE_API_URL;
 
@@ -19,12 +20,16 @@ const slideVariants = {
     }),
 };
 
-export default function AddServer({ isOpen, onClose, userInfo ,  setData }) {
-    const [FormData, setFormData] = useState({ serverName: userInfo?.username ? `${userInfo?.username}'s Server` : "", serverDescription: '', serverDest: '' });
+export default function AddServer({ isOpen, onClose, userInfo, setData }) {
+    const [formData, setFormData] = useState({ serverName: userInfo?.username ? `${userInfo?.username}'s Server` : "", serverDescription: '', serverDest: '' });
     const [message, setMessage] = useState({ text: '', type: '' });
     const [[step, direction], setStepWithDirection] = useState([1, 0]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
+    const ImgInputClick = useRef(null)
+    const [uploadImg, setUploadImg] = useState(null)
+    const [selectedFile, setSelectedFile] = useState(null)
+
 
     const goToStep = (nextStep) => {
         const newDirection = nextStep > step ? 1 : -1;
@@ -34,27 +39,37 @@ export default function AddServer({ isOpen, onClose, userInfo ,  setData }) {
 
 
     if (!isOpen) return null;
-  
+
 
 
 
     const HandleCreate = async (e) => {
-       
+
         e.preventDefault();
         if (isSubmitting) return;
         setIsSubmitting(true);
         const url = `${Api_URL}/servers`
 
-       
+        const bodyData = new FormData();
+        bodyData.append('serverName', formData.serverName)
+        bodyData.append('serverDescription', formData.serverDescription)
+        bodyData.append('serverDest', formData.serverDest)
+
+        if (selectedFile) {
+            bodyData.append('Image', selectedFile)
+        }
+
+
         try {
+
 
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
-                    'Content-Type': 'application/json'
+
                 },
-                body: JSON.stringify({ serverName: FormData.serverName , serverDescription : FormData.serverDescription , serverDest : FormData.serverDest })
+                body: bodyData
             })
 
 
@@ -64,17 +79,19 @@ export default function AddServer({ isOpen, onClose, userInfo ,  setData }) {
                 throw new Error(result.error || 'Cannot Create ');
             }
 
-            
 
-           setData((prev )=>({
-            ...prev , 
-            servers : [...prev.servers , result.newServer]
-           }))
+
+            setData((prev) => ({
+                ...prev,
+                servers: [...prev.servers, result.newServer]
+            }))
 
             setMessage({ text: result.message || 'Server Created Successfully!', type: 'success' });
 
 
-            setFormData({serverName: '' , serverDescription: '', serverDest: ''});
+            setFormData({ serverName: '', serverDescription: '', serverDest: '' });
+            setSelectedFile(null);
+            setUploadImg(null);
 
 
             setTimeout(() => {
@@ -90,8 +107,8 @@ export default function AddServer({ isOpen, onClose, userInfo ,  setData }) {
                 navigate('/login');
             }
             setMessage({ text: error.message, type: 'error' });
-        }finally {
-            setIsSubmitting(false); 
+        } finally {
+            setIsSubmitting(false);
         }
 
 
@@ -102,6 +119,24 @@ export default function AddServer({ isOpen, onClose, userInfo ,  setData }) {
 
     }
 
+
+
+    const HandleTheImgChangePost = async (e) => {
+        const file = e.target.files[0];
+
+
+    
+        if (file) {
+            setSelectedFile(file)
+            const url = URL.createObjectURL(file);
+            setUploadImg(url)
+        }
+
+
+
+
+        console.log('Hi My friend');
+    }
 
 
 
@@ -120,14 +155,14 @@ export default function AddServer({ isOpen, onClose, userInfo ,  setData }) {
 
             {message.text && (
 
-                        <div className={`absolute right-4  top-10 animate-auto-glide p-2 text-center text-sm font-medium rounded-xl transition-all duration-500 ease-in-out transform ${message.type === 'success'
-                            ? 'bg-emerald-500/20 border border-emerald-500 text-emerald-200 translate-x-0 opacity-100 pointer-events-auto'
-                            : 'bg-red-500/20 border border-red-500 text-red-200 '
-                            }`}
-                            onAnimationEnd={() => setMessage({ text: '', type: '' })}>
-                            {message.text}
-                        </div>
-                     )} 
+                <div className={`absolute right-4  top-10 animate-auto-glide p-2 text-center text-sm font-medium rounded-xl transition-all duration-500 ease-in-out transform ${message.type === 'success'
+                    ? 'bg-emerald-500/20 border border-emerald-500 text-emerald-200 translate-x-0 opacity-100 pointer-events-auto'
+                    : 'bg-red-500/20 border border-red-500 text-red-200 '
+                    }`}
+                    onAnimationEnd={() => setMessage({ text: '', type: '' })}>
+                    {message.text}
+                </div>
+            )}
 
             {/* Modal Wrapper with fixed dimensions and hidden overflow */}
             <div className="relative w-full max-w-md overflow-hidden rounded-2xl bg-zinc-900 border border-neutral-800/50 p-6 text-white min-h-[360px] flex flex-col justify-center">
@@ -295,17 +330,26 @@ export default function AddServer({ isOpen, onClose, userInfo ,  setData }) {
 
                             <div className="w-full text-center font-bold text-2xl mt-1">Customize Your Server</div>
                             <div className="w-full text-center text-zinc-400 text-sm mt-1">Give your new server a personality with a name and an icon. You can always change it later.</div>
+
                             <div className="flex justify-center mt-6">
-                                <div className="h-20 w-20 rounded-full bg-zinc-900/50 border-4 border-dotted border-zinc-700"></div>
+                                {!uploadImg ?
+                                    (<div className="h-20 w-20 rounded-full bg-zinc-900/50 border-4 border-dotted border-zinc-700" onClick={() => ImgInputClick?.current?.click()}></div>) :
+
+
+                                    (<img src={uploadImg} alt="avatar" className="h-40 w-40 object-cover rounded-full" onClick={() => ImgInputClick?.current?.click()} />)
+
+                                }
+
                             </div>
+                            <input type="file" ref={ImgInputClick} className="hidden" onChange={(e) => HandleTheImgChangePost(e)} accept="image/*" />
 
                             <form className="flex flex-col gap-y-3 mt-4" >
                                 <div>
                                     <label className="text-xs uppercase tracking-wider text-zinc-300 mb-2 ml-1">Server Name</label>
-                                     <input
+                                    <input
                                         key={userInfo?.username || "default"}
                                         type="text"
-                                        value={`${FormData.serverName}`}
+                                        value={`${formData.serverName}`}
                                         onChange={(e) => setFormData(prev => ({ ...prev, serverName: e.target.value }))}
                                         className="w-full outline-none bg-zinc-950 border border-zinc-800 p-2.5 rounded-lg text-sm mt-2 focus:border-zinc-500 transition-colors"
                                     />
@@ -356,9 +400,9 @@ export default function AddServer({ isOpen, onClose, userInfo ,  setData }) {
 
                             <div className="w-full text-center font-bold text-2xl mt-2">Tell us More About Your Server</div>
                             <div className="w-full text-center text-zinc-400 text-sm mt-2">What is Your New Server for i.e. Gaming, Study, Coding etc</div>
-                           
 
-                            <form className="flex flex-col gap-y-3 mt-6" onSubmit={HandleCreate} >
+
+                            <form className="flex flex-col gap-y-3 mt-6" onSubmit={(e) => HandleCreate(e)} >
                                 <div className="overflow-hidden">
                                     <label className="text-xs uppercase tracking-wider text-zinc-300 mb-2 ml-1">Server Description</label>
                                     <textarea

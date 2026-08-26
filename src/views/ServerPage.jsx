@@ -310,7 +310,7 @@ export default function ServerPage() {
         //     setUploadImg(url)
         // }
 
-        console.log('Hi My firend');
+        console.log('Hi My friend');
     }
 
 
@@ -389,7 +389,7 @@ export default function ServerPage() {
                     </div>
 
 
-                    <div className="w-full min-h-40 bg-blue-300 rounded-tl-xl absolute top-0  left-0 flex items-center justify-center" >
+                    <div className="w-full min-h-40 bg-neutral-800 rounded-tl-xl absolute top-0  left-0 flex items-center justify-center" >
                         {currentImg && (
                             <img src={currentImg || data?.Serverinfo?.[0]?.server_img} alt="avatar" className="h-40 w-full object-cover rounded-tl-xl " />
                         )}
