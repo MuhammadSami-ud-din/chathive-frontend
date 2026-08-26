@@ -50,7 +50,10 @@ export default function ServerPage() {
     const navigate = useNavigate()
     const queryClient = useQueryClient();
     const inputClick = useRef(null)
-    const [serverAvatar, setServerAvatar] = useState(null)
+    const [uploadAvatar, setUploadAvatar] = useState(null)
+    const ImgInputClick = useRef(null)
+    const [uploadImg, setUploadImg] = useState(null)
+
 
 
 
@@ -59,6 +62,12 @@ export default function ServerPage() {
         queryKey: ['FetchChannels', server_id],
         queryFn: () => FetchChannels(server_id)
     })
+
+
+    const currentAvatar = uploadAvatar || data?.Serverinfo?.[0]?.avatar;
+    const currentImg = uploadImg || data?.Serverinfo?.[0]?.server_img;
+
+
 
 
     const isAuthorized = Boolean(Array.isArray(data?.role) && data.role.length > 0)
@@ -218,23 +227,91 @@ export default function ServerPage() {
     }
 
 
-    const HandleThePPChange= ()=>{
-        if(inputClick.current){
+    const HandleThePPChange = () => {
+        if (inputClick.current) {
             inputClick.current.click()
         }
     }
 
-    const HandleThePPChangePost = (e)=>{
+    const HandleThePPChangePost = async (e) => {
         const file = e.target.files[0];
 
-        if (file){
-            const url = URL.createObjectURL(file);
-            setServerAvatar(url)
+        const formData = new FormData();
+        formData.append('avatar', file);
+
+        try {
+            const url = `${Api_URL}/avatar-upload/${server_id}`;
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("authToken")}`
+                },
+                body: formData
+            })
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || 'Profile Picture Set Failed')
+            }
+            console.log(result);
+            setUploadAvatar(result.avatar);
+            queryClient.invalidateQueries(['FetchChannels', server_id]);
+
+        } catch (error) {
+            console.log(error.message);
         }
+
+
+
+
+
+
+        // if (file){
+        //     const url = URL.createObjectURL(file);
+        //     setServerAvatar(url)
+        // }
 
         console.log('Hi My firend');
     }
 
+
+     const HandleTheImgChangePost = async (e) => {
+        const file = e.target.files[0];
+
+        const formData = new FormData();
+        formData.append('Image', file);
+
+        try {
+            const url = `${Api_URL}/img-upload/${server_id}`;
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("authToken")}`
+                },
+                body: formData
+            })
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || 'Profile Picture Set Failed')
+            }
+            console.log(result);
+            setUploadImg(result.server_img);
+            queryClient.invalidateQueries(['FetchChannels', server_id]);
+
+        } catch (error) {
+            console.log(error.message);
+        }
+
+        // if (file){
+        //     const url = URL.createObjectURL(file);
+        //     setUploadImg(url)
+        // }
+
+        console.log('Hi My firend');
+    }
 
 
 
@@ -247,41 +324,41 @@ export default function ServerPage() {
             <div className="flex w-full relative">
 
 
-                <div className="flex-none relative  w-80 h-full flex flex-col  rounded-l-xl border-t border-l border-zinc-800 ">
+                <div className="flex-none relative  w-80 h-full flex flex-col  rounded-l-xl border-t border-l border-zinc-800  ">
                     <div
                         style={{
 
                             backgroundColor: `rgba(24, 24, 27, ${navOpacity})`,
                         }}
-                        className={`absolute top-0 left-0 z-49 flex flex items-center text-white justify-between font-bold  border-b h-13 pl-4 text-lg gap-x-3 shrink-0 w-full transition-all  ${navOpacity > 0.8 ? 'border-b-zinc-800/50 shadow-md' : 'border-b-transparent hover:!bg-zinc-950/50 '
+                        className={`absolute top-0 left-0 z-40 flex flex items-center text-zinc-300 justify-between font-bold  border-b h-13 pl-4 text-lg gap-x-3 shrink-0 w-full  transition-all  ${navOpacity > 0.8 ? 'border-b-zinc-800/50 shadow-md' : 'border-b-transparent hover:!bg-zinc-950/50 '
                             }`}
                     >
 
-                     <div className="flex gap-x-2 justify-center items-center"> 
+                        <div className="flex gap-x-2 justify-center items-center">
 
 
-                        {/* the server PP   */}
-                        <div className="h-8 w-8 bg-zinc-700 rounded-full flex-shrink-0 flex justify-center items-center text-yellow-500" onClick={HandleThePPChange} >{serverAvatar || data?.Serverinfo?.[0]?.avatar ?
-                            (<>
-                                <img src={serverAvatar || data?.Serverinfo?.[0]?.avatar} alt="avatar" className="h-full w-full object-cover rounded-full"  />
-                               
-                            </>    
-                            ) : (
-                                data?.Serverinfo?.[0]?.server_name ? data?.Serverinfo?.[0]?.server_name.charAt(0).toUpperCase() : '?'
-                            )
-                        }
-                        
-                         
-                         </div>
-                         
+                            {/* the server PP   */}
+                            <div className="h-8 w-8 bg-zinc-700 rounded-full flex-shrink-0 flex justify-center items-center text-yellow-500" onClick={HandleThePPChange} >{currentAvatar || data?.Serverinfo?.[0]?.avatar ?
+                                (<>
+                                    <img src={currentAvatar || data?.Serverinfo?.[0]?.avatar} alt="avatar" className="h-full w-full object-cover rounded-full" />
+
+                                </>
+                                ) : (
+                                    data?.Serverinfo?.[0]?.server_name ? data?.Serverinfo?.[0]?.server_name.charAt(0).toUpperCase() : '?'
+                                )
+                            }
+
+
+                            </div>
 
 
 
 
-                        {data?.Serverinfo?.[0]?.server_name}
+
+                            {data?.Serverinfo?.[0]?.server_name}
 
                         </div>
-                         <input type="file" ref={inputClick}  className="hidden" onChange={(e)=>HandleThePPChangePost(e)} accept="image/*" />
+                        <input type="file" ref={inputClick} className="hidden" onChange={(e) => HandleThePPChangePost(e)} accept="image/*" />
 
                         {
                             isMember ?
@@ -312,7 +389,32 @@ export default function ServerPage() {
                     </div>
 
 
-                    <div className="w-full min-h-40 bg-blue-300 rounded-tl-xl absolute top-0  left-0 flex items-center justify-center" />
+                    <div className="w-full min-h-40 bg-blue-300 rounded-tl-xl absolute top-0  left-0 flex items-center justify-center" >
+                        {currentImg && (
+                            <img src={currentImg || data?.Serverinfo?.[0]?.server_img} alt="avatar" className="h-40 w-full object-cover " />
+                        )}
+
+                        {/* {isAuthorized && ( */}
+                        <button
+                            onClick={() => ImgInputClick?.current?.click()}
+                            className={`absolute bottom-3 right-3 z-30 p-2 bg-black/60 hover:bg-black/80 backdrop-blur-md text-white rounded-lg transition-all duration-200 border border-white/20 shadow-lg ${navOpacity > 0.05
+                                    ? 'opacity-0 scale-90 pointer-events-none'
+                                    : 'opacity-100 scale-100 pointer-events-auto'
+                                }`}
+                            title="Change Banner"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </button>
+                        {/* )} */}
+
+
+
+
+                    </div>
+                    <input type="file" ref={ImgInputClick} className="hidden" onChange={(e) => HandleTheImgChangePost(e)} accept="image/*" />
 
 
 
