@@ -8,6 +8,7 @@ const Api_URL = import.meta.env.VITE_API_URL
 
 
 
+
 const FetchChannels = async (server_id) => {
 
     const url = `${Api_URL}/channels/${server_id}`
@@ -220,15 +221,6 @@ export default function ServerPage() {
 
 
 
-
-
-
-
-
-
-
-
-
     return (
         <>
             <div className="flex w-full relative">
@@ -273,8 +265,12 @@ export default function ServerPage() {
 
                     </div>
 
+                  
+                        <div className="w-full min-h-40 bg-blue-300 rounded-tl-xl absolute top-0  left-0 flex items-center justify-center" />
 
-                    <div className="w-full  min-h-40 bg-blue-300 rounded-tl-xl absolute top-0 z-0 left-0 "> </div>
+                         
+                    
+
 
                     <div
                         onScroll={handleScroll}

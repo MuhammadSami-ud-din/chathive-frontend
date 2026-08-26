@@ -1,7 +1,7 @@
 const Api_URL = import.meta.env.VITE_API_URL
 import { useState, useEffect, useRef } from "react"
 import { NavLink, useNavigate } from "react-router-dom"
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 
 
