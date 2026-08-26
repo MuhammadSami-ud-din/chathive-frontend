@@ -23,6 +23,7 @@ export default function AddServer({ isOpen, onClose, userInfo ,  setData }) {
     const [FormData, setFormData] = useState({ serverName: userInfo?.username ? `${userInfo?.username}'s Server` : "", serverDescription: '', serverDest: '' });
     const [message, setMessage] = useState({ text: '', type: '' });
     const [[step, direction], setStepWithDirection] = useState([1, 0]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
 
     const goToStep = (nextStep) => {
@@ -38,7 +39,10 @@ export default function AddServer({ isOpen, onClose, userInfo ,  setData }) {
 
 
     const HandleCreate = async (e) => {
-        e.preventDefault()
+       
+        e.preventDefault();
+        if (isSubmitting) return;
+        setIsSubmitting(true);
         const url = `${Api_URL}/servers`
 
        
@@ -86,6 +90,8 @@ export default function AddServer({ isOpen, onClose, userInfo ,  setData }) {
                 navigate('/login');
             }
             setMessage({ text: error.message, type: 'error' });
+        }finally {
+            setIsSubmitting(false); 
         }
 
 
@@ -385,9 +391,9 @@ export default function AddServer({ isOpen, onClose, userInfo ,  setData }) {
                                     </button>
                                     <button
                                         type="submit"
-                                        
+                                        disabled={isSubmitting}
                                         className="px-5 py-2 bg-indigo-600 rounded-lg text-sm font-medium transition-all hover:bg-indigo-500">
-                                        Create Server
+                                        {isSubmitting ? 'Creating...' : 'Create Server'}
                                     </button>
                                 </div>
                             </form>

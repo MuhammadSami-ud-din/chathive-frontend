@@ -228,7 +228,7 @@ export default function ServerPage() {
 
 
     const HandleThePPChange = () => {
-        if (inputClick.current) {
+        if (isAuthorized &&inputClick.current) {
             inputClick.current.click()
         }
     }
