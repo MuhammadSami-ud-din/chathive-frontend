@@ -56,6 +56,7 @@ export default function Dashboard() {
                 }
              
                 setData(result)
+                console.log(result)
 
 
 
@@ -217,12 +218,12 @@ export default function Dashboard() {
                                 <NavLink
                                     to={`/channels/${item.server_id}`}
                                     key={item.server_id || item._id}
-                                    className={"relative h-12 min-h-8 w-20 min-w-14 mt-1 flex justify-center items-center"}>
+                                    className={"relative h-12 min-h-8 w-20 min-w-14 mt-1 flex justify-center focus:outline-none  items-center"}>
                                     {({ isActive }) => (
                                         <>
-                                            <span className={`peer relative flex h-12 w-12 items-center justify-center  text-white transition-all duration-300 ease-in-out rounded-2xl hover:bg-[#5865f2] ${isActive ? 'bg-[#5865f2]' : 'bg-zinc-800'} cursor-pointer text-xs font-semibold text-center truncate select-none px-1`}>
-
-                                                {item.server_name ? item.server_name.charAt(0).toUpperCase() : '?'}
+                                            <span className={`peer relative flex h-12 w-12 items-center justify-center   text-white transition-all duration-300 ease-in-out rounded-2xl hover:bg-[#5865f2] ${isActive ? 'bg-[#5865f2]' : 'bg-zinc-800'} cursor-pointer text-xs font-semibold text-center truncate select-none `}>
+                                                  {item?.avatar ? (<img src={item?.avatar} alt="avatar" className="w-full h-full object-cover rounded-2xl" />) : item?.server_name ? item.server_name.charAt(0).toUpperCase() : '?'}
+                                                
 
                                             </span>
 

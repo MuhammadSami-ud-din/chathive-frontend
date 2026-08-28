@@ -173,8 +173,12 @@ export default function ServersListing() {
                                 <NavLink
                                     to={`/channels/${server.server_id}`}
                                     key={server.server_id}
-                                    className=" flex flex-col  border border-zinc-700/50 min-w-48 w-[300px] min-h-[340px]  rounded-xl gap-4 transiton-all duration-300 hover:border-zinc-300/50 " >
-                                    <div className="h-37 w-full rounded-t-xl bg-gradient-to-r from-cyan-800 to-neutral-950"></div>
+                                    className=" flex flex-col  border border-zinc-700/50 min-w-48 w-[300px] min-h-[340px]  rounded-xl gap-4 transiton-all duration-300 hover:border-zinc-500/50 " >
+                                    <div className="h-37 w-full rounded-t-xl ">
+                                        {
+                                            server?.server_img ? <img src={server?.server_img} alt="avatar" className="w-full h-full object-cover  rounded-t-xl " /> : <div className=" rounded-t-xl bg-gradient-to-r from-cyan-800 to-neutral-950 h-full w-full" /> 
+                                        }
+                                    </div>
                                     <div className="flex flex-col justify-between flex-1 gap-1 ml-4 text-zinc-400">
                                         <div className="flex flex-col">
                                             <span className="text-xl font-semibold  ">{server.server_name}</span>
