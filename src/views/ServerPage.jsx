@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react"
 import { useParams, useNavigate, Outlet, NavLink, useOutletContext } from "react-router-dom"
-import ChannelChat from "./channelChat"
+
 import CreateChannel from "./CreateChannel"
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 const Api_URL = import.meta.env.VITE_API_URL
@@ -46,7 +46,7 @@ export default function ServerPage() {
     const [joining, setJoining] = useState(false)
     const [isOpen, setIsOpen] = useState(false)
     const [showMessage, setShowMessage] = useState({ message: '', type: '' });
-    const { AddJoinedServers } = useOutletContext()
+    const { AddJoinedServers ,  setPP } = useOutletContext()
     const navigate = useNavigate()
     const queryClient = useQueryClient();
     const inputClick = useRef(null)
@@ -256,7 +256,10 @@ export default function ServerPage() {
             }
             console.log(result);
             setUploadAvatar(result.avatar);
+            setPP({pp : result.avatar , id : data?.Serverinfo?.[0]?.server_id})
             queryClient.invalidateQueries(['FetchChannels', server_id]);
+            queryClient.invalidateQueries(['FetchServers']);
+            
 
         } catch (error) {
             console.log(error.message);

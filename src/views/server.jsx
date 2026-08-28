@@ -1,6 +1,6 @@
 const Api_URL = import.meta.env.VITE_API_URL
 import { useState, useEffect, useRef } from "react"
-import { NavLink, useNavigate } from "react-router-dom"
+import { NavLink, useNavigate, useOutletContext } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query";
 
 
@@ -42,7 +42,6 @@ const FetchServers = async () => {
 
 export default function ServersListing() {
     const [isScrolled, setIsScrolled] = useState(false);
-
     const navigate = useNavigate()
     const scrolableContainer = useRef(null)
 
@@ -173,13 +172,20 @@ export default function ServersListing() {
                                 <NavLink
                                     to={`/channels/${server.server_id}`}
                                     key={server.server_id}
-                                    className=" flex flex-col  border border-zinc-700/50 min-w-48 w-[300px] min-h-[340px]  rounded-xl gap-4 transiton-all duration-300 hover:border-zinc-500/50 " >
+                                    className=" relative flex flex-col  border border-zinc-700/50 min-w-48 w-[310px] min-h-[340px]  rounded-xl gap-4 transiton-all duration-300 hover:border-zinc-500/50 " >
                                     <div className="h-37 w-full rounded-t-xl ">
                                         {
-                                            server?.server_img ? <img src={server?.server_img} alt="avatar" className="w-full h-full object-cover  rounded-t-xl " /> : <div className=" rounded-t-xl bg-gradient-to-r from-cyan-800 to-neutral-950 h-full w-full" /> 
+                                            server?.server_img ? <img src={ server?.server_img} alt="avatar" className="w-full h-full object-cover  rounded-t-xl " /> : <div className=" rounded-t-xl bg-gradient-to-r from-cyan-800 to-neutral-950 h-full w-full" /> 
                                         }
                                     </div>
-                                    <div className="flex flex-col justify-between flex-1 gap-1 ml-4 text-zinc-400">
+
+                                     <div className={`peer top-[36%] left-[10%] absolute flex h-15 w-15 items-center justify-center bg-zinc-900 border-3 border-zinc-950  text-white transition-all duration-300 ease-in-out rounded-2xl hover:bg-[#5865f2]  cursor-pointer text-xs font-semibold text-center truncate select-none `}>
+                                                  {server?.avatar ? (<img src={server?.avatar} alt="avatar" className="w-full h-full object-cover object-center" />) : server?.server_name ? server.server_name.charAt(0).toUpperCase() : '?'}
+                                                
+
+                                            </div>
+
+                                    <div className="flex flex-col justify-between flex-1 gap-1 ml-4 mt-8 text-zinc-400">
                                         <div className="flex flex-col">
                                             <span className="text-xl font-semibold  ">{server.server_name}</span>
                                             <span className="test-xs ">{server.server_description}</span>

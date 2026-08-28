@@ -13,6 +13,7 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [onlineUsers , setOnlineUsers] = useState([])
+    const [PP , setPP] = useState({pp : '' , id : ''})
 
     const url = `${Api_URL}/servers/me`
 
@@ -56,7 +57,7 @@ export default function Dashboard() {
                 }
              
                 setData(result)
-                console.log(result)
+        
 
 
 
@@ -64,7 +65,7 @@ export default function Dashboard() {
             catch (error) {
                 setError(error.message)
                 console.log(error.message)
-                if (error.message === 'Invalid token') {
+                if (error?.message === 'Invalid token') {
                     navigate('/login');
                 }
 
@@ -222,7 +223,7 @@ export default function Dashboard() {
                                     {({ isActive }) => (
                                         <>
                                             <span className={`peer relative flex h-12 w-12 items-center justify-center   text-white transition-all duration-300 ease-in-out rounded-2xl hover:bg-[#5865f2] ${isActive ? 'bg-[#5865f2]' : 'bg-zinc-800'} cursor-pointer text-xs font-semibold text-center truncate select-none `}>
-                                                  {item?.avatar ? (<img src={item?.avatar} alt="avatar" className="w-full h-full object-cover rounded-2xl" />) : item?.server_name ? item.server_name.charAt(0).toUpperCase() : '?'}
+                                                  {item?.avatar ? (<img src={ String(PP.id)===String(item.server_id) ?  PP.pp || item?.avatar : item?.avatar} alt="avatar" className="w-full h-full object-cover rounded-2xl" />) : item?.server_name ? item.server_name.charAt(0).toUpperCase() : '?'}
                                                 
 
                                             </span>
@@ -300,7 +301,7 @@ export default function Dashboard() {
 
 
                     <div className="flex  flex-1 overflow-hidden min-h-0">
-                        <Outlet context={{ setHeaderTitle, AddJoinedServers ,  onlineUsers }} />
+                        <Outlet context={{ setHeaderTitle, AddJoinedServers ,  onlineUsers , PP , setPP }} />
                     </div>
 
 
