@@ -2,6 +2,7 @@ const Api_URL = import.meta.env.VITE_API_URL;
 import { useEffect, useState } from "react"
 import { useNavigate, Outlet, NavLink } from 'react-router-dom';
 import AddServer from "../views/AddAServer";
+import { socket } from "../socket.js";
 
 
 export default function Dashboard() {
@@ -11,10 +12,30 @@ export default function Dashboard() {
     const [headerTitle, setHeaderTitle] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [onlineUsers , setOnlineUsers] = useState([])
 
     const url = `${Api_URL}/servers/me`
 
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleOnlineUsers = (onlineUserIds) => {
+       
+        setOnlineUsers(onlineUserIds);
+    };
+    
+
    
+    socket.on('get_online_users', handleOnlineUsers);
+
+
+    return () => {
+        socket.off('get_online_users', handleOnlineUsers);
+    };
+}, []);
+
+   
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -29,12 +50,11 @@ export default function Dashboard() {
                 });
 
                 const result = await response.json();
-                console.log("SERVER DATA RETURNED:", result);
 
                 if (!response.ok) {
                     throw new Error(result.error || 'no servers found')
                 }
-                console.log(result)
+             
                 setData(result)
 
 
@@ -279,7 +299,7 @@ export default function Dashboard() {
 
 
                     <div className="flex  flex-1 overflow-hidden min-h-0">
-                        <Outlet context={{ setHeaderTitle, AddJoinedServers }} />
+                        <Outlet context={{ setHeaderTitle, AddJoinedServers ,  onlineUsers }} />
                     </div>
 
 
@@ -292,6 +312,7 @@ export default function Dashboard() {
                 onClose={() => setIsOpen(false)}
                 userInfo = {data?.userInfo}
                 setData = {setData}
+                
                 
                  />}
 
