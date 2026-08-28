@@ -254,16 +254,18 @@ export default function ChatArea() {
 
     useEffect(() => {
         if (!socket || !id) return;
-      
+
         const HandleTyping = (data) => {
-           
+
             if (String(data?.userId) === String(id)) {
                 console.log('typing')
+                setTyping(true)
             }
         }
-        const HandleStopTyping = ({userId}) => {
+        const HandleStopTyping = ({ userId }) => {
             if (String(userId) === String(id)) {
                 console.log("not typing")
+                setTyping(false)
             }
         }
         socket.on('start_typing', HandleTyping)
@@ -294,12 +296,27 @@ export default function ChatArea() {
 
                 {/* upper bar to show Friend name */}
                 <div className="flex items-center border-b border-b-neutral-800 h-13 pl-3 text-sm gap-x-3 shrink-0">
-                    <span className="h-8 w-8 rounded-full bg-zinc-700/50 flex justify-center items-center text-lg text-yellow-200/50">{data.user?.avatar ? (
-                        <img src={data.user.avatar} alt="avatar" className="h-full w-full object-cover rounded-full" />
-                    ) : (
-                        data.user?.username ? data.user.username.charAt(0).toUpperCase() : '?'
-                    )}</span>
-                    <span className="text-zinc-100">{data.user.username}</span>
+                    <span className="h-8 w-8 rounded-full bg-zinc-700/50 flex justify-center items-center text-lg text-yellow-200/50">
+                        {data.user?.avatar ? (
+                            <img src={data.user.avatar} alt="avatar" className="h-full w-full object-cover rounded-full" />
+                        ) : (
+                            data.user?.username ? data.user.username.charAt(0).toUpperCase() : '?'
+                        )}
+                    </span>
+
+                    <div className="flex flex-col">
+                        <span className="text-zinc-100">{data.user.username}</span>
+
+              
+                        <span
+                            className={`text-zinc-400 text-[10px] transition-all duration-300 ease-in-out overflow-hidden ${typing
+                                    ? 'opacity-100 max-h-4 translate-y-0'
+                                    : 'opacity-0 max-h-0 -translate-y-1'
+                                }`}
+                        >
+                            Typing...
+                        </span>
+                    </div>
                 </div>
 
 
