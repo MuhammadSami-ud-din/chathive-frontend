@@ -12,30 +12,37 @@ export default function Dashboard() {
     const [headerTitle, setHeaderTitle] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    const [onlineUsers , setOnlineUsers] = useState([])
-    const [PP , setPP] = useState({pp : '' , id : ''})
+    const [onlineUsers, setOnlineUsers] = useState([])
+    const [PP, setPP] = useState({ pp: '', id: '' })
 
     const url = `${Api_URL}/servers/me`
 
-  useEffect(() => {
-    if (!socket) return;
+    useEffect(() => {
+        if (!socket) return;
 
-    const handleOnlineUsers = (onlineUserIds) => {
-       
-        setOnlineUsers(onlineUserIds);
-    };
-    
+        const handleOnlineUsers = (onlineUserIds) => {
 
-   
-    socket.on('get_online_users', handleOnlineUsers);
+            setOnlineUsers(onlineUserIds);
+        };
+        const handleConnect = () => {
+            socket.emit("get_online_users_request");
+        };
 
 
-    return () => {
-        socket.off('get_online_users', handleOnlineUsers);
-    };
-}, []);
+        socket.on('connect', handleConnect);
+        socket.on('get_online_users', handleOnlineUsers);
 
-   
+        if (socket.connected) {
+        socket.emit("get_online_users_request");
+    }
+
+
+        return () => {
+            socket.off('get_online_users', handleOnlineUsers);
+        };
+    }, []);
+
+
 
 
     useEffect(() => {
@@ -55,9 +62,9 @@ export default function Dashboard() {
                 if (!response.ok) {
                     throw new Error(result.error || 'no servers found')
                 }
-             
+
                 setData(result)
-        
+
 
 
 
@@ -81,12 +88,12 @@ export default function Dashboard() {
 
     const AddJoinedServers = (newServer) => {
         setData((prev) => {
-           
+
             if (prev.servers.some((s) => s.server_id === newServer.server_id)) return prev;
-            
+
             return {
-                ...prev , 
-            servers : [...prev.servers, newServer]
+                ...prev,
+                servers: [...prev.servers, newServer]
             }
         })
     }
@@ -213,32 +220,32 @@ export default function Dashboard() {
                             </div>
                         </div>
 
-                        
-                            {/*Joined server list*/}
-                            {data?.servers?.map((item) => (
-                                <NavLink
-                                    to={`/channels/${item.server_id}`}
-                                    key={item.server_id || item._id}
-                                    className={"relative h-12 min-h-8 w-20 min-w-14 mt-1 flex justify-center focus:outline-none  items-center"}>
-                                    {({ isActive }) => (
-                                        <>
-                                            <span className={`peer relative flex h-12 w-12 items-center justify-center   text-white transition-all duration-300 ease-in-out rounded-2xl hover:bg-[#5865f2] ${isActive ? 'bg-[#5865f2]' : 'bg-zinc-800'} cursor-pointer text-xs font-semibold text-center truncate select-none `}>
-                                                  {item?.avatar ? (<img src={ String(PP.id)===String(item.server_id) ?  PP.pp || item?.avatar : item?.avatar} alt="avatar" className="w-full h-full object-cover rounded-2xl" />) : item?.server_name ? item.server_name.charAt(0).toUpperCase() : '?'}
-                                                
 
-                                            </span>
+                        {/*Joined server list*/}
+                        {data?.servers?.map((item) => (
+                            <NavLink
+                                to={`/channels/${item.server_id}`}
+                                key={item.server_id || item._id}
+                                className={"relative h-12 min-h-8 w-20 min-w-14 mt-1 flex justify-center focus:outline-none  items-center"}>
+                                {({ isActive }) => (
+                                    <>
+                                        <span className={`peer relative flex h-12 w-12 items-center justify-center   text-white transition-all duration-300 ease-in-out rounded-2xl hover:bg-[#5865f2] ${isActive ? 'bg-[#5865f2]' : 'bg-zinc-800'} cursor-pointer text-xs font-semibold text-center truncate select-none `}>
+                                            {item?.avatar ? (<img src={String(PP.id) === String(item.server_id) ? PP.pp || item?.avatar : item?.avatar} alt="avatar" className="w-full h-full object-cover rounded-2xl" />) : item?.server_name ? item.server_name.charAt(0).toUpperCase() : '?'}
 
-                                            <div className={`absolute left-0 w-1 bg-white rounded-r-full transition-all duration-300  ${isActive ? 'h-10 ' : 'h-3 peer-hover:h-5 '}`} />
-                                            <div className="absolute left-full z-50 py-1 px-3  bg-zinc-600 rounded-xl flex items-center justify-center opacity-0 font-black text-base pointer-events-none top-1/2 -translate-y-1/2 whitespace-nowrap transition-opacity peer-hover:opacity-100 " >{item.server_name}
-                                                <div className="absolute -left-2 h-0 w-0 border-y-[8px] rounded-sm  border-y-transparent border-r-[13px] border-r-zinc-600" />
 
-                                            </div>
-                                        </>
-                                    )}
+                                        </span>
 
-                                </NavLink>
-                            ))}
-                       
+                                        <div className={`absolute left-0 w-1 bg-white rounded-r-full transition-all duration-300  ${isActive ? 'h-10 ' : 'h-3 peer-hover:h-5 '}`} />
+                                        <div className="absolute left-full z-50 py-1 px-3  bg-zinc-600 rounded-xl flex items-center justify-center opacity-0 font-black text-base pointer-events-none top-1/2 -translate-y-1/2 whitespace-nowrap transition-opacity peer-hover:opacity-100 " >{item.server_name}
+                                            <div className="absolute -left-2 h-0 w-0 border-y-[8px] rounded-sm  border-y-transparent border-r-[13px] border-r-zinc-600" />
+
+                                        </div>
+                                    </>
+                                )}
+
+                            </NavLink>
+                        ))}
+
                         {/*add a Server*/}
                         <div className=" relative flex justify-center items-center  w-20 ">
                             <span onClick={() => setIsOpen(true)} className=" peer flex h-12 w-12 cursor-pointer mt-2 ml-1 items-center justify-center bg-zinc-800  text-white transition-all duration-200 ease-in-out rounded-2xl hover:bg-[#5865f2] ">
@@ -301,7 +308,7 @@ export default function Dashboard() {
 
 
                     <div className="flex  flex-1 overflow-hidden min-h-0">
-                        <Outlet context={{ setHeaderTitle, AddJoinedServers ,  onlineUsers , PP , setPP }} />
+                        <Outlet context={{ setHeaderTitle, AddJoinedServers, onlineUsers, PP, setPP }} />
                     </div>
 
 
@@ -312,11 +319,11 @@ export default function Dashboard() {
             {isOpen && < AddServer
                 isOpen
                 onClose={() => setIsOpen(false)}
-                userInfo = {data?.userInfo}
-                setData = {setData}
-                
-                
-                 />}
+                userInfo={data?.userInfo}
+                setData={setData}
+
+
+            />}
 
 
         </>
