@@ -7,7 +7,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 const Api_URL = import.meta.env.VITE_API_URL;
 import { socket } from "../socket.js";
 
-  
+
 
 
 const CleanDate = (date) => {
@@ -48,7 +48,7 @@ const CleanTime = (date) => {
 
 
 const DMmessages = async (id) => {
-  
+
     const url = `${Api_URL}/messages/dm/${id}`;
 
     const response = await fetch(url, {
@@ -67,8 +67,8 @@ const DMmessages = async (id) => {
     }
 
 
-    return result ;
-   
+    return result;
+
 
 
 };
@@ -78,21 +78,24 @@ const DMmessages = async (id) => {
 export default function ChatArea() {
 
     const { id } = useParams();
-   const { conversationId, setConversationId } = useOutletContext() || {};
+    const [typing, setTyping] = useState(false);
+    const { conversationId, setConversationId } = useOutletContext() || {};
     const [message, setMessage] = useState('')
     const navigate = useNavigate();
     const [isFocused, setIsFocused] = useState(false);
     const messageEndRef = useRef(null)
-   
+    const isTypingRef = useRef(false);
+    const typingRef = useRef(null);
+
     const conversationIdRef = useRef(conversationId);
     const queryClient = useQueryClient();
 
 
-   const { data = { success: false, data: [], my_id: '', user: {} } , error} = useQuery({
-    queryKey : ['DMmessages' , id],
-    queryFn : () => DMmessages(id),
-    enabled : !!id
-   })
+    const { data = { success: false, data: [], my_id: '', user: {} }, error } = useQuery({
+        queryKey: ['DMmessages', id],
+        queryFn: () => DMmessages(id),
+        enabled: !!id
+    })
 
 
 
@@ -122,7 +125,7 @@ export default function ChatArea() {
         return () => {
             socket.off('connect', handleReconnect);
         };
-    }, [conversationId ]);
+    }, [conversationId]);
 
     useEffect(() => {
         const handleNewMessage = (msg) => {
@@ -151,7 +154,7 @@ export default function ChatArea() {
         };
     }, []);
 
-    
+
 
     useEffect(() => {
         if (error?.message === 'Invalid token') {
@@ -160,14 +163,14 @@ export default function ChatArea() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [error, navigate])
 
-    useEffect(()=>{
-         const activeConvId = data?.data?.[0]?.conversation_id;
+    useEffect(() => {
+        const activeConvId = data?.data?.[0]?.conversation_id;
 
-    if (activeConvId && setConversationId) {
-        setConversationId(activeConvId);
-    }
-     // eslint-disable-next-line react-hooks/exhaustive-deps
-    } , [conversationId , data , setConversationId])
+        if (activeConvId && setConversationId) {
+            setConversationId(activeConvId);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [conversationId, data, setConversationId])
 
 
     async function SendMsg() {
@@ -199,6 +202,11 @@ export default function ChatArea() {
                 };
             });
 
+            if (typingRef.current) {
+                clearTimeout(typingRef.current);
+            }
+            socket.emit('stop_typing', { conversation_id: conversationId })
+
             setMessage('');
 
         } catch (error) {
@@ -218,8 +226,55 @@ export default function ChatArea() {
         }
     };
 
+    const TypingIndicator = () => {
+        if (!socket) return;
 
 
+        if (!isTypingRef.current) {
+            isTypingRef.current = true;
+            socket.emit('start_typing', {
+                conversation_id: conversationId
+            });
+        }
+
+
+        if (typingRef.current) {
+            clearTimeout(typingRef.current);
+        }
+
+
+        typingRef.current = setTimeout(() => {
+            socket.emit('stop_typing', {
+                conversation_id: conversationId
+            });
+            isTypingRef.current = false;
+        }, 2000);
+    };
+
+
+    useEffect(() => {
+        if (!socket || !id) return;
+      
+        const HandleTyping = (data) => {
+           
+            if (String(data?.userId) === String(id)) {
+                console.log('typing')
+            }
+        }
+        const HandleStopTyping = ({userId}) => {
+            if (String(userId) === String(id)) {
+                console.log("not typing")
+            }
+        }
+        socket.on('start_typing', HandleTyping)
+        socket.on('stop_typing', HandleStopTyping)
+
+        return () => {
+            socket.off('start_typing', HandleTyping)
+            socket.off('stop_typing', HandleStopTyping)
+        }
+
+    }, [conversationId, id])
 
 
 
@@ -328,6 +383,7 @@ export default function ChatArea() {
 
                                 onChange={(e) => {
                                     setMessage(e.target.value)
+                                    TypingIndicator();
                                 }} />
 
                             <button className="h-7 w-15 bg-green-400/50 mr-2 ml-2 rounded-2xl transition-colors disabled:bg-zinc-800 disabled:text-zinc-500 disabled:cursor-not-allowed disabled:hover:bg-zinc-800" onClick={SendMsg} disabled={!message.trim()}>Send</button>
