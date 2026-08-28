@@ -86,6 +86,7 @@ export default function ChatArea() {
     const messageEndRef = useRef(null)
     const isTypingRef = useRef(false);
     const typingRef = useRef(null);
+    const { onlineUsers } = useOutletContext();
 
     const conversationIdRef = useRef(conversationId);
     const queryClient = useQueryClient();
@@ -96,6 +97,11 @@ export default function ChatArea() {
         queryFn: () => DMmessages(id),
         enabled: !!id
     })
+
+    const isOnline = onlineUsers.some(
+        (userId) => String(id) === String(userId)
+    );
+
 
 
 
@@ -307,15 +313,28 @@ export default function ChatArea() {
                     <div className="flex flex-col">
                         <span className="text-zinc-100">{data.user.username}</span>
 
-              
-                        <span
-                            className={`text-zinc-400 text-[10px] transition-all duration-300 ease-in-out overflow-hidden ${typing
-                                    ? 'opacity-100 max-h-4 translate-y-0'
-                                    : 'opacity-0 max-h-0 -translate-y-1'
-                                }`}
-                        >
-                            Typing...
-                        </span>
+
+                        <div className="h-4 overflow-hidden relative text-[10px] font-normal">
+                            {/* Typing Indicator */}
+                            <span
+                                className={`absolute inset-0 text-zinc-400  font-medium transition-all duration-300 ease-in-out ${typing
+                                        ? 'opacity-100 translate-y-0'
+                                        : 'opacity-0 -translate-y-2 pointer-events-none'
+                                    }`}
+                            >
+                                Typing...
+                            </span>
+
+                            {/* Online Status */}
+                            <span
+                                className={`absolute inset-0 text-zinc-400 transition-all duration-300 ease-in-out ${isOnline && !typing
+                                        ? 'opacity-100 translate-y-0'
+                                        : 'opacity-0 translate-y-2 pointer-events-none'
+                                    }`}
+                            >
+                                Online
+                            </span>
+                        </div>
                     </div>
                 </div>
 

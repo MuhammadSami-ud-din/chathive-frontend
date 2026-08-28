@@ -120,7 +120,7 @@ export default function DM() {
         }
         catch (error) {
             console.log(error.message)
-            if (error.message === 'Invalid token') {
+            if (error?.message === 'Invalid token') {
                 navigate('/login');
             }
 
@@ -228,7 +228,7 @@ export default function DM() {
 
             {/* chat area rightbar */}
             <div className="bg-[#151518] border-t border-t-zinc-800 flex-1 flex flex-col min-w-0">
-                <Outlet context={{ conversationId, setConversationId }} />
+                <Outlet context={{ conversationId, setConversationId , onlineUsers }} />
             </div>
 
 
