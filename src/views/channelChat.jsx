@@ -300,6 +300,7 @@ export default function ChannelChat() {
 
                     <div className="flex flex-col">
                         <span className="text-zinc-100">{ChannelInfo?.channel_name}</span>
+
                         <div
                             className={`grid transition-all duration-300 ease-in-out ${TypingUsers?.length > 0
                                     ? 'grid-rows-[1fr] opacity-100 mt-0.5'
@@ -307,9 +308,27 @@ export default function ChannelChat() {
                                 }`}
                         >
                             <div className="overflow-hidden">
-                                <span className="text-emerald-400 font-medium text-[11px] leading-none block">
-                                    Typing...
-                                </span>
+                                {TypingUsers?.length === 1 ? (() => {
+                                    
+                                    const typingUserMessage = data?.data?.find(
+                                        (msg) => msg.sender_id === TypingUsers[0]
+                                    );
+                                    const username = typingUserMessage?.sender?.username || 'Someone';
+
+                                    return (
+                                        <span className="text-zinc-400 font-medium text-[11px] leading-none block">
+                                            {`${username} is typing...`}
+                                        </span>
+                                    );
+                                })() : 
+                                   (TypingUsers.length > 1) ? 
+                                   (
+                                    <span className="text-zinc-400 font-medium text-[11px] leading-none block">
+                                        {`${TypingUsers?.length } users are typing...`}
+                                    </span>
+                                ):
+                                ''
+                                 }
                             </div>
                         </div>
                     </div>
