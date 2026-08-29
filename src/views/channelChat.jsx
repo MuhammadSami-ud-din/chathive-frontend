@@ -59,10 +59,10 @@ const ChannelFetch = async (channel_id) => {
     if (!response.ok) {
         throw new Error(result.error || 'no servers found')
     }
-    
 
 
-    
+
+
     return result
 
 
@@ -82,7 +82,7 @@ const ChannelFetch = async (channel_id) => {
 export default function ChannelChat() {
 
     const { channel_id } = useParams();
-    
+
     const [message, setMessage] = useState('')
     const navigate = useNavigate();
     const [isFocused, setIsFocused] = useState(false);
@@ -90,14 +90,17 @@ export default function ChannelChat() {
     const channels = useOutletContext();
     const messageEndRef = useRef(null)
     const queryClient = useQueryClient();
+    const isTypingRef = useRef(false);
+    const typingRef = useRef(null);
+    const [TypingUsers, setTypingUsers] = useState([])
 
 
-    const {data = { success: false, data: [], my_id: '' } , error , isSuccess} = useQuery({
-        queryKey : ['ChannelFetch' , channel_id],
-        queryFn : ()=> ChannelFetch(channel_id)
+    const { data = { success: false, data: [], my_id: '' }, error, isSuccess } = useQuery({
+        queryKey: ['ChannelFetch', channel_id],
+        queryFn: () => ChannelFetch(channel_id)
     })
 
-  
+
 
     const ChannelInfo = channels.find((channel) => Number(channel.channel_id) === Number(channel_id));
 
@@ -133,7 +136,7 @@ export default function ChannelChat() {
     useEffect(() => {
         const handleNewMessage = (msg) => {
             if (String(msg.channel_id) === String(channel_id)) {
-                queryClient.setQueryData(['ChannelFetch' , channel_id ] , (prev) => {
+                queryClient.setQueryData(['ChannelFetch', channel_id], (prev) => {
                     const alreadyExists = prev.data.some((m) => String(m._id) === String(msg._id));
                     if (alreadyExists) return prev;
                     return { ...prev, data: [...prev.data, msg] };
@@ -152,34 +155,34 @@ export default function ChannelChat() {
             socket.off('newMessage', handleNewMessage);
             socket.off('new_error', handleError);
         };
-    }, [channel_id]);
+    }, [channel_id, queryClient]);
 
 
 
 
 
-useEffect(() => {
-    if (isSuccess) {
-        const timer = setTimeout(() => {
-            setShowMessage({ text: 'Fetch Successful', type: 'success' });
-        }, 0);
-        return () => clearTimeout(timer);
-    }
-}, [isSuccess]);
-
-useEffect(() => {
-    if (error) {
-        const timer = setTimeout(() => {
-            setShowMessage({ text: error?.message || 'Not Authorized', type: 'error' });
-        }, 0);
-        
-        if (error?.message === 'Invalid token') {
-            navigate('/login');
+    useEffect(() => {
+        if (isSuccess) {
+            const timer = setTimeout(() => {
+                setShowMessage({ text: 'Fetch Successful', type: 'success' });
+            }, 0);
+            return () => clearTimeout(timer);
         }
-        
-        return () => clearTimeout(timer);
-    }
-}, [error, navigate]);
+    }, [isSuccess]);
+
+    useEffect(() => {
+        if (error) {
+            const timer = setTimeout(() => {
+                setShowMessage({ text: error?.message || 'Not Authorized', type: 'error' });
+            }, 0);
+
+            if (error?.message === 'Invalid token') {
+                navigate('/login');
+            }
+
+            return () => clearTimeout(timer);
+        }
+    }, [error, navigate]);
 
 
     async function SendMsg() {
@@ -201,7 +204,7 @@ useEffect(() => {
                 throw new Error(result.error || 'Error');
             }
 
-            queryClient.setQueryData(['ChannelFetch' , channel_id] , (prev) => {
+            queryClient.setQueryData(['ChannelFetch', channel_id], (prev) => {
                 const alreadyExists = prev.data.some((m) => String(m._id) === String(result.data._id));
                 if (alreadyExists) return prev;
                 return {
@@ -209,6 +212,11 @@ useEffect(() => {
                     data: [...prev.data, result.data]
                 }
             });
+
+            if (typingRef.current) {
+                clearTimeout(typingRef.current);
+            }
+            socket.emit('stop_channel_typing', channel_id)
 
             setMessage('');
 
@@ -231,6 +239,49 @@ useEffect(() => {
     };
 
 
+    const HandleTypingUsers = () => {
+
+        if (!socket) return;
+
+        if (!isTypingRef.current) {
+            isTypingRef.current = true;
+            socket.emit('channel_typing', channel_id);
+        }
+
+        if (typingRef.current) {
+            clearTimeout(typingRef.current);
+        }
+
+        typingRef.current = setTimeout(() => {
+            socket.emit('stop_channel_typing', channel_id);
+            isTypingRef.current = false
+        }, 2000)
+    }
+
+    useEffect(() => {
+        if (!socket || !channel_id) return;
+        const usersTyping = (typingUsers) => {
+            console.log('hi')
+            console.log(typingUsers);
+            setTypingUsers(typingUsers)
+        }
+
+        const usersNotTyping = (notTypingUsers) => {
+            console.log(notTypingUsers);
+            setTypingUsers(notTypingUsers)
+        }
+
+        socket.on('channel_typing', usersTyping)
+        socket.on('stop_channel_typing', usersNotTyping)
+
+        return () => {
+            socket.off('channel_typing', usersTyping)
+            socket.off('stop_channel_typing', usersNotTyping)
+        }
+    }, [channel_id])
+
+
+
 
 
 
@@ -246,7 +297,22 @@ useEffect(() => {
                     ) : (
                         ChannelInfo?.channel_name ? ChannelInfo.channel_name.charAt(0).toUpperCase() : '?'
                     )}</span>
-                    <span className="text-zinc-100">{ChannelInfo?.channel_name}</span>
+
+                    <div className="flex flex-col">
+                        <span className="text-zinc-100">{ChannelInfo?.channel_name}</span>
+                        <div
+                            className={`grid transition-all duration-300 ease-in-out ${TypingUsers?.length > 0
+                                    ? 'grid-rows-[1fr] opacity-100 mt-0.5'
+                                    : 'grid-rows-[0fr] opacity-0 mt-0'
+                                }`}
+                        >
+                            <div className="overflow-hidden">
+                                <span className="text-emerald-400 font-medium text-[11px] leading-none block">
+                                    Typing...
+                                </span>
+                            </div>
+                        </div>
+                    </div>
 
                     {showMessage.text && (
 
@@ -258,7 +324,6 @@ useEffect(() => {
                             {showMessage.text}
                         </div>
                     )}
-
 
 
 
@@ -354,6 +419,7 @@ useEffect(() => {
 
                                 onChange={(e) => {
                                     setMessage(e.target.value)
+                                    HandleTypingUsers()
                                 }} />
 
                             <button className="h-7 w-15 bg-green-400/50 mr-2 ml-2 rounded-2xl transition-colors disabled:bg-zinc-800 disabled:text-zinc-500 disabled:cursor-not-allowed disabled:hover:bg-zinc-800" onClick={SendMsg} disabled={!message.trim()}>Send</button>
