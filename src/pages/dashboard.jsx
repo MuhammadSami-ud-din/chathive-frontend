@@ -1,8 +1,10 @@
 const Api_URL = import.meta.env.VITE_API_URL;
-import { useEffect, useState } from "react"
-import { useNavigate, Outlet, NavLink } from 'react-router-dom';
+import { useEffect, useRef, useState } from "react"
+import { useNavigate, Outlet, NavLink, useParams } from 'react-router-dom';
 import AddServer from "../views/AddAServer";
 import { socket } from "../socket.js";
+import { QueryClient, useQueryClient } from "@tanstack/react-query";
+// import { useQueryClient } from "@tanstack/react-query";
 
 
 export default function Dashboard() {
@@ -14,6 +16,13 @@ export default function Dashboard() {
     const [error, setError] = useState("");
     const [onlineUsers, setOnlineUsers] = useState([])
     const [PP, setPP] = useState({ pp: '', id: '' })
+    
+
+    const queryClient = useQueryClient();
+    const inputClick = useRef(null)
+    const [uploadAvatar, setUploadAvatar] = useState(null)
+
+    const currentAvatar = uploadAvatar || data?.userInfo?.avatar;
 
     const url = `${Api_URL}/servers/me`
 
@@ -98,7 +107,58 @@ export default function Dashboard() {
         })
     }
 
-    
+
+    const HandleThePPChange = () => {
+        
+            inputClick.current.click()
+        
+    }
+
+    const HandleThePPChangePost = async (e) => {
+        const file = e.target.files[0];
+
+        const formData = new FormData();
+        formData.append('avatar', file);
+
+        try {
+            const url = `${Api_URL}/avatar-upload`;
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("authToken")}`
+                },
+                body: formData
+            })
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || 'Profile Picture Set Failed')
+            }
+            console.log(result);
+            queryClient.invalidateQueries({ queryKey: ['DMmessages'] })
+            setUploadAvatar(result.avatar);
+            setPP({ pp: result.avatar})
+           
+
+
+        } catch (error) {
+            console.log(error.message);
+        }
+
+
+
+
+
+
+        // if (file){
+        //     const url = URL.createObjectURL(file);
+        //     setServerAvatar(url)
+        // }
+
+        console.log('Hi My firend');
+    }
+
 
 
 
@@ -223,7 +283,9 @@ export default function Dashboard() {
 
 
                         {/*Joined server list*/}
-                        {data?.servers?.map((item) => (
+                        {data?.servers?.map((item , index) => {
+                            if (index >= 5) return null;
+                            return (
                             <NavLink
                                 to={`/channels/${item.server_id}`}
                                 key={item.server_id || item._id}
@@ -245,7 +307,7 @@ export default function Dashboard() {
                                 )}
 
                             </NavLink>
-                        ))}
+                        )})}
 
                         {/*add a Server*/}
                         <div className=" relative flex justify-center items-center  w-20 ">
@@ -309,7 +371,7 @@ export default function Dashboard() {
 
 
                     <div className="flex  flex-1 overflow-hidden min-h-0">
-                        <Outlet context={{ setHeaderTitle, AddJoinedServers, onlineUsers, PP, setPP }} />
+                        <Outlet context={{ setHeaderTitle, AddJoinedServers, onlineUsers, PP, setPP , uploadAvatar }} />
                     </div>
 
 
@@ -327,29 +389,36 @@ export default function Dashboard() {
             />}
 
 
-            <div className="fixed h-15 w-80  bottom-2 left-2 border border-zinc-700 rounded-lg bg-zinc-800 text-white flex items-center gap-x-2 pl-3  ">
-                <div className=" relative h-8 w-8 bg-zinc-700 rounded-full flex-shrink-0 flex justify-center items-center" >{data?.userInfo?.avatar ?
-                    (
-                        <img src={data?.userInfo?.avatar} alt="avatar" className="h-full w-full object-cover rounded-full" />
+
+           {/* user's Info */}
+            <div className="fixed h-15 w-80 z-100  bottom-2 left-2 border border-zinc-700 rounded-lg bg-zinc-800 text-white flex items-center gap-x-2 pl-3  ">
+                <div className="relative h-8 w-8 bg-zinc-700 rounded-full flex-shrink-0 flex justify-center items-center text-yellow-500" onClick={HandleThePPChange} >{currentAvatar || data?.userInfo?.avatar ?
+                    (<>
+                        <img src={currentAvatar || data?.userInfo?.avatar} alt="avatar" className="h-full w-full object-cover rounded-full" />
+
+                    </>
                     ) : (
-                        data?.userInfo ? data?.userInfo?.username.charAt(0).toUpperCase() : '?'
+                        data?.userInfo?.username ?  data?.userInfo?.username.charAt(0).toUpperCase() :'?'
                     )
                 }
 
-                    <div className={`absolute bottom-0 -right-0 h-2.5 w-2.5 rounded-full ring-2 ring-zinc-900 
-                                        ${onlineUsers?.includes(data?.userInfo?.id) ? "bg-emerald-600" : "bg-zinc-700"}
+                <div className={`absolute bottom-0 -right-1 h-3 w-3 rounded-full ring-2 ring-zinc-900 
+                                        ${onlineUsers?.includes(data?.userInfo?.id) ? "bg-emerald-700" : "bg-zinc-700"}
                                         `}>
 
-                    </div>
+                                    </div>
+
 
                 </div>
+                 <input type="file" ref={inputClick} className="hidden" onChange={(e) => HandleThePPChangePost(e)} accept="image/*" />
+
 
                 <div>
                     <div>
                         {data?.userInfo?.username}
                     </div>
                     <div className="text-xs text-zinc-400">{onlineUsers?.includes(data?.userInfo?.id) ? 'Online' : 'Offline'}</div>
-                    </div>
+                </div>
             </div>
 
 

@@ -79,7 +79,7 @@ export default function ChatArea() {
 
     const { id } = useParams();
     const [typing, setTyping] = useState(false);
-    const { conversationId, setConversationId } = useOutletContext() || {};
+    const { conversationId, setConversationId , uploadAvatar} = useOutletContext() || {};
     const [message, setMessage] = useState('')
     const navigate = useNavigate();
     const [isFocused, setIsFocused] = useState(false);
@@ -90,6 +90,7 @@ export default function ChatArea() {
 
     const conversationIdRef = useRef(conversationId);
     const queryClient = useQueryClient();
+    
 
 
     const { data = { success: false, data: [], my_id: '', user: {} }, error } = useQuery({
@@ -103,7 +104,7 @@ export default function ChatArea() {
     );
 
 
-
+const currentAvatar = uploadAvatar || data?.user?.avatar;
 
     const scrollToBottom = () => {
         messageEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -304,14 +305,14 @@ export default function ChatArea() {
                 <div className="flex items-center border-b border-b-neutral-800 h-13 pl-3 text-sm gap-x-3 shrink-0">
                     <span className="h-8 w-8 rounded-full bg-zinc-700/50 flex justify-center items-center text-lg text-yellow-200/50">
                         {data.user?.avatar ? (
-                            <img src={data.user.avatar} alt="avatar" className="h-full w-full object-cover rounded-full" />
+                            <img src={currentAvatar || data?.user?.avatar} alt="avatar" className="h-full w-full object-cover rounded-full" />
                         ) : (
                             data.user?.username ? data.user.username.charAt(0).toUpperCase() : '?'
                         )}
                     </span>
 
                     <div className="flex flex-col">
-                        <span className="text-zinc-100">{data.user.username}</span>
+                        <span className="text-zinc-100">{data?.user?.username}</span>
 
 
                         <div className="h-4 overflow-hidden relative text-[10px] font-normal">
@@ -349,8 +350,8 @@ export default function ChatArea() {
                         <div className=" flex flex-col  w-full min-h-0 flex-1 overflow-y-auto overflow-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden min-w-50 p-2 mb-2 space-y-3 ">
 
                             <div className=" h-100 shrink-0 flex flex-col justify-center items-center  ">
-                                <span className="h-25 w-25 rounded-full border-5  border-zinc-800 bg-zinc-900 flex justify-center items-center text-6xl text-yellow-200/50 mb-4">{data.user?.avatar ? (
-                                    <img src={data.user.avatar} alt="avatar" className="h-full w-full object-cover rounded-full" />
+                                <span className="h-25 w-25 rounded-full border-5  border-zinc-800 bg-zinc-900 flex justify-center items-center text-6xl text-yellow-200/50 mb-4">{data?.user?.avatar ? (
+                                    <img src={currentAvatar || data?.user?.avatar} alt="avatar" className="h-full w-full object-cover rounded-full" />
                                 ) : (
                                     data.user?.username ? data.user.username.charAt(0).toUpperCase() : '?'
                                 )}</span>
@@ -432,7 +433,7 @@ export default function ChatArea() {
                         <div className=" relative  flex-1 w-full bg-gradient-to-r from-black-300  to-emerald-900 p-4">
                             <span className="absolute peer rounded-full border-4 border-zinc-800 h-20 w-20 -bottom-[23%] bg-zinc-900 flex justify-center items-center text-4xl text-yellow-100/50">
                                 {data.user?.avatar ? (
-                                    <img src={data.user.avatar} alt="avatar" className="h-full w-full object-cover rounded-full " />
+                                    <img src={currentAvatar || data?.user?.avatar} alt="avatar" className="h-full w-full object-cover rounded-full " />
                                 ) : (
                                     data.user?.username ? data.user.username.charAt(0).toUpperCase() : '?'
                                 )}

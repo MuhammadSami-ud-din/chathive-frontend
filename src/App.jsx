@@ -10,7 +10,9 @@ import ChatArea from './views/chat.jsx'
 import ServersListing from './views/server.jsx'
 import ServerPage from './views/ServerPage.jsx'
 import ChannelChat from './views/channelChat.jsx'
-import CreateChannel from './views/CreateChannel.jsx'
+import AllServers from './views/AllServers.jsx'
+import JoinedServers from './views/joinedServers.jsx'
+import MyServers from './views/myservers.jsx'
 
 
 function ProtectedRoute({ children }) {
@@ -38,7 +40,11 @@ function App() {
           </ProtectedRoute>
         } >
           <Route index element={<DefaultView />} />
-          <Route path='/discovery/servers' element={<ServersListing />} />
+          <Route path='/discovery/servers' element={<ServersListing />} >
+          <Route index element={<AllServers />} />
+          <Route path='joined' element={<JoinedServers />} />
+          <Route path='created' element={<MyServers />} />
+          </Route>
           <Route path='/channels/:server_id' element={<ServerPage />} >
           <Route path=':channel_id' element={<ChannelChat />} />
           </Route>

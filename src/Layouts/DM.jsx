@@ -31,8 +31,8 @@ const fetchDM = async () => {
 
 
 export default function DM() {
-    const { setHeaderTitle , onlineUsers } = useOutletContext() || {};
-   
+    const { setHeaderTitle, onlineUsers } = useOutletContext() || {};
+
     const [conversationId, setConversationId] = useState(null)
     const navigate = useNavigate()
 
@@ -190,14 +190,14 @@ export default function DM() {
     `}>
                                 <div className=" relative h-8 w-8 bg-zinc-700 rounded-full flex-shrink-0 flex justify-center items-center" >{user?.avatar ?
                                     (
-                                        <img src={data.user.avatar} alt="avatar" className="h-full w-full object-cover rounded-full" />
+                                        <img src={user?.avatar} alt="avatar" className="h-full w-full object-cover rounded-full" />
                                     ) : (
                                         user?.username ? user?.username.charAt(0).toUpperCase() : '?'
                                     )
                                 }
 
                                     <div className={`absolute bottom-0 -right-1 h-3 w-3 rounded-full ring-2 ring-zinc-900 
-                                        ${onlineUsers?.includes(user?.id) ? "bg-emerald-700" : "bg-zinc-700" }
+                                        ${onlineUsers?.includes(user?.id) ? "bg-emerald-700" : "bg-zinc-700"}
                                         `}>
 
                                     </div>
@@ -228,7 +228,7 @@ export default function DM() {
 
             {/* chat area rightbar */}
             <div className="bg-[#151518] border-t border-t-zinc-800 flex-1 flex flex-col min-w-0">
-                <Outlet context={{ conversationId, setConversationId , onlineUsers }} />
+                <Outlet context={{ conversationId, setConversationId, onlineUsers }} />
             </div>
 
 
