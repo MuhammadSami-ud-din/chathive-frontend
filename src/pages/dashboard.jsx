@@ -33,8 +33,8 @@ export default function Dashboard() {
         socket.on('get_online_users', handleOnlineUsers);
 
         if (socket.connected) {
-        socket.emit("get_online_users_request");
-    }
+            socket.emit("get_online_users_request");
+        }
 
 
         return () => {
@@ -98,6 +98,7 @@ export default function Dashboard() {
         })
     }
 
+    
 
 
 
@@ -324,6 +325,32 @@ export default function Dashboard() {
 
 
             />}
+
+
+            <div className="fixed h-15 w-80  bottom-2 left-2 border border-zinc-700 rounded-lg bg-zinc-800 text-white flex items-center gap-x-2 pl-3  ">
+                <div className=" relative h-8 w-8 bg-zinc-700 rounded-full flex-shrink-0 flex justify-center items-center" >{data?.userInfo?.avatar ?
+                    (
+                        <img src={data?.userInfo?.avatar} alt="avatar" className="h-full w-full object-cover rounded-full" />
+                    ) : (
+                        data?.userInfo ? data?.userInfo?.username.charAt(0).toUpperCase() : '?'
+                    )
+                }
+
+                    <div className={`absolute bottom-0 -right-0 h-2.5 w-2.5 rounded-full ring-2 ring-zinc-900 
+                                        ${onlineUsers?.includes(data?.userInfo?.id) ? "bg-emerald-600" : "bg-zinc-700"}
+                                        `}>
+
+                    </div>
+
+                </div>
+
+                <div>
+                    <div>
+                        {data?.userInfo?.username}
+                    </div>
+                    <div className="text-xs text-zinc-400">{onlineUsers?.includes(data?.userInfo?.id) ? 'Online' : 'Offline'}</div>
+                    </div>
+            </div>
 
 
         </>
