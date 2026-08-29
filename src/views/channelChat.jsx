@@ -1,21 +1,16 @@
-
 import { useEffect, useState, useRef } from "react";
 import React from "react";
-import { useParams, useNavigate, useOutletContext } from "react-router-dom"
+import { useParams, useNavigate, useOutletContext } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const Api_URL = import.meta.env.VITE_API_URL;
 import { socket } from "../socket.js";
 
-
 const CleanDate = (date) => {
     if (!date) return "";
-
     const strDate = typeof date === 'string' ? date : String(date);
     const safeString = strDate.replace(' ', 'T');
     const parsed = new Date(safeString);
-
-
     if (isNaN(parsed.getTime())) return "";
 
     return parsed.toLocaleDateString('en-US', {
@@ -25,12 +20,11 @@ const CleanDate = (date) => {
     });
 };
 
-
 const CleanTime = (date) => {
     if (!date) return "";
     const strTIme = typeof date === 'string' ? date : String(date);
     const safeString = strTIme.replace(' ', 'T');
-    const parse = new Date(safeString)
+    const parse = new Date(safeString);
     if (isNaN(parse.getTime())) return "";
 
     return parse.toLocaleTimeString('en-US', {
@@ -40,10 +34,8 @@ const CleanTime = (date) => {
     });
 };
 
-
-
 const ChannelFetch = async (channel_id) => {
-    const url = `${Api_URL}/channels/${channel_id}/messages`
+    const url = `${Api_URL}/channels/${channel_id}/messages`;
 
     const response = await fetch(url, {
         method: "GET",
@@ -55,69 +47,50 @@ const ChannelFetch = async (channel_id) => {
 
     const result = await response.json();
 
-
     if (!response.ok) {
-        throw new Error(result.error || 'no servers found')
+        throw new Error(result.error || 'No channels found');
     }
 
-
-
-
-    return result
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
+    return result;
+};
 
 export default function ChannelChat() {
-
     const { channel_id } = useParams();
 
-    const [message, setMessage] = useState('')
+    const [message, setMessage] = useState('');
     const navigate = useNavigate();
     const [isFocused, setIsFocused] = useState(false);
     const [showMessage, setShowMessage] = useState({ text: '', type: '' });
     const channels = useOutletContext();
-    const messageEndRef = useRef(null)
+    const messageEndRef = useRef(null);
     const queryClient = useQueryClient();
     const isTypingRef = useRef(false);
     const typingRef = useRef(null);
-    const [TypingUsers, setTypingUsers] = useState([])
-
+    const [TypingUsers, setTypingUsers] = useState([]);
 
     const { data = { success: false, data: [], my_id: '' }, error, isSuccess } = useQuery({
         queryKey: ['ChannelFetch', channel_id],
         queryFn: () => ChannelFetch(channel_id)
-    })
+    });
 
-
-
-    const ChannelInfo = channels.find((channel) => Number(channel.channel_id) === Number(channel_id));
-
-
-
+    const ChannelInfo = channels?.find((channel) => Number(channel.channel_id) === Number(channel_id));
 
     const scrollToBottom = () => {
-        messageEndRef.current?.scrollIntoView({ behavior: "smooth" })
-    }
-    useEffect(() => {
-        scrollToBottom()
-    }, [data.data])
-
-
+        messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
 
     useEffect(() => {
+        scrollToBottom();
+    }, [data.data]);
 
+    // Channel Room Join & Cleanup
+    useEffect(() => {
+        setTypingUsers([]); // Reset typing state on channel change
+        isTypingRef.current = false;
+        
+        if (typingRef.current) {
+            clearTimeout(typingRef.current);
+        }
 
         socket.emit('join_channel', channel_id);
 
@@ -132,11 +105,12 @@ export default function ChannelChat() {
         };
     }, [channel_id]);
 
-
+    // Socket New Message Listeners
     useEffect(() => {
         const handleNewMessage = (msg) => {
             if (String(msg.channel_id) === String(channel_id)) {
                 queryClient.setQueryData(['ChannelFetch', channel_id], (prev) => {
+                    if (!prev || !prev.data) return prev;
                     const alreadyExists = prev.data.some((m) => String(m._id) === String(msg._id));
                     if (alreadyExists) return prev;
                     return { ...prev, data: [...prev.data, msg] };
@@ -157,10 +131,6 @@ export default function ChannelChat() {
         };
     }, [channel_id, queryClient]);
 
-
-
-
-
     useEffect(() => {
         if (isSuccess) {
             const timer = setTimeout(() => {
@@ -176,14 +146,11 @@ export default function ChannelChat() {
                 setShowMessage({ text: error?.message || 'Not Authorized', type: 'error' });
             }, 0);
 
-            if (error?.message === 'Invalid token') {
-                navigate('/login');
-            }
+           
 
             return () => clearTimeout(timer);
         }
-    }, [error, navigate]);
-
+    }, [error]);
 
     async function SendMsg() {
         const url = `${Api_URL}/channels/${channel_id}/messages`;
@@ -205,18 +172,20 @@ export default function ChannelChat() {
             }
 
             queryClient.setQueryData(['ChannelFetch', channel_id], (prev) => {
+                if (!prev || !prev.data) return prev;
                 const alreadyExists = prev.data.some((m) => String(m._id) === String(result.data._id));
                 if (alreadyExists) return prev;
                 return {
                     ...prev,
                     data: [...prev.data, result.data]
-                }
+                };
             });
 
             if (typingRef.current) {
                 clearTimeout(typingRef.current);
             }
-            socket.emit('stop_channel_typing', channel_id)
+            socket.emit('stop_channel_typing', channel_id);
+            isTypingRef.current = false;
 
             setMessage('');
 
@@ -226,9 +195,7 @@ export default function ChannelChat() {
         }
     }
 
-
     const handleKeyDown = (e) => {
-
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
 
@@ -238,9 +205,7 @@ export default function ChannelChat() {
         }
     };
 
-
     const HandleTypingUsers = () => {
-
         if (!socket) return;
 
         if (!isTypingRef.current) {
@@ -254,233 +219,182 @@ export default function ChannelChat() {
 
         typingRef.current = setTimeout(() => {
             socket.emit('stop_channel_typing', channel_id);
-            isTypingRef.current = false
-        }, 2000)
-    }
+            isTypingRef.current = false;
+        }, 2000);
+    };
 
+    // Socket Channel Typing Listeners (Filtered current user)
     useEffect(() => {
         if (!socket || !channel_id) return;
-        const usersTyping = (typingUsers) => {
-            console.log('hi')
-            console.log(typingUsers);
-            setTypingUsers(typingUsers)
-        }
 
-        const usersNotTyping = (notTypingUsers) => {
-            console.log(notTypingUsers);
-            setTypingUsers(notTypingUsers)
-        }
+        const usersTyping = (typingUsersList) => {
+            // Self-user filter out taake apni hi typing bar show na ho
+            const filteredOtherUsers = typingUsersList.filter(
+                (id) => String(id) !== String(data.my_id)
+            );
+            setTypingUsers(filteredOtherUsers);
+        };
 
-        socket.on('channel_typing', usersTyping)
-        socket.on('stop_channel_typing', usersNotTyping)
+        const usersNotTyping = (notTypingUsersList) => {
+            const filteredOtherUsers = notTypingUsersList.filter(
+                (id) => String(id) !== String(data.my_id)
+            );
+            setTypingUsers(filteredOtherUsers);
+        };
+
+        socket.on('channel_typing', usersTyping);
+        socket.on('stop_channel_typing', usersNotTyping);
 
         return () => {
-            socket.off('channel_typing', usersTyping)
-            socket.off('stop_channel_typing', usersNotTyping)
-        }
-    }, [channel_id])
-
-
-
-
-
-
+            socket.off('channel_typing', usersTyping);
+            socket.off('stop_channel_typing', usersNotTyping);
+        };
+    }, [channel_id, data.my_id]);
 
     return (
-        <>
-            <div className="flex flex-col overflow-hidden w-full h-full">
-
-                {/* upper bar to show Channel name and search bar to search the chats in the channel whcih will IA come later  */}
-                <div className="flex items-center border-b border-b-neutral-800 h-13 pl-3 text-sm gap-x-3 shrink-0">
-                    <span className="h-8 w-8 rounded-full bg-zinc-700/50 flex justify-center items-center text-lg text-yellow-200/50">{ChannelInfo?.avatar ? (
+        <div className="flex flex-col overflow-hidden w-full h-full">
+            {/* Upper Header Bar */}
+            <div className="flex items-center border-b border-b-neutral-800 h-13 pl-3 text-sm gap-x-3 shrink-0">
+                <span className="h-8 w-8 rounded-full bg-zinc-700/50 flex justify-center items-center text-lg text-yellow-200/50 overflow-hidden">
+                    {ChannelInfo?.avatar ? (
                         <img src={ChannelInfo.avatar} alt="avatar" className="h-full w-full object-cover rounded-full" />
                     ) : (
                         ChannelInfo?.channel_name ? ChannelInfo.channel_name.charAt(0).toUpperCase() : '?'
-                    )}</span>
+                    )}
+                </span>
 
-                    <div className="flex flex-col">
-                        <span className="text-zinc-100">{ChannelInfo?.channel_name}</span>
+                <div className="flex flex-col">
+                    <span className="text-zinc-100">{ChannelInfo?.channel_name}</span>
 
-                        <div
-                            className={`grid transition-all duration-300 ease-in-out ${TypingUsers?.length > 0
-                                    ? 'grid-rows-[1fr] opacity-100 mt-0.5'
-                                    : 'grid-rows-[0fr] opacity-0 mt-0'
-                                }`}
-                        >
-                            <div className="overflow-hidden">
-                                {TypingUsers?.length === 1 ? (() => {
-                                    
-                                    const typingUserMessage = data?.data?.find(
-                                        (msg) => msg.sender_id === TypingUsers[0]
-                                    );
-                                    const username = typingUserMessage?.sender?.username || 'Someone';
+                    {/* Dynamic Typing Indicator */}
+                    <div
+                        className={`grid transition-all duration-300 ease-in-out ${
+                            TypingUsers?.length > 0
+                                ? 'grid-rows-[1fr] opacity-100 mt-0.5'
+                                : 'grid-rows-[0fr] opacity-0 mt-0'
+                        }`}
+                    >
+                        <div className="overflow-hidden">
+                            {TypingUsers?.length === 1 ? (() => {
+                                const typingUserMessage = data?.data?.find(
+                                    (msg) => String(msg.sender_id) === String(TypingUsers[0])
+                                );
+                                const username = typingUserMessage?.sender?.username || 'Someone';
 
-                                    return (
-                                        <span className="text-zinc-400 font-medium text-[11px] leading-none block">
-                                            {`${username} is typing...`}
-                                        </span>
-                                    );
-                                })() : 
-                                   (TypingUsers.length > 1) ? 
-                                   (
+                                return (
                                     <span className="text-zinc-400 font-medium text-[11px] leading-none block">
-                                        {`${TypingUsers?.length } users are typing...`}
+                                        {`${username} is typing...`}
                                     </span>
-                                ):
-                                ''
-                                 }
-                            </div>
+                                );
+                            })() : TypingUsers?.length > 1 ? (
+                                <span className="text-zinc-400 font-medium text-[11px] leading-none block">
+                                    {`${TypingUsers.length} users are typing...`}
+                                </span>
+                            ) : null}
                         </div>
                     </div>
-
-                    {showMessage.text && (
-
-                        <div className={`absolute right-4 animate-auto-glide p-2 text-center text-sm font-medium rounded-xl transition-all duration-500 ease-in-out transform ${showMessage.type === 'success'
-                            ? 'bg-emerald-500/20 border border-emerald-500 text-emerald-200 translate-x-0 opacity-100 pointer-events-auto'
-                            : 'bg-red-500/20 border border-red-500 text-red-200 '
-                            }`}
-                            onAnimationEnd={() => setShowMessage({ text: '', type: '' })}>
-                            {showMessage.text}
-                        </div>
-                    )}
-
-
-
                 </div>
 
+                {showMessage.text && (
+                    <div
+                        className={`absolute right-4 animate-auto-glide p-2 text-center text-sm font-medium rounded-xl transition-all duration-500 ease-in-out transform ${
+                            showMessage.type === 'success'
+                                ? 'bg-emerald-500/20 border border-emerald-500 text-emerald-200 translate-x-0 opacity-100 pointer-events-auto'
+                                : 'bg-red-500/20 border border-red-500 text-red-200'
+                        }`}
+                        onAnimationEnd={() => setShowMessage({ text: '', type: '' })}
+                    >
+                        {showMessage.text}
+                    </div>
+                )}
+            </div>
 
-
-                <div className=" flex flex-1 w-full min-h-0 overflow-hidden">
-
-                    {/* middle area */}
-                    <div className="flex   flex-1  min-h-0 min-w-50 overflow-hidden flex-col  ">
-
-                        {/* scrollable chat area */}
-                        <div className=" flex flex-col  w-full min-h-0 flex-1 overflow-y-auto overflow-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden min-w-50 p-2 mb-2 space-y-3 ">
-
-
-                            {/* {Server Info at the begining} */}
-                            <div className=" h-100 shrink-0 flex flex-col justify-center items-center  ">
-                                <span className="h-25 w-25 rounded-full border-5  border-zinc-800 bg-zinc-900 flex justify-center items-center text-6xl text-yellow-200/50 mb-4">{ChannelInfo?.avatar ? (
+            {/* Chat Body */}
+            <div className="flex flex-1 w-full min-h-0 overflow-hidden">
+                <div className="flex flex-1 min-h-0 min-w-50 overflow-hidden flex-col">
+                    {/* Scrollable Chat Area */}
+                    <div className="flex flex-col w-full min-h-0 flex-1 overflow-y-auto overflow-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden min-w-50 p-2 mb-2 space-y-3">
+                        {/* Beginning Header */}
+                        <div className="h-100 shrink-0 flex flex-col justify-center items-center">
+                            <span className="h-25 w-25 rounded-full border-5 border-zinc-800 bg-zinc-900 flex justify-center items-center text-6xl text-yellow-200/50 mb-4 overflow-hidden">
+                                {ChannelInfo?.avatar ? (
                                     <img src={ChannelInfo?.avatar} alt="avatar" className="h-full w-full object-cover rounded-full" />
                                 ) : (
                                     ChannelInfo?.channel_name ? ChannelInfo.channel_name.charAt(0).toUpperCase() : '?'
-                                )}</span>
-
-                                <span className="text-4xl text-zinc-500 font-bold text-center">{ChannelInfo?.channel_name}</span>
-                                <span className="text-zinc-500 ">{ChannelInfo?.description}</span>
-                                <span className="text-zinc-500 ">Channel Created on: {CleanDate(ChannelInfo?.created_at)}</span>
-                                <div className="p-1 px-3 mt-10 flex  rounded-3xl  bg-zinc-800  text-sm text-yellow-200/50 text-center ">This is the Beginning of messages history In  " {ChannelInfo?.channel_name} "</div>
-                            </div>
-
-
-
-                            {data.data.map((msg, index) => {
-
-                                const isMe = String(msg.sender_id) === String(data.my_id)
-                                const prevMsg_date = index > 0 ? CleanDate(data.data[index - 1].Date) : null;
-
-                                const currentDate = CleanDate(msg.Date);
-
-                                const isSame = prevMsg_date === currentDate;
-
-
-                                return (
-
-                                    <React.Fragment key={msg._id || index}>
-                                        {!isSame && (
-                                            <div className=' flex justify-center items-center my-5 p-2'>
-                                                <span className='rounded-3xl font-semibold text-sm text-shadow-mist-700/50 bg-teal-900/50  p-1 px-3 text-center '> {currentDate} </span>
-                                            </div>)}
-
-
-                                        <div className={`flex  w-full  items-start ${isMe ? 'justify-end ' : 'justify-start '} `} >
-
-
-                                            <div className={`  pb-1 px-1 flex flex-col rounded-xl text-sm flex-none  max-w-[70%] shrink-0 break-words shadow-sm leading-relaxed ${isMe ? 'bg-green-700/50 ' : 'bg-zinc-700/70 '} `}>
-
-                                                {!isMe && (
-                                                    <div className={`rounded-t-xl pl-2 pt-1 pr-7  font-bold  text-amber-200 `}>{msg?.sender?.username}</div>
-                                                )}
-                                                <div className="px-2 pt-1 text-sm flex-none  shrink-0 break-words shadow-sm leading-relaxed">
-                                                    {msg.content}
-                                                    <span className="float-right ml-2 mt-3 text-[10px] text-zinc-300 opacity-70 select-none leading-none">
-                                                        {CleanTime(msg.Date)}
-                                                    </span>
-                                                </div>
-
-                                            </div>
-                                        </div>
-
-
-
-                                    </React.Fragment>
-
-
-                                )
-
-                            }
-                            )}
-
-                            <div ref={messageEndRef} />
-                        </div>
-
-
-                        {/* input field */}
-                        <div className={`flex w-full p-1 pl-2 mb-2 shrink-0 rounded-3xl items-center ${isFocused ? 'border border-green-500/50 bg-zinc-900/50' : 'border border-zinc-700 bg-transparent'}`}>
-                            <textarea
-                                onFocus={() => setIsFocused(true)}
-                                onBlur={() => setIsFocused(false)}
-                                rows={'2'}
-                                className="flex-1 h-6 border-none outline-none resize-none bg-transparent w-full overflow-hidden ml-2"
-                                onKeyDown={handleKeyDown}
-                                value={message}
-
-                                onChange={(e) => {
-                                    setMessage(e.target.value)
-                                    HandleTypingUsers()
-                                }} />
-
-                            <button className="h-7 w-15 bg-green-400/50 mr-2 ml-2 rounded-2xl transition-colors disabled:bg-zinc-800 disabled:text-zinc-500 disabled:cursor-not-allowed disabled:hover:bg-zinc-800" onClick={SendMsg} disabled={!message.trim()}>Send</button>
-                        </div>
-
-                    </div>
-
-                    {/* Friends information profile */}
-                    {/* <div className="flex border border-zinc-700/50 flex-col m-2  rounded-2xl w-80 shrink-0  overflow-y-auto">
-                        <div className=" relative  flex-1 w-full bg-gradient-to-r from-black-300  to-emerald-900 p-4">
-                            <span className="absolute peer rounded-full border-4 border-zinc-800 h-20 w-20 -bottom-[23%] bg-zinc-900 flex justify-center items-center text-4xl text-yellow-100/50">
-                                {data.user?.avatar ? (
-                                    <img src={data.user.avatar} alt="avatar" className="h-full w-full object-cover rounded-full " />
-                                ) : (
-                                    data.user?.username ? data.user.username.charAt(0).toUpperCase() : '?'
                                 )}
                             </span>
-                            <span className="absolute bg-black h-20 w-20 -bottom-[23%] rounded-full opacity-0 transition-opacity duration-300 peer-hover:opacity-10 pointer-events-none"></span>
-                        </div>
-                        <div className=" flex-4 w-full bg-zinc-900/80 pt-12 px-6">
-                            <p className="text-lg text-zinc-300">{data.user.username}</p>
-                            <p className="text-sm text-zinc-500">{data.user.email}</p>
-                            <p className="text-xm text-zinc-400 mt-5">Member Since:</p>
-                            <p className="text-sm text-zinc-500 ">
-                                {CleanDate(data.user.created_at)}
-                            </p>
 
-
+                            <span className="text-4xl text-zinc-500 font-bold text-center">{ChannelInfo?.channel_name}</span>
+                            <span className="text-zinc-500">{ChannelInfo?.description}</span>
+                            <span className="text-zinc-500">Channel Created on: {CleanDate(ChannelInfo?.created_at)}</span>
+                            <div className="p-1 px-3 mt-10 flex rounded-3xl bg-zinc-800 text-sm text-yellow-200/50 text-center">
+                                This is the Beginning of messages history In "{ChannelInfo?.channel_name}"
+                            </div>
                         </div>
 
+                        {data.data.map((msg, index) => {
+                            const isMe = String(msg.sender_id) === String(data.my_id);
+                            const prevMsg_date = index > 0 ? CleanDate(data.data[index - 1].Date) : null;
+                            const currentDate = CleanDate(msg.Date);
+                            const isSame = prevMsg_date === currentDate;
 
+                            return (
+                                <React.Fragment key={msg._id || index}>
+                                    {!isSame && (
+                                        <div className="flex justify-center items-center my-5 p-2">
+                                            <span className="rounded-3xl font-semibold text-sm bg-teal-900/50 p-1 px-3 text-center text-zinc-200">
+                                                {currentDate}
+                                            </span>
+                                        </div>
+                                    )}
 
+                                    <div className={`flex w-full items-start ${isMe ? 'justify-end' : 'justify-start'}`}>
+                                        <div className={`pb-1 px-1 flex flex-col rounded-xl text-sm flex-none max-w-[70%] shrink-0 break-words shadow-sm leading-relaxed ${isMe ? 'bg-green-700/50' : 'bg-zinc-700/70'}`}>
+                                            {!isMe && (
+                                                <div className="rounded-t-xl pl-2 pt-1 pr-7 font-bold text-amber-200">
+                                                    {msg?.sender?.username}
+                                                </div>
+                                            )}
+                                            <div className="px-2 pt-1 text-sm flex-none shrink-0 break-words shadow-sm leading-relaxed">
+                                                {msg.content}
+                                                <span className="float-right ml-2 mt-3 text-[10px] text-zinc-300 opacity-70 select-none leading-none">
+                                                    {CleanTime(msg.Date)}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </React.Fragment>
+                            );
+                        })}
 
+                        <div ref={messageEndRef} />
+                    </div>
 
-                    </div> */}
+                    {/* Input Field Area */}
+                    <div className={`flex w-full p-1 pl-2 mb-2 shrink-0 rounded-3xl items-center ${isFocused ? 'border border-green-500/50 bg-zinc-900/50' : 'border border-zinc-700 bg-transparent'}`}>
+                        <textarea
+                            onFocus={() => setIsFocused(true)}
+                            onBlur={() => setIsFocused(false)}
+                            rows="2"
+                            className="flex-1 h-6 border-none outline-none resize-none bg-transparent w-full overflow-hidden ml-2 text-zinc-100"
+                            onKeyDown={handleKeyDown}
+                            value={message}
+                            onChange={(e) => {
+                                setMessage(e.target.value);
+                                HandleTypingUsers();
+                            }}
+                        />
 
-
-
+                        <button
+                            className="h-7 w-15 bg-green-400/50 mr-2 ml-2 rounded-2xl transition-colors disabled:bg-zinc-800 disabled:text-zinc-500 disabled:cursor-not-allowed disabled:hover:bg-zinc-800 text-sm font-medium"
+                            onClick={SendMsg}
+                            disabled={!message.trim()}
+                        >
+                            Send
+                        </button>
+                    </div>
                 </div>
-
             </div>
-
-        </>
-    )
+        </div>
+    );
 }

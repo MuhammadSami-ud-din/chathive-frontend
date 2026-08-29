@@ -57,9 +57,7 @@ export default function CreateChannel({ server_id, isOpen, onclose , onChannelCr
         catch (error) {
             console.log(error.message);
             setMessage({ text: error.message, type: 'error' });
-            if (error.message === 'Invalid token') {
-                navigate('/login');
-            }
+           
             // setMessage({ text: error.message, type: 'error' });
         } 
 

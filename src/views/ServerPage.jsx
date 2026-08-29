@@ -103,11 +103,8 @@ export default function ServerPage() {
     useEffect(() => {
 
 
-        if (error?.message === 'Invalid token') {
-            navigate('/login');
-        }
-
-    }, [navigate, error])
+      console.log(error?.message)
+    }, [ error])
 
 
 
@@ -258,7 +255,9 @@ export default function ServerPage() {
             setUploadAvatar(result.avatar);
             setPP({pp : result.avatar , id : data?.Serverinfo?.[0]?.server_id})
             queryClient.invalidateQueries(['FetchChannels', server_id]);
-            queryClient.invalidateQueries(['FetchServers']);
+            queryClient.invalidateQueries(['FetchServersMe'])
+            queryClient.invalidateQueries(['FetchServersjoined'])
+            
             
 
         } catch (error) {

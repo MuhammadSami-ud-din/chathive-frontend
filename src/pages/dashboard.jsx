@@ -270,17 +270,35 @@ export default function Dashboard() {
                         </NavLink>
 
                         {/*Personal Server*/}
-                        <div className="relative flex justify-center items-center  w-20">
-                            <span className=" peer flex h-12 w-12 cursor-pointer mt-1 ml-1 items-center justify-center bg-zinc-800  text-white transition-all duration-200 ease-in-out rounded-2xl hover:bg-[#5865f2] ">
-                                owner
-                            </span>
-                            <div className="absolute left-0 w-1 bg-white h-0 rounded-r-full transition-all duration-300 peer-hover:h-7" />
-                            <div className="absolute left-full z-50 py-1 px-3  bg-zinc-600 rounded-xl flex items-center justify-center opacity-0 font-black text-base pointer-events-none top-1/2 -translate-y-1/2 whitespace-nowrap transition-opacity peer-hover:opacity-100 " >Muhammads Server
-                                <div className="absolute -left-2 h-0 w-0 border-y-[8px] rounded-sm  border-y-transparent border-r-[13px] border-r-zinc-600" />
+                       
+                          {data?.myservers?.map((item , index) => {
+                            if (index >= 5) return null;
+                            return (
+                            <NavLink
+                                to={`/channels/${item.server_id}`}
+                                key={item.server_id || item._id}
+                                className={"relative h-12 min-h-8 w-20 min-w-14 mt-1  flex justify-center focus:outline-none  items-center"}>
+                                {({ isActive }) => (
+                                    <>
+                                        <span className={`peer relative flex h-12 w-12 items-center justify-center   text-white transition-all duration-300 ease-in-out rounded-2xl hover:bg-[#5865f2] ${isActive ? 'bg-[#5865f2]' : 'bg-zinc-800'} cursor-pointer text-xs font-semibold text-center truncate select-none `}>
+                                            {item?.avatar ? (<img src={String(PP.id) === String(item.server_id) ? PP.pp || item?.avatar : item?.avatar} alt="avatar" className="w-full h-full object-cover rounded-2xl" />) : item?.server_name ? item.server_name.charAt(0).toUpperCase() : '?'}
 
-                            </div>
-                        </div>
 
+                                        </span>
+
+                                        <div className={`absolute left-0 w-1 bg-white rounded-r-full transition-all duration-300  ${isActive ? 'h-10 ' : 'h-3 peer-hover:h-5 '}`} />
+                                        <div className="absolute left-full z-50 py-1 px-3  bg-zinc-600 rounded-xl flex items-center justify-center opacity-0 font-black text-base pointer-events-none top-1/2 -translate-y-1/2 whitespace-nowrap transition-opacity peer-hover:opacity-100 " >{item.server_name}
+                                            <div className="absolute -left-2 h-0 w-0 border-y-[8px] rounded-sm  border-y-transparent border-r-[13px] border-r-zinc-600" />
+
+                                        </div>
+                                    </>
+                                )}
+
+                            </NavLink>
+                        )})}
+
+                        <div className="w-10 h-[2px] bg-zinc-700 rounded-full my-2" />
+                       
 
                         {/*Joined server list*/}
                         {data?.servers?.map((item , index) => {

@@ -164,11 +164,9 @@ const currentAvatar = uploadAvatar || data?.user?.avatar;
 
 
     useEffect(() => {
-        if (error?.message === 'Invalid token') {
-            navigate('/login');
-        }
+        console.log(error?.message)
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [error, navigate])
+    }, [error])
 
     useEffect(() => {
         const activeConvId = data?.data?.[0]?.conversation_id;

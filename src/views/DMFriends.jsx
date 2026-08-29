@@ -39,9 +39,7 @@ export default function DMFriends() {
                 setSearchedUsers(result.data || []);
             } catch (error) {
                 console.error(error.message);
-                if (error.message === 'Invalid token') {
-                    navigate('/login');
-                }
+                
             }
         }, 300);
 

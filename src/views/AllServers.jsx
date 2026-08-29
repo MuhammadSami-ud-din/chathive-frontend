@@ -78,13 +78,10 @@ export default function AllServers(){
         useEffect(() => {
     
            
-            if (error?.message === 'Invalid token') {
-                navigate('/login');
-            }
+          console.log(error?.message)
     
     
-    
-        }, [error, navigate])
+        }, [error])
 
 
 
