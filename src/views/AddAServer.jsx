@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { useState, useRef } from "react";
+import { NavLink, useNavigate, useOutletContext } from "react-router-dom";
 import { motion, AnimatePresence } from 'framer-motion';
 
 
@@ -20,7 +20,7 @@ const slideVariants = {
     }),
 };
 
-export default function AddServer({ isOpen, onClose, userInfo, setData }) {
+export default function AddServer({ isOpen, onClose, userInfo, setData ,  setInviteURL , HandleInviteJoin }) {
     const [formData, setFormData] = useState({ serverName: userInfo?.username ? `${userInfo?.username}'s Server` : "", serverDescription: '', serverDest: '' });
     const [message, setMessage] = useState({ text: '', type: '' });
     const [[step, direction], setStepWithDirection] = useState([1, 0]);
@@ -29,6 +29,7 @@ export default function AddServer({ isOpen, onClose, userInfo, setData }) {
     const ImgInputClick = useRef(null)
     const [uploadImg, setUploadImg] = useState(null)
     const [selectedFile, setSelectedFile] = useState(null)
+   
 
 
     const goToStep = (nextStep) => {
@@ -266,6 +267,7 @@ export default function AddServer({ isOpen, onClose, userInfo, setData }) {
                                 <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Invite Link</label>
                                 <input
                                     type="text"
+                                    onChange={(e)=>setInviteURL(e.target.value)}
                                     placeholder="https://ChatHive.gg/Htmkfe"
                                     className="outline-none bg-zinc-950 border border-zinc-800 p-2.5 rounded-lg text-sm focus:border-indigo-500 transition-colors"
                                 />
@@ -302,7 +304,7 @@ export default function AddServer({ isOpen, onClose, userInfo, setData }) {
                                 >
                                     Back
                                 </button>
-                                <button className="px-5 py-2 bg-indigo-600 rounded-lg text-sm font-medium transition-all hover:bg-indigo-500">
+                                <button onClick={HandleInviteJoin} className="px-5 py-2 bg-indigo-600 rounded-lg text-sm font-medium transition-all hover:bg-indigo-500">
                                     Join Server
                                 </button>
                             </div>

@@ -119,6 +119,7 @@ const currentAvatar = uploadAvatar || data?.user?.avatar;
 
 
     useEffect(() => {
+        setMessage('')
         if (!conversationId) return;
 
         socket.emit('join_conversation', conversationId);

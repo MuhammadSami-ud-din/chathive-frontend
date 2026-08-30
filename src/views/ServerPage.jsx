@@ -46,13 +46,15 @@ export default function ServerPage() {
     const [joining, setJoining] = useState(false)
     const [isOpen, setIsOpen] = useState(false)
     const [showMessage, setShowMessage] = useState({ message: '', type: '' });
-    const { AddJoinedServers ,  setPP } = useOutletContext()
+    const { AddJoinedServers, setPP } = useOutletContext()
     const navigate = useNavigate()
     const queryClient = useQueryClient();
     const inputClick = useRef(null)
     const [uploadAvatar, setUploadAvatar] = useState(null)
     const ImgInputClick = useRef(null)
     const [uploadImg, setUploadImg] = useState(null)
+    const [isCopied, setIsCopied] = useState(false)
+
 
 
 
@@ -103,8 +105,8 @@ export default function ServerPage() {
     useEffect(() => {
 
 
-      console.log(error?.message)
-    }, [ error])
+        console.log(error?.message)
+    }, [error])
 
 
 
@@ -225,7 +227,7 @@ export default function ServerPage() {
 
 
     const HandleThePPChange = () => {
-        if (isAuthorized &&inputClick.current) {
+        if (isAuthorized && inputClick.current) {
             inputClick.current.click()
         }
     }
@@ -253,12 +255,12 @@ export default function ServerPage() {
             }
             console.log(result);
             setUploadAvatar(result.avatar);
-            setPP({pp : result.avatar , id : data?.Serverinfo?.[0]?.server_id})
+            setPP({ pp: result.avatar, id: data?.Serverinfo?.[0]?.server_id })
             queryClient.invalidateQueries(['FetchChannels', server_id]);
             queryClient.invalidateQueries(['FetchServersMe'])
             queryClient.invalidateQueries(['FetchServersjoined'])
-            
-            
+
+
 
         } catch (error) {
             console.log(error.message);
@@ -278,7 +280,7 @@ export default function ServerPage() {
     }
 
 
-     const HandleTheImgChangePost = async (e) => {
+    const HandleTheImgChangePost = async (e) => {
         const file = e.target.files[0];
 
         const formData = new FormData();
@@ -316,6 +318,19 @@ export default function ServerPage() {
     }
 
 
+
+
+    const inviteURL = `${window.location.origin}/server_join/${server_id}`;
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(inviteURL);
+        setIsCopied(true);
+
+        setTimeout(()=>{
+            setIsCopied(false);
+        },2000);
+
+    }
 
 
 
@@ -364,7 +379,7 @@ export default function ServerPage() {
 
                         {
                             isMember ?
-                                (<div className="relative w-12 h-12 text-sm p-1.5 rounded-xl mr-3 transition-all group ">
+                                (<div className="relative w-12 h-12 text-sm p-1.5 rounded-xl mr-3 transition-all group " onClick={handleCopy}>
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
 
                                         <g>
@@ -376,7 +391,7 @@ export default function ServerPage() {
                                         </g>
                                     </svg>
 
-                                    <div className="absolute z-10 font-medium  p-2 mt-7 text-sm w-max bg-zinc-600 rounded-xl pointer-events-none opacity-0  left-1/2  -translate-1/2 scale-0 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:scale-100     ">Invite to Server
+                                    <div className="absolute z-10 font-medium  p-2 mt-7 text-sm w-max bg-zinc-600 rounded-xl pointer-events-none opacity-0  left-1/2  -translate-1/2 scale-0 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:scale-100     ">{isCopied ? 'Copied' : 'Invite to Server'}
                                         <div className="absolute bottom-full  left-[45%] h-0 w-0 border-x-8   border-x-transparent border-b-8 border-b-zinc-600" />
                                     </div>
                                 </div>
@@ -397,20 +412,20 @@ export default function ServerPage() {
                         )}
 
                         {isAuthorized && (
-                        <button
-                            onClick={() => ImgInputClick?.current?.click()}
-                            className={`absolute bottom-3 right-3 z-30 p-2 bg-black/60 hover:bg-black/80 backdrop-blur-md text-white rounded-lg transition-all duration-200 border border-white/20 shadow-lg ${navOpacity > 0.05
+                            <button
+                                onClick={() => ImgInputClick?.current?.click()}
+                                className={`absolute bottom-3 right-3 z-30 p-2 bg-black/60 hover:bg-black/80 backdrop-blur-md text-white rounded-lg transition-all duration-200 border border-white/20 shadow-lg ${navOpacity > 0.05
                                     ? 'opacity-0 scale-90 pointer-events-none'
                                     : 'opacity-100 scale-100 pointer-events-auto'
-                                }`}
-                            title="Change Banner"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                        </button>
-                         )}
+                                    }`}
+                                title="Change Banner"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </button>
+                        )}
 
 
 

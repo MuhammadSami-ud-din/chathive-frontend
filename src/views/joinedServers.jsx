@@ -40,7 +40,7 @@ const FetchServers = async () => {
 
 export default function JoinedServers(){
      const [isScrolled, setIsScrolled] = useState(false);
-        const navigate = useNavigate()
+      
         const scrolableContainer = useRef(null)
     
         useEffect(() => {
@@ -66,7 +66,7 @@ export default function JoinedServers(){
         }, []);
     
         const { data :  Data = [] , error } = useQuery({
-            queryKey: ['FetchServersMe'],
+            queryKey: ['FetchServersjoined'],
             queryFn: FetchServers
         })
       
@@ -77,14 +77,10 @@ export default function JoinedServers(){
     
         useEffect(() => {
     
-           
-            if (error?.message === 'Invalid token') {
-                navigate('/login');
-            }
+           console.log(error?.message)
     
     
-    
-        }, [error, navigate])
+        }, [error])
 
 
 

@@ -16,9 +16,11 @@ export default function Dashboard() {
     const [error, setError] = useState("");
     const [onlineUsers, setOnlineUsers] = useState([])
     const [PP, setPP] = useState({ pp: '', id: '' })
+    const [inviteURL, setInviteURL] = useState('')
+    const [showMessage, setShowMessage] = useState({ message: '', type: '' });
 
-    console.log(onlineUsers)
-    
+
+
 
     const queryClient = useQueryClient();
     const inputClick = useRef(null)
@@ -83,7 +85,7 @@ export default function Dashboard() {
             catch (error) {
                 setError(error.message)
                 console.log(error.message)
-                if (error?.message === 'Invalid token' ) {
+                if (error?.message === 'Invalid token') {
                     navigate('/login');
                 }
 
@@ -111,9 +113,9 @@ export default function Dashboard() {
 
 
     const HandleThePPChange = () => {
-        
-            inputClick.current.click()
-        
+
+        inputClick.current.click()
+
     }
 
     const HandleThePPChangePost = async (e) => {
@@ -140,8 +142,8 @@ export default function Dashboard() {
             console.log(result);
             queryClient.invalidateQueries({ queryKey: ['DMmessages'] })
             setUploadAvatar(result.avatar);
-            setPP({ pp: result.avatar})
-           
+            setPP({ pp: result.avatar })
+
 
 
         } catch (error) {
@@ -163,12 +165,106 @@ export default function Dashboard() {
 
 
 
-console.log(data?.userInfo?.id)
+
+    const HandleInviteJoin = async (e) => {
+
+        e.preventDefault();
+        if (!inviteURL.trim()) return;
+
+        const server_id = inviteURL.includes('/server_join/') ?
+            inviteURL.split('/server_join/')[1].trim() :
+            inviteURL.trim()
+
+
+        const url = `${Api_URL}/server_join/${server_id}`
+        try {
+
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
+                    "Content-Type": "application/json"
+                }
+            });
+
+            const result = await response.json();
+
+
+            if (!response.ok) {
+                throw new Error(result.error || 'no servers found')
+            }
+
+
+            setShowMessage({ message: result.message || 'Server Join Successfull', type: 'success' });
+
+
+            if (result?.serverInfo) {
+                AddJoinedServers(result.serverInfo)
+            }
+
+            navigate(`/channels/${server_id}`)
+            setIsOpen(false);
+
+
+
+
+
+        }
+        catch (error) {
+
+            console.log(error.message)
+            // setIsMember(false);
+            setShowMessage({ message: error.message || 'Already a Member', type: 'error' });
+
+
+        }
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     return (
         <>
             <div className="flex flex-col w-screen h-screen bg-zinc-900 overflow-hidden">
+
+                
+                     {showMessage.message && (
+
+                        <div className={`fixed z-100 top-10 right-1 animate-auto-glide p-2 text-center text-sm font-medium rounded-xl transition-all duration-500 ease-in-out transform ${showMessage.type === 'success'
+                            ? 'bg-emerald-500/20 border border-emerald-500 text-emerald-200 translate-x-0 opacity-100 pointer-events-auto'
+                            : 'bg-red-500/20 border border-red-500 text-red-200  translate-x-0 opacity-100 pointer-events-auto '
+                            }`}
+                            onAnimationEnd={() => setShowMessage({ message: '', type: '' })}>
+                            {showMessage.message}
+                        </div>
+                    )}
+                
 
                 {/*//navebar*/}
                 <div className=" relative h-8 flex-none  px-4 flex items-center justify-end ">
@@ -272,62 +368,64 @@ console.log(data?.userInfo?.id)
                         </NavLink>
 
                         {/*Personal Server*/}
-                       
-                          {data?.myservers?.map((item , index) => {
+
+                        {data?.myservers?.map((item, index) => {
                             if (index >= 5) return null;
                             return (
-                            <NavLink
-                                to={`/channels/${item.server_id}`}
-                                key={item.server_id || item._id}
-                                className={"relative h-12 min-h-8 w-20 min-w-14 mt-1  flex justify-center focus:outline-none  items-center"}>
-                                {({ isActive }) => (
-                                    <>
-                                        <span className={`peer relative flex h-12 w-12 items-center justify-center   text-white transition-all duration-300 ease-in-out rounded-2xl hover:bg-[#5865f2] ${isActive ? 'bg-[#5865f2]' : 'bg-zinc-800'} cursor-pointer text-xs font-semibold text-center truncate select-none `}>
-                                            {item?.avatar ? (<img src={String(PP.id) === String(item.server_id) ? PP.pp || item?.avatar : item?.avatar} alt="avatar" className="w-full h-full object-cover rounded-2xl" />) : item?.server_name ? item.server_name.charAt(0).toUpperCase() : '?'}
+                                <NavLink
+                                    to={`/channels/${item.server_id}`}
+                                    key={item.server_id || item._id}
+                                    className={"relative h-12 min-h-8 w-20 min-w-14 mt-1  flex justify-center focus:outline-none  items-center"}>
+                                    {({ isActive }) => (
+                                        <>
+                                            <span className={`peer relative flex h-12 w-12 items-center justify-center   text-white transition-all duration-300 ease-in-out rounded-2xl hover:bg-[#5865f2] ${isActive ? 'bg-[#5865f2]' : 'bg-zinc-800'} cursor-pointer text-xs font-semibold text-center truncate select-none `}>
+                                                {item?.avatar ? (<img src={String(PP.id) === String(item.server_id) ? PP.pp || item?.avatar : item?.avatar} alt="avatar" className="w-full h-full object-cover rounded-2xl" />) : item?.server_name ? item.server_name.charAt(0).toUpperCase() : '?'}
 
 
-                                        </span>
+                                            </span>
 
-                                        <div className={`absolute left-0 w-1 bg-white rounded-r-full transition-all duration-300  ${isActive ? 'h-10 ' : 'h-3 peer-hover:h-5 '}`} />
-                                        <div className="absolute left-full z-50 py-1 px-3  bg-zinc-600 rounded-xl flex items-center justify-center opacity-0 font-black text-base pointer-events-none top-1/2 -translate-y-1/2 whitespace-nowrap transition-opacity peer-hover:opacity-100 " >{item.server_name}
-                                            <div className="absolute -left-2 h-0 w-0 border-y-[8px] rounded-sm  border-y-transparent border-r-[13px] border-r-zinc-600" />
+                                            <div className={`absolute left-0 w-1 bg-white rounded-r-full transition-all duration-300  ${isActive ? 'h-10 ' : 'h-3 peer-hover:h-5 '}`} />
+                                            <div className="absolute left-full z-50 py-1 px-3  bg-zinc-600 rounded-xl flex items-center justify-center opacity-0 font-black text-base pointer-events-none top-1/2 -translate-y-1/2 whitespace-nowrap transition-opacity peer-hover:opacity-100 " >{item.server_name}
+                                                <div className="absolute -left-2 h-0 w-0 border-y-[8px] rounded-sm  border-y-transparent border-r-[13px] border-r-zinc-600" />
 
-                                        </div>
-                                    </>
-                                )}
+                                            </div>
+                                        </>
+                                    )}
 
-                            </NavLink>
-                        )})}
+                                </NavLink>
+                            )
+                        })}
 
                         <div className="w-10 h-[2px] bg-zinc-700 rounded-full my-2" />
-                       
+
 
                         {/*Joined server list*/}
-                        {data?.servers?.map((item , index) => {
+                        {data?.servers?.map((item, index) => {
                             if (index >= 5) return null;
                             return (
-                            <NavLink
-                                to={`/channels/${item.server_id}`}
-                                key={item.server_id || item._id}
-                                className={"relative h-12 min-h-8 w-20 min-w-14 mt-1 flex justify-center focus:outline-none  items-center"}>
-                                {({ isActive }) => (
-                                    <>
-                                        <span className={`peer relative flex h-12 w-12 items-center justify-center   text-white transition-all duration-300 ease-in-out rounded-2xl hover:bg-[#5865f2] ${isActive ? 'bg-[#5865f2]' : 'bg-zinc-800'} cursor-pointer text-xs font-semibold text-center truncate select-none `}>
-                                            {item?.avatar ? (<img src={String(PP.id) === String(item.server_id) ? PP.pp || item?.avatar : item?.avatar} alt="avatar" className="w-full h-full object-cover rounded-2xl" />) : item?.server_name ? item.server_name.charAt(0).toUpperCase() : '?'}
+                                <NavLink
+                                    to={`/channels/${item.server_id}`}
+                                    key={item.server_id || item._id}
+                                    className={"relative h-12 min-h-8 w-20 min-w-14 mt-1 flex justify-center focus:outline-none  items-center"}>
+                                    {({ isActive }) => (
+                                        <>
+                                            <span className={`peer relative flex h-12 w-12 items-center justify-center   text-white transition-all duration-300 ease-in-out rounded-2xl hover:bg-[#5865f2] ${isActive ? 'bg-[#5865f2]' : 'bg-zinc-800'} cursor-pointer text-xs font-semibold text-center truncate select-none `}>
+                                                {item?.avatar ? (<img src={String(PP.id) === String(item.server_id) ? PP.pp || item?.avatar : item?.avatar} alt="avatar" className="w-full h-full object-cover rounded-2xl" />) : item?.server_name ? item.server_name.charAt(0).toUpperCase() : '?'}
 
 
-                                        </span>
+                                            </span>
 
-                                        <div className={`absolute left-0 w-1 bg-white rounded-r-full transition-all duration-300  ${isActive ? 'h-10 ' : 'h-3 peer-hover:h-5 '}`} />
-                                        <div className="absolute left-full z-50 py-1 px-3  bg-zinc-600 rounded-xl flex items-center justify-center opacity-0 font-black text-base pointer-events-none top-1/2 -translate-y-1/2 whitespace-nowrap transition-opacity peer-hover:opacity-100 " >{item.server_name}
-                                            <div className="absolute -left-2 h-0 w-0 border-y-[8px] rounded-sm  border-y-transparent border-r-[13px] border-r-zinc-600" />
+                                            <div className={`absolute left-0 w-1 bg-white rounded-r-full transition-all duration-300  ${isActive ? 'h-10 ' : 'h-3 peer-hover:h-5 '}`} />
+                                            <div className="absolute left-full z-50 py-1 px-3  bg-zinc-600 rounded-xl flex items-center justify-center opacity-0 font-black text-base pointer-events-none top-1/2 -translate-y-1/2 whitespace-nowrap transition-opacity peer-hover:opacity-100 " >{item.server_name}
+                                                <div className="absolute -left-2 h-0 w-0 border-y-[8px] rounded-sm  border-y-transparent border-r-[13px] border-r-zinc-600" />
 
-                                        </div>
-                                    </>
-                                )}
+                                            </div>
+                                        </>
+                                    )}
 
-                            </NavLink>
-                        )})}
+                                </NavLink>
+                            )
+                        })}
 
                         {/*add a Server*/}
                         <div className=" relative flex justify-center items-center  w-20 ">
@@ -391,7 +489,7 @@ console.log(data?.userInfo?.id)
 
 
                     <div className="flex  flex-1 overflow-hidden min-h-0">
-                        <Outlet context={{ setHeaderTitle, AddJoinedServers, onlineUsers, PP, setPP , uploadAvatar }} />
+                        <Outlet context={{ setHeaderTitle, AddJoinedServers, onlineUsers, PP, setPP, uploadAvatar }} />
                     </div>
 
 
@@ -404,13 +502,15 @@ console.log(data?.userInfo?.id)
                 onClose={() => setIsOpen(false)}
                 userInfo={data?.userInfo}
                 setData={setData}
+                setInviteURL={setInviteURL}
+                HandleInviteJoin={HandleInviteJoin}
 
 
             />}
 
 
 
-           {/* user's Info */}
+            {/* user's Info */}
             <div className="fixed h-15 w-80 z-100  bottom-2 left-2 border border-zinc-700 rounded-lg bg-zinc-800 text-white flex items-center gap-x-2 pl-3  ">
                 <div className="relative h-8 w-8 bg-zinc-700 rounded-full flex-shrink-0 flex justify-center items-center text-yellow-500" onClick={HandleThePPChange} >{currentAvatar || data?.userInfo?.avatar ?
                     (<>
@@ -418,19 +518,19 @@ console.log(data?.userInfo?.id)
 
                     </>
                     ) : (
-                        data?.userInfo?.username ?  data?.userInfo?.username.charAt(0).toUpperCase() :'?'
+                        data?.userInfo?.username ? data?.userInfo?.username.charAt(0).toUpperCase() : '?'
                     )
                 }
 
-                <div className={`absolute bottom-0 -right-1 h-3 w-3 rounded-full ring-2 ring-zinc-900 
+                    <div className={`absolute bottom-0 -right-1 h-3 w-3 rounded-full ring-2 ring-zinc-900 
                                         ${onlineUsers?.includes(String(data?.userInfo?.id)) ? "bg-emerald-700" : "bg-zinc-700"}
                                         `}>
 
-                                    </div>
+                    </div>
 
 
                 </div>
-                 <input type="file" ref={inputClick} className="hidden" onChange={(e) => HandleThePPChangePost(e)} accept="image/*" />
+                <input type="file" ref={inputClick} className="hidden" onChange={(e) => HandleThePPChangePost(e)} accept="image/*" />
 
 
                 <div>

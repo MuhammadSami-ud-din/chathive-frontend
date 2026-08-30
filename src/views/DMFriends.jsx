@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { NavLink, useNavigate, useOutletContext, useLocation } from "react-router-dom";
 
@@ -7,7 +8,7 @@ export default function DMFriends() {
     const [isFocused, setIsFocused] = useState(false);
     const [userName, setUserName] = useState('');
     const [searchedUsers, setSearchedUsers] = useState([]);
-    
+    const queryClient = useQueryClient();
     const location = useLocation();
     const navigate = useNavigate();
     const { setConversationId } = useOutletContext() || {};
@@ -39,7 +40,7 @@ export default function DMFriends() {
                 setSearchedUsers(result.data || []);
             } catch (error) {
                 console.error(error.message);
-                
+
             }
         }, 300);
 
@@ -67,6 +68,18 @@ export default function DMFriends() {
             if (setConversationId) {
                 setConversationId(result?.conversation?.conversation_id);
             }
+
+            queryClient.setQueryData(['Dmlist'], (oldData) => {
+
+                if (!oldData) return { success: true, data: [result.conversation] }
+
+                return {
+                    ...oldData,
+                    data: [...oldData.data, result.FriendsInfo]
+                }
+            })
+
+
 
             setUserName('');
             setSearchedUsers([]);
@@ -111,8 +124,8 @@ export default function DMFriends() {
                         onBlur={() => setIsFocused(false)}
                         onChange={(e) => setUserName(e.target.value)}
                     />
-                    
-                    <button 
+
+                    <button
                         onClick={() => searchedUsers.length > 0 && GetOrCreate(searchedUsers[0].id)}
                         className="h-full max-h-9 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs md:text-sm font-medium text-white transition-colors mr-1 shrink-0"
                     >
