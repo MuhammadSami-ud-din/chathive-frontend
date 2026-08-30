@@ -16,6 +16,8 @@ export default function Dashboard() {
     const [error, setError] = useState("");
     const [onlineUsers, setOnlineUsers] = useState([])
     const [PP, setPP] = useState({ pp: '', id: '' })
+
+    console.log(onlineUsers)
     
 
     const queryClient = useQueryClient();
@@ -81,7 +83,7 @@ export default function Dashboard() {
             catch (error) {
                 setError(error.message)
                 console.log(error.message)
-                if (error?.message === 'Invalid token') {
+                if (error?.message === 'Invalid token' ) {
                     navigate('/login');
                 }
 
@@ -161,7 +163,7 @@ export default function Dashboard() {
 
 
 
-
+console.log(data?.userInfo?.id)
 
 
     return (
@@ -421,7 +423,7 @@ export default function Dashboard() {
                 }
 
                 <div className={`absolute bottom-0 -right-1 h-3 w-3 rounded-full ring-2 ring-zinc-900 
-                                        ${onlineUsers?.includes(data?.userInfo?.id) ? "bg-emerald-700" : "bg-zinc-700"}
+                                        ${onlineUsers?.includes(String(data?.userInfo?.id)) ? "bg-emerald-700" : "bg-zinc-700"}
                                         `}>
 
                                     </div>
@@ -435,7 +437,7 @@ export default function Dashboard() {
                     <div>
                         {data?.userInfo?.username}
                     </div>
-                    <div className="text-xs text-zinc-400">{onlineUsers?.includes(data?.userInfo?.id) ? 'Online' : 'Offline'}</div>
+                    <div className="text-xs text-zinc-400">{onlineUsers?.includes(String(data?.userInfo?.id)) ? 'Online' : 'Offline'}</div>
                 </div>
             </div>
 

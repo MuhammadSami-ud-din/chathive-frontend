@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import React from "react";
-import { useParams, useNavigate, useOutletContext } from "react-router-dom";
+import { useParams,  useOutletContext } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const Api_URL = import.meta.env.VITE_API_URL;
@@ -58,8 +58,8 @@ export default function ChannelChat() {
     const { channel_id } = useParams();
 
     const [message, setMessage] = useState('');
-    const navigate = useNavigate();
-    const [isFocused, setIsFocused] = useState(false);
+
+    const [isFocused, setIsFocused] = useState(true);
     const [showMessage, setShowMessage] = useState({ text: '', type: '' });
     const channels = useOutletContext();
     const messageEndRef = useRef(null);
@@ -85,6 +85,7 @@ export default function ChannelChat() {
 
     // Channel Room Join & Cleanup
     useEffect(() => {
+        setMessage('');
         setTypingUsers([]); // Reset typing state on channel change
         isTypingRef.current = false;
         

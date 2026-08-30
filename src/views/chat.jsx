@@ -1,7 +1,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import React from "react";
-import { useParams, useNavigate, useOutletContext } from "react-router-dom"
+import { useParams,  useOutletContext } from "react-router-dom"
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const Api_URL = import.meta.env.VITE_API_URL;
@@ -81,7 +81,7 @@ export default function ChatArea() {
     const [typing, setTyping] = useState(false);
     const { conversationId, setConversationId , uploadAvatar} = useOutletContext() || {};
     const [message, setMessage] = useState('')
-    const navigate = useNavigate();
+    
     const [isFocused, setIsFocused] = useState(false);
     const messageEndRef = useRef(null)
     const isTypingRef = useRef(false);
