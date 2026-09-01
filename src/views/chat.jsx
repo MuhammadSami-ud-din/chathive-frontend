@@ -1,7 +1,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import React from "react";
-import { useParams,  useOutletContext } from "react-router-dom"
+import { useParams, useOutletContext } from "react-router-dom"
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const Api_URL = import.meta.env.VITE_API_URL;
@@ -79,18 +79,21 @@ export default function ChatArea() {
 
     const { id } = useParams();
     const [typing, setTyping] = useState(false);
-    const { conversationId, setConversationId , uploadAvatar} = useOutletContext() || {};
+    const { conversationId, setConversationId, uploadAvatar } = useOutletContext() || {};
     const [message, setMessage] = useState('')
-    
     const [isFocused, setIsFocused] = useState(false);
     const messageEndRef = useRef(null)
     const isTypingRef = useRef(false);
     const typingRef = useRef(null);
     const { onlineUsers } = useOutletContext();
-
     const conversationIdRef = useRef(conversationId);
     const queryClient = useQueryClient();
-    
+    const [showContext, setShowContext] = useState(false);
+    const [DelID, setDelID] = useState('');
+    const [msgId, setMsgId] = useState(null);
+
+
+
 
 
     const { data = { success: false, data: [], my_id: '', user: {} }, error } = useQuery({
@@ -104,7 +107,7 @@ export default function ChatArea() {
     );
 
 
-const currentAvatar = uploadAvatar || data?.user?.avatar;
+    const currentAvatar = uploadAvatar || data?.user?.avatar;
 
     const scrollToBottom = () => {
         messageEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -285,6 +288,15 @@ const currentAvatar = uploadAvatar || data?.user?.avatar;
     }, [conversationId, id])
 
 
+    const HandleRightClick = (e)=>{
+        e.preventDefault();
+        setShowContext(true);
+    }
+
+    const HandleDelMsg = ()=>{
+        console.log('delted')
+    }
+
 
 
 
@@ -318,8 +330,8 @@ const currentAvatar = uploadAvatar || data?.user?.avatar;
                             {/* Typing Indicator */}
                             <span
                                 className={`absolute inset-0 text-zinc-400  font-medium transition-all duration-300 ease-in-out ${typing
-                                        ? 'opacity-100 translate-y-0'
-                                        : 'opacity-0 -translate-y-2 pointer-events-none'
+                                    ? 'opacity-100 translate-y-0'
+                                    : 'opacity-0 -translate-y-2 pointer-events-none'
                                     }`}
                             >
                                 Typing...
@@ -328,8 +340,8 @@ const currentAvatar = uploadAvatar || data?.user?.avatar;
                             {/* Online Status */}
                             <span
                                 className={`absolute inset-0 text-zinc-400 transition-all duration-300 ease-in-out ${isOnline && !typing
-                                        ? 'opacity-100 translate-y-0'
-                                        : 'opacity-0 translate-y-2 pointer-events-none'
+                                    ? 'opacity-100 translate-y-0'
+                                    : 'opacity-0 translate-y-2 pointer-events-none'
                                     }`}
                             >
                                 Online
@@ -382,14 +394,31 @@ const currentAvatar = uploadAvatar || data?.user?.avatar;
                                             </div>)}
 
 
-                                        <div className={`flex w-full  items-start ${isMe ? 'justify-end ' : 'justify-start '} `} >
+                                        <div className={` flex w-full  items-start ${isMe ? 'justify-end ' : 'justify-start '} `} >
 
-                                            <div className={` px-3 py-2   rounded-2xl text-sm flex-none max-w-[70%] md:max-w-[600px]  break-words shadow-sm leading-relaxed ${isMe ? 'bg-green-700/50 ' : 'bg-zinc-500/50 '} `}>
+                                            <div className={` relative  px-3 py-2   rounded-2xl text-sm flex-none max-w-[70%]    break-words shadow-sm leading-relaxed ${isMe ? 'bg-green-700/50 ' : 'bg-zinc-500/50 '} ${showContext && (msgId === msg._id)  ? 'z-50' : 'z-0'}`} onContextMenu={(e)=>{
+                                                 HandleRightClick(e);
+                                                 setMsgId(msg._id);
+                                            }}>
                                                 {msg.content}
                                                 <span className="float-right ml-2 mt-3 text-[10px] text-zinc-300 opacity-70 select-none leading-none">
                                                     {CleanTime(msg.created_at)}
                                                 </span>
+
+                                                {(msgId === msg._id) && showContext && (
+                                                    <div className={`${isMe ? 'right-full ' : 'left-full'} absolute p-1 px-2  bg-zinc-800 rounded-xl z-50`}>
+                                                    <button className={`  text-red-700 `} onClick={()=>{
+                                                        setShowContext(false)
+                                                        setDelID(msg._id);
+                                                        HandleDelMsg();
+                                                        
+                                                        }} >Delete</button>
+                                                </div>
+                                                )}
                                             </div>
+
+
+
                                         </div>
 
 
@@ -405,6 +434,11 @@ const currentAvatar = uploadAvatar || data?.user?.avatar;
 
                             <div ref={messageEndRef} />
                         </div>
+
+
+                        {showContext &&(
+                            <div className="fixed inset-0 bg-black/60 " onClick={()=>setShowContext(false)}></div>
+                        )}
 
 
                         {/* input field */}
