@@ -4,12 +4,14 @@ import { useNavigate, Outlet, NavLink, useParams } from 'react-router-dom';
 import AddServer from "../views/AddAServer";
 import { socket } from "../socket.js";
 import { QueryClient, useQueryClient } from "@tanstack/react-query";
+import UserProfile from "../views/UserProfile.jsx";
 // import { useQueryClient } from "@tanstack/react-query";
 
 
 export default function Dashboard() {
     const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
+    const [profileOpen, setProfileOpen] = useState(false);
     const [data, setData] = useState([]);
     const [headerTitle, setHeaderTitle] = useState('');
     const [loading, setLoading] = useState(true);
@@ -253,18 +255,18 @@ export default function Dashboard() {
         <>
             <div className="flex flex-col w-screen h-screen bg-zinc-900 overflow-hidden">
 
-                
-                     {showMessage.message && (
 
-                        <div className={`fixed z-100 top-10 right-1 animate-auto-glide p-2 text-center text-sm font-medium rounded-xl transition-all duration-500 ease-in-out transform ${showMessage.type === 'success'
-                            ? 'bg-emerald-500/20 border border-emerald-500 text-emerald-200 translate-x-0 opacity-100 pointer-events-auto'
-                            : 'bg-red-500/20 border border-red-500 text-red-200  translate-x-0 opacity-100 pointer-events-auto '
-                            }`}
-                            onAnimationEnd={() => setShowMessage({ message: '', type: '' })}>
-                            {showMessage.message}
-                        </div>
-                    )}
-                
+                {showMessage.message && (
+
+                    <div className={`fixed z-100 top-10 right-1 animate-auto-glide p-2 text-center text-sm font-medium rounded-xl transition-all duration-500 ease-in-out transform ${showMessage.type === 'success'
+                        ? 'bg-emerald-500/20 border border-emerald-500 text-emerald-200 translate-x-0 opacity-100 pointer-events-auto'
+                        : 'bg-red-500/20 border border-red-500 text-red-200  translate-x-0 opacity-100 pointer-events-auto '
+                        }`}
+                        onAnimationEnd={() => setShowMessage({ message: '', type: '' })}>
+                        {showMessage.message}
+                    </div>
+                )}
+
 
                 {/*//navebar*/}
                 <div className=" relative h-8 flex-none  px-4 flex items-center justify-end ">
@@ -511,7 +513,7 @@ export default function Dashboard() {
 
 
             {/* user's Info */}
-            <div className="fixed h-15 w-80 z-100  bottom-2 left-2 border border-zinc-700 rounded-lg bg-zinc-800 text-white flex items-center gap-x-2 pl-3  ">
+            <div className="fixed h-15 w-80 z-100  bottom-2 left-2 border border-zinc-700 rounded-lg bg-zinc-800 text-white flex items-center gap-x-2 pl-3 justify-between  ">
                 <div className="relative h-8 w-8 bg-zinc-700 rounded-full flex-shrink-0 flex justify-center items-center text-yellow-500" onClick={HandleThePPChange} >{currentAvatar || data?.userInfo?.avatar ?
                     (<>
                         <img src={currentAvatar || data?.userInfo?.avatar} alt="avatar" className="h-full w-full object-cover rounded-full" />
@@ -533,13 +535,37 @@ export default function Dashboard() {
                 <input type="file" ref={inputClick} className="hidden" onChange={(e) => HandleThePPChangePost(e)} accept="image/*" />
 
 
-                <div>
+                <div className="flex-1">
                     <div>
                         {data?.userInfo?.username}
                     </div>
                     <div className="text-xs text-zinc-400">{onlineUsers?.includes(String(data?.userInfo?.id)) ? 'Online' : 'Offline'}</div>
                 </div>
+
+                <div  className=" group h-8 w-8 flex justify-center items-center rounded-lg transition-all hover:bg-zinc-600 mr-3 ">
+                    <span className="group" onClick={() => setProfileOpen(true)}>
+                        <svg
+                    className='text-zinc-400 h-6 w-6 transition-transform duration-300 group-hover:rotate-180'
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                >
+                    <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" />
+                </svg>
+                    </span>
+                </div>
             </div>
+
+
+
+             {profileOpen && < UserProfile
+                isOpen
+                onClose={() => setProfileOpen(false)}
+                userInfo={data?.userInfo}
+               
+            />}
+
+
+
 
 
         </>
