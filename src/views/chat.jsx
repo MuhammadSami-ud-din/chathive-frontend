@@ -293,9 +293,38 @@ export default function ChatArea() {
         setShowContext(true);
     }
 
-    const HandleDelMsg = ()=>{
-        console.log('delted')
-    }
+    const HandleDelMsg = async ()=>{
+        const url = `${Api_URL}/messages/dm/delete/${DelID}`
+      
+  try {
+    const response = await fetch(url , {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+      }
+    });
+
+
+     const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || 'Error');
+            }
+
+
+    
+    data.data(prev => prev.filter(m => (String(m._id) !== String(DelID))));
+
+
+  } catch (error) {
+    console.error("Delete error:", error);
+  }
+};
+
+// useEffect(()=>{
+//     if (!socket) reu
+// })
+    
 
 
 
