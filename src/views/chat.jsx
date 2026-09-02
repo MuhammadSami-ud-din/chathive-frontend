@@ -89,7 +89,7 @@ export default function ChatArea() {
     const conversationIdRef = useRef(conversationId);
     const queryClient = useQueryClient();
     const [showContext, setShowContext] = useState(false);
-    const [DelID, setDelID] = useState('');
+   
     const [msgId, setMsgId] = useState(null);
 
 
@@ -288,43 +288,80 @@ export default function ChatArea() {
     }, [conversationId, id])
 
 
-    const HandleRightClick = (e)=>{
+    const HandleRightClick = (e) => {
         e.preventDefault();
         setShowContext(true);
     }
 
-    const HandleDelMsg = async ()=>{
-        const url = `${Api_URL}/messages/dm/delete/${DelID}`
-      
-  try {
-    const response = await fetch(url , {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-      }
-    });
 
 
-     const result = await response.json();
+
+
+
+    const HandleDelMsg = async (targetMsgId) => {
+        if (!targetMsgId) return;
+
+        const url = `${Api_URL}/messages/dm/delete/${targetMsgId}`;
+
+        try {
+            const response = await fetch(url, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                }
+            });
+
+            const result = await response.json();
 
             if (!response.ok) {
-                throw new Error(result.error || 'Error');
+                queryClient.invalidateQueries(['DMmessages', id]);
+                throw new Error(result.error || 'Failed to delete message');
             }
 
+            
+            queryClient.setQueryData(['DMmessages', id], (prev) => {
+                if (!prev || !prev.data) return prev;
+                return {
+                    ...prev,
+                    data: prev.data.filter(m => String(m._id) !== String(targetMsgId))
+                };
+            });
 
-    
-    data.data(prev => prev.filter(m => (String(m._id) !== String(DelID))));
+        } catch (error) {
+            console.error("Delete error:", error.message);
+            queryClient.invalidateQueries(['DMmessages', id]);
+        } finally {
+            setShowContext(false);
+            setMsgId(null);
+            
+        }
+    };
 
 
-  } catch (error) {
-    console.error("Delete error:", error);
-  }
-};
+    useEffect(() => {
+        if (!socket) return;
 
-// useEffect(()=>{
-//     if (!socket) reu
-// })
-    
+        const handleSocketDelete = (payload) => {
+
+            const deletedId = payload?.msg_id || payload?.messageId;
+            if (!deletedId) return;
+
+            queryClient.setQueryData(['DMmessages', id], (prev) => {
+                if (!prev || !prev.data) return prev;
+                return {
+                    ...prev,
+                    data: prev.data.filter((m) => String(m._id) !== String(deletedId))
+                };
+            });
+        };
+
+        socket.on('delete_message', handleSocketDelete);
+
+        return () => {
+            socket.off('delete_message', handleSocketDelete);
+        };
+    }, [id, queryClient]);
+
 
 
 
@@ -425,9 +462,13 @@ export default function ChatArea() {
 
                                         <div className={` flex w-full  items-start ${isMe ? 'justify-end ' : 'justify-start '} `} >
 
-                                            <div className={` relative  px-3 py-2   rounded-2xl text-sm flex-none max-w-[70%]    break-words shadow-sm leading-relaxed ${isMe ? 'bg-green-700/50 ' : 'bg-zinc-500/50 '} ${showContext && (msgId === msg._id)  ? 'z-50' : 'z-0'}`} onContextMenu={(e)=>{
-                                                 HandleRightClick(e);
-                                                 setMsgId(msg._id);
+                                            <div className={` relative  px-3 py-2   rounded-2xl text-sm flex-none max-w-[70%]    break-words shadow-sm leading-relaxed ${isMe ? 'bg-green-700/50 ' : 'bg-zinc-500/50 '} ${showContext && (msgId === msg._id)  ? 'z-50' : 'z-0'}`} onContextMenu={(e) => {
+                                               if(isMe){
+                                                e.preventDefault()
+                                                HandleRightClick(e);
+                                                setMsgId(msg._id);
+                                               }
+                                               
                                             }}>
                                                 {msg.content}
                                                 <span className="float-right ml-2 mt-3 text-[10px] text-zinc-300 opacity-70 select-none leading-none">
@@ -435,14 +476,16 @@ export default function ChatArea() {
                                                 </span>
 
                                                 {(msgId === msg._id) && showContext && (
-                                                    <div className={`${isMe ? 'right-full ' : 'left-full'} absolute p-1 px-2  bg-zinc-800 rounded-xl z-50`}>
-                                                    <button className={`  text-red-700 `} onClick={()=>{
-                                                        setShowContext(false)
-                                                        setDelID(msg._id);
-                                                        HandleDelMsg();
-                                                        
-                                                        }} >Delete</button>
-                                                </div>
+                                                    <div className={`${isMe ? 'right-full ' : 'left-full'} absolute p-1 px-2 bg-zinc-800 rounded-xl z-50`}>
+                                                        <button
+                                                            className="text-red-700"
+                                                            onClick={() => {
+                                                                HandleDelMsg(msg._id);
+                                                            }}
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </div>
                                                 )}
                                             </div>
 
@@ -465,8 +508,8 @@ export default function ChatArea() {
                         </div>
 
 
-                        {showContext &&(
-                            <div className="fixed inset-0 bg-black/60 " onClick={()=>setShowContext(false)}></div>
+                        {showContext && (
+                            <div className="fixed inset-0 bg-black/60 " onClick={() => setShowContext(false)}></div>
                         )}
 
 
