@@ -1,22 +1,51 @@
 import { useNavigate } from "react-router-dom";
 import { socket } from "../socket";
+const Api_URL = import.meta.env.VITE_API_URL;
 
 
 
 
 export default function UserProfile({ isOpen, onClose, userInfo }) {
-     const navigate = useNavigate();
-    if(!isOpen) return;
-  
+    const navigate = useNavigate();
+    if (!isOpen) return;
 
-const HandleLogOut = ()=>
-{
-    socket.disconnect()
-    localStorage.removeItem('authToken')
-   setTimeout(()=>{
-     navigate('/login');
-} , 1000)
-}
+
+    const HandleLogOut = () => {
+        socket.disconnect()
+        localStorage.removeItem('authToken')
+        setTimeout(() => {
+            navigate('/login');
+        }, 1000)
+    }
+
+
+    const HandleDelAcc = async () => {
+        const url = `${Api_URL}/delete/account`
+
+        try {
+            const response = await fetch(url, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                }
+            })
+
+            const result = response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || 'Cannot Delete');
+            }
+
+            setTimeout(() => {
+                navigate('/login');
+            }, 1000)
+        }
+        catch(error) {
+            console.log(error);
+        }
+        }
+
+
 
 
 
@@ -79,45 +108,64 @@ const HandleLogOut = ()=>
                     </div>
 
 
-                   <div className="px-10 p-6 mt-10 space-y-10">
+                    <div className="px-10 p-6 mt-10 space-y-10">
 
-                     <div className="text-xl text-zinc-400 font-bold">
-                        Account
-                     </div>
+                        <div className="text-xl text-zinc-400 font-bold">
+                            Account
+                        </div>
 
-                      <div className="flex justify-between">
-                        <div className="text-sm text-zinc-400 font-bold">
-                        Username
-                     </div>
-                     <div className="text-sm text-zinc-400">{userInfo?.username}</div>
-                      </div>
+                        <div className="flex justify-between">
+                            <div className="text-sm text-zinc-400 font-bold">
+                                Username
+                            </div>
+                            <div className="text-sm text-zinc-400">{userInfo?.username}</div>
+                        </div>
 
-                      <div className="flex justify-between">
-                        <div className="text-sm text-zinc-400 font-bold">
-                        Email
-                     </div>
-                     <div className="text-sm text-zinc-400">{userInfo?.email}</div>
-                      </div>
+                        <div className="flex justify-between">
+                            <div className="text-sm text-zinc-400 font-bold">
+                                Email
+                            </div>
+                            <div className="text-sm text-zinc-400">{userInfo?.email}</div>
+                        </div>
 
-                      <div className="flex justify-between">
-                        <div className="text-sm text-zinc-400 font-bold">
-                        Phone No.
-                     </div>
-                     <div className="text-sm text-zinc-300">You have not added any Numbers yet.</div>
-                      </div>
+                        <div className="flex justify-between">
+                            <div className="text-sm text-zinc-400 font-bold">
+                                Phone No.
+                            </div>
+                            <div className="text-sm text-zinc-300">You have not added any Numbers yet.</div>
+                        </div>
 
-                      
 
-                    <div className="mt-6 space-y-3 border-t border-zinc-800 pt-4">
-                        <div className="font-semibold text-lg text-center text-sm">Log Out from this Account</div>
-                        <button
-                            onClick={HandleLogOut}
-                            className="w-full text-center bg-red-800/50 rounded-lg py-2.5 text-sm font-medium transition-all hover:bg-red-700/50"
-                        >
-                            Log Out 
-                        </button>
+
+                        <div className="mt-6 space-y-3 border-t border-zinc-800 pt-4">
+
+                            <div className="flex w-full justify-between">
+                                <div className="font-semibold text-lg text-zinc-300  text-center text-sm flex  items-center ">Log Out from this Account</div>
+                                <button
+                                    onClick={HandleLogOut}
+                                    className="w-30 text-center text-zinc-300  bg-red-800/50 rounded-lg py-2.5 text-sm font-medium transition-all hover:bg-red-700/50"
+                                >
+                                    Log Out
+                                </button>
+                            </div>
+
+                            <div className="flex w-full justify-between">
+                                <div className="font-semibold text-zinc-300 text-lg text-center text-sm flex  items-center ">Delete this Account</div>
+                                <button
+                                    onClick={HandleDelAcc}
+                                    className="w-30 text-center text-zinc-300  bg-red-800/50 rounded-lg py-2.5 text-sm font-medium transition-all hover:bg-red-700/50"
+                                >
+                                    Delete Account
+                                </button>
+                            </div>
+
+
+
+
+
+
+                        </div>
                     </div>
-                   </div>
 
                 </div>
 
