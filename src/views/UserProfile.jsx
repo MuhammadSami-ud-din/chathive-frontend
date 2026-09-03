@@ -1,11 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import { socket } from "../socket";
+import { useState } from "react";
 const Api_URL = import.meta.env.VITE_API_URL;
 
 
 
 
 export default function UserProfile({ isOpen, onClose, userInfo }) {
+    const [message, setMessage] = useState({ text: '', type: '' });
     const navigate = useNavigate();
     if (!isOpen) return;
 
@@ -13,9 +15,10 @@ export default function UserProfile({ isOpen, onClose, userInfo }) {
     const HandleLogOut = () => {
         socket.disconnect()
         localStorage.removeItem('authToken')
+         setMessage({ text: 'Logged Out!!!', type: 'success' });
         setTimeout(() => {
             navigate('/login');
-        }, 1000)
+        }, 2000)
     }
 
 
@@ -36,12 +39,15 @@ export default function UserProfile({ isOpen, onClose, userInfo }) {
                 throw new Error(result.error || 'Cannot Delete');
             }
 
+            setMessage({ text: result.message || 'Account deleted successfully!', type: 'success' });
+
             setTimeout(() => {
                 navigate('/login');
-            }, 1000)
+            }, 2000)
         }
         catch(error) {
             console.log(error);
+            setMessage({ text: error.message, type: 'error' });
         }
         }
 
@@ -64,6 +70,24 @@ export default function UserProfile({ isOpen, onClose, userInfo }) {
             )} */}
 
             {/* Modal Wrapper */}
+
+
+    
+
+
+             {message.text && (
+
+                        <div className={`fixed top-8 right-4 animate-auto-glide p-2 text-center text-sm font-medium rounded-xl transition-all duration-500 ease-in-out transform ${message.type === 'success'
+                            ? 'bg-emerald-500/20 border border-emerald-500 text-emerald-200 translate-x-0 opacity-100 pointer-events-auto'
+                            : 'bg-red-500/20 border border-red-500 text-red-200  translate-x-0 opacity-100 pointer-events-auto '
+                            }`}
+                            onAnimationEnd={() => setMessage({ message: '', type: '' })}>
+                            {message.text}
+                        </div>
+                    )}
+
+
+
 
 
 
