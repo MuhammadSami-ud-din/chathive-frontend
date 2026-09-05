@@ -57,24 +57,7 @@ export default function UserProfile({ isOpen, onClose, userInfo }) {
 
     return (
         <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
-            {/* 
-            {message.text && (
-
-                <div className={`absolute right-4  top-10 animate-auto-glide p-2 text-center text-sm font-medium rounded-xl transition-all duration-500 ease-in-out transform ${message.type === 'success'
-                    ? 'bg-emerald-500/20 border border-emerald-500 text-emerald-200 translate-x-0 opacity-100 pointer-events-auto'
-                    : 'bg-red-500/20 border border-red-500 text-red-200 '
-                    }`}
-                    onAnimationEnd={() => setMessage({ text: '', type: '' })}>
-                    {message.text}
-                </div>
-            )} */}
-
-            {/* Modal Wrapper */}
-
-
-    
-
-
+            
              {message.text && (
 
                         <div className={`fixed top-8 right-4 animate-auto-glide p-2 text-center text-sm font-medium rounded-xl transition-all duration-500 ease-in-out transform ${message.type === 'success'
