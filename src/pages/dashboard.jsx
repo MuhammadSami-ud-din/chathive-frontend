@@ -20,6 +20,7 @@ export default function Dashboard() {
     const [PP, setPP] = useState({ pp: '', id: '' })
     const [inviteURL, setInviteURL] = useState('')
     const [showMessage, setShowMessage] = useState({ message: '', type: '' });
+    const videoRef = useRef(null);
 
 
 
@@ -233,7 +234,17 @@ export default function Dashboard() {
 
 
 
-
+    useEffect(()=>{
+        navigator.mediaDevices.getUserMedia({video: true , audio : true})
+        .then((stream)=>{
+            if(videoRef.current){
+                videoRef.current.srcObject = stream;
+            }
+        })
+        .catch((error)=>{
+             console.log('error in video showing' , error.message);
+        })
+    }, [])
 
 
 
@@ -253,6 +264,11 @@ export default function Dashboard() {
 
     return (
         <>
+
+        {/* <div className="flex justify-center items-center w-full h-full">
+            <video ref={videoRef} autoPlay playsInline muted className="w-full h-full" />
+        </div> */}
+
             <div className="flex flex-col w-screen h-screen bg-zinc-900 overflow-hidden">
 
 
