@@ -13,6 +13,7 @@ import ChannelChat from './views/channelChat.jsx'
 import AllServers from './views/AllServers.jsx'
 import JoinedServers from './views/joinedServers.jsx'
 import MyServers from './views/myservers.jsx'
+import CallTest from './pages/videocall.jsx'
 
 
 function ProtectedRoute({ children }) {
@@ -48,6 +49,8 @@ function App() {
           <Route path='/channels/:server_id' element={<ServerPage />} >
           <Route path=':channel_id' element={<ChannelChat />} />
           </Route>
+
+          {/* <Route path='/call' element={<CallTest />}/> */}
           
 
 

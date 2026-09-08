@@ -54,6 +54,7 @@ export default function Dashboard() {
 
 
         return () => {
+            
             socket.off('get_online_users', handleOnlineUsers);
         };
     }, []);
@@ -234,20 +235,23 @@ export default function Dashboard() {
 
 
 
-    useEffect(()=>{
-        navigator.mediaDevices.getUserMedia({video: true , audio : true})
-        .then((stream)=>{
-            if(videoRef.current){
-                videoRef.current.srcObject = stream;
-            }
-        })
-        .catch((error)=>{
-             console.log('error in video showing' , error.message);
-        })
-    }, [])
+    // useEffect(()=>{
+    //     navigator.mediaDevices.getUserMedia({video: true , audio : true})
+    //     .then((stream)=>{
+    //         if(videoRef.current){
+    //             videoRef.current.srcObject = stream;
+    //         }
+    //     })
+    //     .catch((error)=>{
+    //          console.log('error in video showing' , error.message);
+    //     })
+    // }, [])
 
 
 
+    window.addEventListener('pagehide' , ()=>{
+        socket.disconnect();
+    })
 
 
 
@@ -579,6 +583,7 @@ export default function Dashboard() {
                 userInfo={data?.userInfo}
                
             />}
+
 
 
 

@@ -87,7 +87,7 @@ export default function MyServers(){
 return(
     <>
      {/* {Right Side} */}
-            <div className={`relative  bg-[#151518] border-t border-t-zinc-800 h-full flex-1 flex flex-col min-w-0 overflow-hidden  `}>
+            <div className={`relative   bg-[#151518] border-t border-t-zinc-800 h-full flex-1 flex flex-col min-w-0 overflow-hidden  `}>
 
                 {/* upper bar to select the type of servers u wanna see */}
                 <div className={`absolute flex items-center border-b border-b-zinc-800/50 h-13 pl-3 text-sm gap-x-3 shrink-0 w-full transition-colors duration-300 ${isScrolled

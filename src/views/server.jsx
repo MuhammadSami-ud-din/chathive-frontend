@@ -4,8 +4,11 @@ export default function ServersListing() {
   
 
     return (
-        <>
-            <div className="flex-none  w-80 h-full flex flex-col  rounded-l-xl border-t border-l border-zinc-800 ">
+        <div className="flex  w-full h-full min-h-screen bg-[#151518] overflow-hidden ">
+           
+
+
+             <div className="flex-none  w-80 h-full flex flex-col  rounded-l-xl border-t border-l border-zinc-800 ">
                 <div className="flex items-center border-b border-b-neutral-800 h-13  pl-5 text-xl font-bold">
                     Discover
                 </div>
@@ -70,13 +73,14 @@ export default function ServersListing() {
             </div>
 
 
-           <div>
+           <div className="flex-1 min-w-0 h-full">
             <Outlet />
            </div>
 
+          
 
 
 
-        </>
+        </div>
     )
 }
