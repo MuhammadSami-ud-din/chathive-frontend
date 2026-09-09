@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { socket } from "../socket";
 import { useOutletContext } from "react-router-dom";
 
@@ -14,10 +14,12 @@ const ICE_SERVERS = {
 export default function Call() {
     const { userInfo } = useOutletContext();
     const [receiverId, setReceiverId] = useState('');
+    const [incomingCaller, setIncomingCaller] = useState(null);
+    const [CallStatus, setCallStatus] = useState('idle');
+    const [PendingOffer, setPendingOffer] = useState(null);
 
-if (userInfo) {
-    console.log(userInfo || 'hello')
-  }
+
+
     console.log(userInfo || 'bahar')
 
 
@@ -65,14 +67,55 @@ if (userInfo) {
         pc.onicecandidate = (event) => {
             if (event.candidate) {
                 socket.emit('ice_candidate', {
-                    targetUserId: callerID,
+                    targetUserId: receiverId,
                     candidate: event.candidate
                 })
 
             }
         }
 
+        peerConnnection.current = pc;
+        return pc;
+
     }
+
+
+    //Backend Socket
+
+    useEffect(() => {
+        if (!socket) return;
+
+        socket.on('incoming_call', ({ offer, from }) => {
+            setIncomingCaller(from);
+            setPendingOffer(offer);
+            setCallStatus('Incoming');
+
+        })
+
+
+
+
+        socket.on('call_answered', async ({ answer }) => {
+            if (peerConnnection.current) {
+                await peerConnnection.current.setRemoteDescription(new RTCSessionDescription(answer));
+                setCallStatus('Answered');
+            }
+        })
+
+
+        socket.on('ice_candidate', async ({ candidate }) => {
+            try{
+                if (peerConnnection.current && peerConnnection.current.remoteDescription) {
+                await peerConnnection.current.addIceCandidate(new RTCIceCandidate(candidate));
+                setCallStatus('Answered');
+            }
+            }
+            catch(error){
+                console.log('Ice candidate error' , error);
+            }
+        })
+
+    })
 
 
 
