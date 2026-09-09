@@ -21,6 +21,7 @@ export default function Dashboard() {
     const [inviteURL, setInviteURL] = useState('')
     const [showMessage, setShowMessage] = useState({ message: '', type: '' });
     const videoRef = useRef(null);
+    const [userInfo ,setUserInfo] = useState([]);
 
 
 
@@ -81,8 +82,9 @@ export default function Dashboard() {
                 }
 
                 setData(result)
-
-
+                setUserInfo(result?.userInfo);
+               
+                //console.log(userInfo)
 
 
             }
@@ -228,6 +230,8 @@ export default function Dashboard() {
 
     }
 
+    
+
 
 
 
@@ -252,6 +256,8 @@ export default function Dashboard() {
     window.addEventListener('pagehide' , ()=>{
         socket.disconnect();
     })
+
+
 
 
 
@@ -511,7 +517,7 @@ export default function Dashboard() {
 
 
                     <div className="flex  flex-1 overflow-hidden min-h-0">
-                        <Outlet context={{ setHeaderTitle, AddJoinedServers, onlineUsers, PP, setPP, uploadAvatar }} />
+                        <Outlet context={{ setHeaderTitle, AddJoinedServers, onlineUsers, PP, setPP, uploadAvatar , userInfo  }} />
                     </div>
 
 

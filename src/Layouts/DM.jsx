@@ -31,8 +31,8 @@ const fetchDM = async () => {
 
 
 export default function DM() {
-    const { setHeaderTitle, onlineUsers, uploadAvatar } = useOutletContext() || {};
-
+    const { setHeaderTitle, onlineUsers, uploadAvatar , userInfo } = useOutletContext() || {};
+   
     const [conversationId, setConversationId] = useState(null)
     const navigate = useNavigate()
 
@@ -123,6 +123,8 @@ export default function DM() {
 
 
     }
+
+   
 
 
 
@@ -222,7 +224,7 @@ export default function DM() {
 
             {/* chat area rightbar */}
             <div className="bg-[#151518] border-t border-t-zinc-800 flex-1 flex flex-col min-w-0">
-                <Outlet context={{ conversationId, setConversationId, onlineUsers , uploadAvatar}} />
+                <Outlet context={{ conversationId, setConversationId, onlineUsers , uploadAvatar , data : data.data , userInfo}} />
             </div>
 
 

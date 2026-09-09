@@ -13,7 +13,7 @@ import ChannelChat from './views/channelChat.jsx'
 import AllServers from './views/AllServers.jsx'
 import JoinedServers from './views/joinedServers.jsx'
 import MyServers from './views/myservers.jsx'
-import CallTest from './pages/videocall.jsx'
+import Call from './pages/videocall.jsx'
 
 
 function ProtectedRoute({ children }) {
@@ -30,36 +30,37 @@ function App() {
     <BrowserRouter>
       <Routes>
 
-        
+
         <Route path='/login' element={<LoginUser />} />
         <Route path='/register' element={<RegisterUser />} />
 
 
-        <Route  element={
+        <Route element={
           <ProtectedRoute>
             <Dashboard />
           </ProtectedRoute>
-        } >
+         } >
           <Route index element={<DefaultView />} />
           <Route path='/discovery/servers' element={<ServersListing />} >
-          <Route index element={<AllServers />} />
-          <Route path='joined' element={<JoinedServers />} />
-          <Route path='created' element={<MyServers />} />
+            <Route index element={<AllServers />} />
+            <Route path='joined' element={<JoinedServers />} />
+            <Route path='created' element={<MyServers />} />
           </Route>
           <Route path='/channels/:server_id' element={<ServerPage />} >
-          <Route path=':channel_id' element={<ChannelChat />} />
+            <Route path=':channel_id' element={<ChannelChat />} />
           </Route>
 
-          {/* <Route path='/call' element={<CallTest />}/> */}
-          
+
+
 
 
           <Route path='/@me' element={<DM />} >
             <Route index element={<DMFriends />} />
             <Route path=":id" element={<ChatArea />} />
+            <Route path='call' element={<Call />} />
 
           </Route>
-          
+
         </Route>
 
 
