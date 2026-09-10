@@ -57,7 +57,8 @@ function App() {
           <Route path='/@me' element={<DM />} >
             <Route index element={<DMFriends />} />
             <Route path=":id" element={<ChatArea />} />
-            <Route path='call' element={<Call />} />
+            
+            <Route path=":id/call" element={<Call />} />
 
           </Route>
 

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { socket } from "../socket";
-import { useOutletContext } from "react-router-dom";
+import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 
 const ICE_SERVERS = {
     iceServers: [
@@ -13,10 +13,14 @@ const ICE_SERVERS = {
 
 export default function Call() {
     const { userInfo } = useOutletContext();
-    const [receiverId, setReceiverId] = useState('');
+
     const [incomingCaller, setIncomingCaller] = useState(null);
     const [CallStatus, setCallStatus] = useState('idle');
     const [PendingOffer, setPendingOffer] = useState(null);
+    const navigate = useNavigate();
+    const { id } = useParams();
+
+
 
 
 
@@ -29,6 +33,8 @@ export default function Call() {
 
     const localStream = useRef(null);
     const peerConnnection = useRef(null);
+
+
 
 
     const StartCamera = async () => {
@@ -48,7 +54,7 @@ export default function Call() {
 
     }
 
-    const CreatePeerConnection = async () => {
+    const CreatePeerConnection = async (targetUserId) => {
         const pc = new RTCPeerConnection(ICE_SERVERS);
 
         if (localStream.current) {
@@ -67,7 +73,7 @@ export default function Call() {
         pc.onicecandidate = (event) => {
             if (event.candidate) {
                 socket.emit('ice_candidate', {
-                    targetUserId: receiverId,
+                    targetUserId,
                     candidate: event.candidate
                 })
 
@@ -104,18 +110,116 @@ export default function Call() {
 
 
         socket.on('ice_candidate', async ({ candidate }) => {
-            try{
+            try {
                 if (peerConnnection.current && peerConnnection.current.remoteDescription) {
-                await peerConnnection.current.addIceCandidate(new RTCIceCandidate(candidate));
-                setCallStatus('Answered');
+                    await peerConnnection.current.addIceCandidate(new RTCIceCandidate(candidate));
+                    setCallStatus('Answered');
+                }
             }
-            }
-            catch(error){
-                console.log('Ice candidate error' , error);
+            catch (error) {
+                console.log('Ice candidate error', error);
             }
         })
 
+
+        socket.on('call_ended', () => {
+            cleanupCall();
+        });
+
+
+        return () => {
+            socket.off('incoming_call');
+            socket.off('call_answered');
+            socket.off('ice_candidate');
+            socket.off('call_ended');
+        };
+
     })
+
+
+
+    const makeCall = async () => {
+        if (!id) return;
+        setCallStatus('Calling');
+
+        await StartCamera();
+
+        const pc = CreatePeerConnection(id);
+        const offer = await pc.createOffer();
+
+        await pc.setLocalDescription(offer);
+
+        socket.emit('call_user', {
+            receiverId: id,
+            offer,
+            callerInfo: userInfo
+
+        })
+
+    }
+
+
+
+
+    const AnswerCall = async () => {
+        if (!id) return;
+        setCallStatus('Answered');
+
+        await StartCamera();
+
+        const pc = CreatePeerConnection(userInfo?.id);
+
+
+        await pc.setRemoteDescription(new RTCSessionDescription(PendingOffer));
+
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer)
+
+        socket.emit('answer_call', {
+            targetUserId: id,
+            answer
+
+        })
+
+    }
+
+
+    const endCall = () => {
+        const targetId = id || incomingCaller?.userId;
+        if (targetId) {
+            socket.emit('end_call', { targetUserId: targetId });
+        }
+        cleanupCall();
+    }
+
+
+    const cleanupCall = () => {
+        if (peerConnnection.current) {
+            peerConnnection.current.close();
+            peerConnnection.current = null;
+        }
+
+        if (localStream.current) {
+            localStream.current.getTracks().forEach((track) => track.stop());
+            localStream.current = null;
+        }
+
+        if (localVideoRef.current) localVideoRef.current.srcObject = null;
+        if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
+
+        setCallStatus('idle');
+        setIncomingCaller(null);
+        setPendingOffer(null);
+
+        setTimeout(() => {
+            navigate(`/@me/${id}`)
+        })
+    }
+
+
+
+
+
 
 
 
@@ -133,9 +237,7 @@ export default function Call() {
                     muted
                 />
                 <button onClick={StartCamera} className="h-10 w-30" >Start Camera</button>
-                {/* <button onClick={()=>{
-                localVideoRef.current = null;
-            }} className="h-10 w-30" >Stop Camera</button> */}
+
 
             </div>
 
