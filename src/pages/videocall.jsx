@@ -10,11 +10,11 @@ const ICE_SERVERS = {
 };
 
 export default function Call() {
-    const { userInfo , CallStatus , setCallStatus , incomingCaller, setIncomingCaller , PendingOffer, setPendingOffer } = useOutletContext();
+    const { userInfo } = useOutletContext();
 
-
-    // const [CallStatus, setCallStatus] = useState('idle');
-    
+    const [incomingCaller, setIncomingCaller] = useState(null);
+    const [CallStatus, setCallStatus] = useState('idle');
+    const [PendingOffer, setPendingOffer] = useState(null);
     const navigate = useNavigate();
     const { id } = useParams(); // Target user ID from route
 
@@ -130,8 +130,7 @@ export default function Call() {
         };
     }, []);
 
-    useEffect(()=>{
- const makeCall = async () => {
+    const makeCall = async () => {
         if (!id) {
             alert("No recipient ID provided in route params.");
             return;
@@ -150,15 +149,10 @@ export default function Call() {
             offer,
             callerInfo: {
                 id: currentUserId,
-                username: userInfo?.username || userInfo?.name || 'Unknown User',
-                avatar : userInfo?.avatar
+                username: userInfo?.username || userInfo?.name || 'Unknown User'
             }
         });
     };
-    makeCall();
-    })
-
-   
 
     const AnswerCall = async () => {
         const targetId = id || incomingCaller?.id || incomingCaller?._id || incomingCaller?.userId;
@@ -211,7 +205,6 @@ export default function Call() {
         setPendingOffer(null);
     };
 
-    
     return (
         <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
             <h2>WebRTC Video Call</h2>
@@ -228,11 +221,11 @@ export default function Call() {
                 </div>
             </div>
 
-            {/* {CallStatus === 'idle' && (
+            {CallStatus === 'idle' && (
                 <button onClick={makeCall} style={{ padding: '8px 15px', backgroundColor: '#2e7d32', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
                     Start Call
                 </button>
-            )} */}
+            )}
 
             {CallStatus === 'Calling' && (
                 <div>

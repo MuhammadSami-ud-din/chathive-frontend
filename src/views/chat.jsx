@@ -79,7 +79,7 @@ export default function ChatArea() {
 
     const { id } = useParams();
     const [typing, setTyping] = useState(false);
-    const { conversationId, setConversationId, uploadAvatar , CallStatus , setCallStatus } = useOutletContext() || {};
+    const { conversationId, setConversationId, uploadAvatar } = useOutletContext() || {};
     const [message, setMessage] = useState('')
     const [isFocused, setIsFocused] = useState(false);
     const messageEndRef = useRef(null)
@@ -89,8 +89,6 @@ export default function ChatArea() {
     const conversationIdRef = useRef(conversationId);
     const queryClient = useQueryClient();
     const [showContext, setShowContext] = useState(false);
-      
-   
 
     const [msgId, setMsgId] = useState(null);
 
@@ -419,7 +417,6 @@ export default function ChatArea() {
 
                      <NavLink 
                     to={`call`}
-                    onClick={()=>setCallStatus('Calling')}
                     className="w-10 h-10" >
                         <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#e9eaec" strokeWidth="0.5s" strokeLinecap="round" strokeLinejoin="round">
                             <rect x="2" y="5" width="11" height="14" rx="3" />

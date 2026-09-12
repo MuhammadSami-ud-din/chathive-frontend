@@ -3,7 +3,6 @@ const Api_URL = import.meta.env.VITE_API_URL;
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useOutletContext, useNavigate } from "react-router-dom"
-import { socket } from "../socket";
 
 
 
@@ -32,18 +31,16 @@ const fetchDM = async () => {
 
 
 export default function DM() {
-    const { setHeaderTitle, onlineUsers, uploadAvatar, userInfo } = useOutletContext() || {};
-    const [CallStatus, setCallStatus] = useState('idle');
-    const [incomingCaller, setIncomingCaller] = useState(null);
+    const { setHeaderTitle, onlineUsers, uploadAvatar , userInfo } = useOutletContext() || {};
+   
     const [conversationId, setConversationId] = useState(null)
-    const [PendingOffer, setPendingOffer] = useState(null);
     const navigate = useNavigate()
 
 
 
 
 
-    console.log(incomingCaller, CallStatus)
+
 
     useEffect(() => {
         if (setHeaderTitle) {
@@ -82,7 +79,7 @@ export default function DM() {
 
 
     const currentAvatar = uploadAvatar || data?.userInfo?.avatar;
-
+   
 
 
 
@@ -127,19 +124,7 @@ export default function DM() {
 
     }
 
-    useEffect(()=>{
-        if(!socket) return;
-
-          const handleIncomingCall = ({ offer, from }) => {
-            console.log("Incoming Call Event Received from:", from);
-            setIncomingCaller(from);
-            setPendingOffer(offer);
-            setCallStatus('Incoming');
-        };
-        socket.on('incoming_call', handleIncomingCall);
-    })
-
-
+   
 
 
 
@@ -239,21 +224,7 @@ export default function DM() {
 
             {/* chat area rightbar */}
             <div className="bg-[#151518] border-t border-t-zinc-800 flex-1 flex flex-col min-w-0">
-                <Outlet context={{ conversationId, setConversationId, onlineUsers, uploadAvatar, data: data.data, userInfo, CallStatus, setCallStatus, incomingCaller, setIncomingCaller , PendingOffer , setPendingOffer }} />
-
-            </div>
-
-
-
-            <div className="fixed  w-80 border border-zinc-600 rounded-xl right-4 py-2 px-1 flex flex-col items-center gap-y-4 bg-zinc-800/30 backdrop-blur ">
-                <div className="text-center text-lg text-zinc-400 ">Incoming Call</div>
-                <img className="h-20 w-20 rounded-full object-fit" src={incomingCaller?.avatar} />
-                <div className="text-xl">{incomingCaller?.username}</div>
-                <div className="w-full flex p-2 gap-x-1 mb-1">
-                     <button className="bg-red-700 p-1 flex-1 rounded-xl">Reject</button>
-                    <button className="bg-green-700 p-1 flex-1 rounded-xl ">Accept</button>
-                   
-                </div>
+                <Outlet context={{ conversationId, setConversationId, onlineUsers , uploadAvatar , data : data.data , userInfo}} />
             </div>
 
 
