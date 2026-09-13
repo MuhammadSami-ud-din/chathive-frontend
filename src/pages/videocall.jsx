@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { socket } from "../socket";
-import { useNavigate, useOutletContext, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useOutletContext, useParams } from "react-router-dom";
 
 const ICE_SERVERS = {
     iceServers: [
@@ -11,23 +11,36 @@ const ICE_SERVERS = {
 
 export default function Call() {
     const { userInfo } = useOutletContext();
-
-    const [incomingCaller, setIncomingCaller] = useState(null);
-    const [CallStatus, setCallStatus] = useState('idle');
-    const [PendingOffer, setPendingOffer] = useState(null);
+    const location = useLocation();
+    // const [incomingCaller, setIncomingCaller] = useState(null);
+    // const [PendingOffer, setPendingOffer] = useState(null);
     const navigate = useNavigate();
     const { id } = useParams(); // Target user ID from route
 
     const localVideoRef = useRef(null);
     const remoteVideoRef = useRef(null);
-
     const localStream = useRef(null);
-    const peerConnnection = useRef(null);
+    const peerConnection = useRef(null);
     const iceCandidatesQueue = useRef([]);
+
+    const offerFromRouter = location.state?.offer;
+    const callerInfo = location.state?.from;
+    const targetId = id || callerInfo?.id;
 
     const currentUserId = userInfo?.id || userInfo?._id;
 
+    const [CallStatus, setCallStatus] = useState(offerFromRouter ? 'Incoming' : 'Calling');
+    const callInitialized = useRef(false);
+    const hasNavigatedBack = useRef(false);
+    const userInfoRef = useRef(userInfo);
+    useEffect(() => {
+        userInfoRef.current = userInfo;
+    }, [userInfo]);
+
+
+
     const StartCamera = async () => {
+        if (localStream.current) return localStream.current;
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
             localStream.current = stream;
@@ -42,12 +55,60 @@ export default function Call() {
         }
     };
 
-    const CreatePeerConnection = (targetUserId) => {
-        const pc = new RTCPeerConnection(ICE_SERVERS);
+    const teardownConnections = useCallback(() => {
+        if (peerConnection.current) {
+            peerConnection.current.ontrack = null;
+            peerConnection.current.onicecandidate = null;
+            peerConnection.current.oniceconnectionstatechange = null;
+            peerConnection.current.close();
+            peerConnection.current = null;
+        }
 
         if (localStream.current) {
-            localStream.current.getTracks().forEach((track) => {
-                pc.addTrack(track, localStream.current);
+            localStream.current.getTracks().forEach((track) => track.stop());
+            localStream.current = null;
+        }
+
+        if (localVideoRef.current) localVideoRef.current.srcObject = null;
+        if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
+
+        iceCandidatesQueue.current = [];
+    }, []);
+
+    const cleanupCall = useCallback(() => {
+        teardownConnections();
+        setCallStatus('idle');
+
+        if (!hasNavigatedBack.current) {
+            hasNavigatedBack.current = true;
+            navigate(-1);
+        }
+    }, [navigate, teardownConnections]);
+
+
+
+    const processQueuedIceCandidates = useCallback(async () => {
+        if (!peerConnection.current || !peerConnection.current.remoteDescription) return;
+
+        while (iceCandidatesQueue.current.length > 0) {
+            const candidate = iceCandidatesQueue.current.shift();
+            try {
+                await peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate));
+            } catch (error) {
+                console.error('Error processing queued ICE candidate:', error);
+            }
+        }
+
+
+    }, [])
+
+    const CreatePeerConnection = useCallback((targetUserId, stream) => {
+        if (peerConnection.current) return peerConnection.current;
+        const pc = new RTCPeerConnection(ICE_SERVERS);
+
+        if (stream) {
+            stream.getTracks().forEach((track) => {
+                pc.addTrack(track, stream);
             });
         }
 
@@ -66,45 +127,50 @@ export default function Call() {
             }
         };
 
-        peerConnnection.current = pc;
-        return pc;
-    };
-
-    const processQueuedIceCandidates = async () => {
-        if (!peerConnnection.current) return;
-        while (iceCandidatesQueue.current.length > 0) {
-            const candidate = iceCandidatesQueue.current.shift();
-            try {
-                await peerConnnection.current.addIceCandidate(new RTCIceCandidate(candidate));
-            } catch (error) {
-                console.error('Error processing queued ICE candidate:', error);
+        pc.oniceconnectionstatechange = () => {
+            if (pc.iceConnectionState === 'failed') {
+                if (targetId) socket.emit('end_call', { targetUserId: String(targetId) });
+                cleanupCall();
+            } else if (pc.iceConnectionState === 'disconnected') {
+                setTimeout(() => {
+                    if (pc.iceConnectionState === 'disconnected') {
+                        if (targetId) socket.emit('end_call', { targetUserId: String(targetId) });
+                        cleanupCall();
+                    }
+                }, 5000);
             }
-        }
-    };
+        };
+
+        peerConnection.current = pc;
+        return pc;
+    }, [cleanupCall, targetId])
+
+
 
     useEffect(() => {
         if (!socket) return;
 
-        const handleIncomingCall = ({ offer, from }) => {
-            console.log("Incoming Call Event Received from:", from);
-            setIncomingCaller(from);
-            setPendingOffer(offer);
-            setCallStatus('Incoming');
-        };
-
         const handleCallAnswered = async ({ answer }) => {
+            if (!peerConnection.current) return;
             console.log("Call Answered Event Received");
-            if (peerConnnection.current) {
-                await peerConnnection.current.setRemoteDescription(new RTCSessionDescription(answer));
-                await processQueuedIceCandidates();
-                setCallStatus('Answered');
+            if (peerConnection.current.signalingState === 'have-local-offer') {
+                try {
+                    await peerConnection.current.setRemoteDescription(new RTCSessionDescription(answer));
+                    await processQueuedIceCandidates();
+                    setCallStatus('Answered');
+                } catch (err) {
+                    console.error("Failed to set remote description:", err);
+                }
+            } else {
+                console.warn(`Cannot set remote answer in state: ${peerConnection.current.signalingState}`);
             }
-        };
+        }
+
 
         const handleIceCandidate = async ({ candidate }) => {
-            if (peerConnnection.current && peerConnnection.current.remoteDescription) {
+            if (peerConnection.current && peerConnection.current.remoteDescription) {
                 try {
-                    await peerConnnection.current.addIceCandidate(new RTCIceCandidate(candidate));
+                    await peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate));
                 } catch (error) {
                     console.error('ICE candidate error:', error);
                 }
@@ -115,95 +181,193 @@ export default function Call() {
 
         const handleCallEnded = () => {
             cleanupCall();
+
         };
 
-        socket.on('incoming_call', handleIncomingCall);
         socket.on('call_answered', handleCallAnswered);
         socket.on('ice_candidate', handleIceCandidate);
         socket.on('call_ended', handleCallEnded);
 
         return () => {
-            socket.off('incoming_call', handleIncomingCall);
             socket.off('call_answered', handleCallAnswered);
             socket.off('ice_candidate', handleIceCandidate);
             socket.off('call_ended', handleCallEnded);
-        };
-    }, []);
-
-    const makeCall = async () => {
-        if (!id) {
-            alert("No recipient ID provided in route params.");
-            return;
         }
-        setCallStatus('Calling');
 
-        await StartCamera();
 
-        const pc = CreatePeerConnection(id);
-        const offer = await pc.createOffer();
+    }, [cleanupCall, navigate, processQueuedIceCandidates])
 
-        await pc.setLocalDescription(offer);
+    useEffect(() => {
 
-        socket.emit('call_user', {
-            receiverId: String(id),
-            offer,
-            callerInfo: {
-                id: currentUserId,
-                username: userInfo?.username || userInfo?.name || 'Unknown User'
+        if (callInitialized.current) return;
+        callInitialized.current = true;
+        let cancelled = false;
+
+        const call = async () => {
+            const stream = await StartCamera();
+            if (!stream) return;
+
+
+            if (cancelled) {
+
+                stream.getTracks().forEach((track) => track.stop());
+                if (localStream.current === stream) localStream.current = null;
+                if (localVideoRef.current) localVideoRef.current.srcObject = null;
+                return;
             }
-        });
-    };
 
-    const AnswerCall = async () => {
-        const targetId = id || incomingCaller?.id || incomingCaller?._id || incomingCaller?.userId;
-        if (!targetId || !PendingOffer) return;
+            if (offerFromRouter) {
 
-        setCallStatus('Answered');
 
-        await StartCamera();
+                const AnswerCall = async () => {
 
-        const pc = CreatePeerConnection(targetId);
+                    if (!targetId || !offerFromRouter) return;
 
-        await pc.setRemoteDescription(new RTCSessionDescription(PendingOffer));
-        
-        const answer = await pc.createAnswer();
-        await pc.setLocalDescription(answer);
+                    setCallStatus('Answered');
 
-        await processQueuedIceCandidates();
 
-        socket.emit('answer_call', {
-            targetUserId: String(targetId),
-            answer
-        });
-    };
+
+                    const pc = CreatePeerConnection(targetId, stream);
+
+                    await pc.setRemoteDescription(new RTCSessionDescription(offerFromRouter));
+
+                    const answer = await pc.createAnswer();
+                    await pc.setLocalDescription(answer);
+
+                    await processQueuedIceCandidates();
+
+                    socket.emit('answer_call', {
+                        targetUserId: String(targetId),
+                        answer
+                    });
+                };
+                AnswerCall();
+
+            }
+            else {
+
+
+                const makeCall = async () => {
+                    if (!id) {
+                        alert("No recipient ID provided in route params.");
+                        return;
+                    }
+                    setCallStatus('Calling');
+
+
+                    const pc = CreatePeerConnection(id, stream);
+                    const offer = await pc.createOffer();
+
+                    await pc.setLocalDescription(offer);
+
+                    socket.emit('call_user', {
+                        receiverId: String(id),
+                        offer,
+                        callerInfo: {
+                            id: currentUserId,
+                            username: userInfoRef.current?.username || 'Unknown User',
+                            avatar: userInfoRef.current?.avatar
+                        }
+                    });
+                };
+                makeCall();
+
+
+            }
+
+
+
+        }
+
+        call();
+
+
+        // return () => {
+
+        //             cleanupCall();
+        //         };
+        return () => {
+            cancelled = true;
+            teardownConnections();
+            callInitialized.current = false;
+        };
+
+
+
+    }, [CreatePeerConnection, offerFromRouter, id, targetId, currentUserId, processQueuedIceCandidates, cleanupCall, teardownConnections]);
+
+
+
+    // const makeCall = async () => {
+    //     if (!id) {
+    //         alert("No recipient ID provided in route params.");
+    //         return;
+    //     }
+    //     setCallStatus('Calling');
+
+    //     await StartCamera();
+
+    //     const pc = CreatePeerConnection(id);
+    //     const offer = await pc.createOffer();
+
+    //     await pc.setLocalDescription(offer);
+
+    //     socket.emit('call_user', {
+    //         receiverId: String(id),
+    //         offer,
+    //         callerInfo: {
+    //             id: currentUserId,
+    //             username: userInfo?.username || userInfo?.name || 'Unknown User',
+    //             avatar: userInfo?.avatar
+    //         }
+    //     });
+    // };
+
+    // const AnswerCall = async () => {
+    //     const targetId = id || incomingCaller?.id || incomingCaller?._id || incomingCaller?.userId;
+    //     if (!targetId || !PendingOffer) return;
+
+    //     setCallStatus('Answered');
+
+    //     await StartCamera();
+
+    //     const pc = CreatePeerConnection(targetId);
+
+    //     await pc.setRemoteDescription(new RTCSessionDescription(PendingOffer));
+
+    //     const answer = await pc.createAnswer();
+    //     await pc.setLocalDescription(answer);
+
+    //     await processQueuedIceCandidates();
+
+    //     socket.emit('answer_call', {
+    //         targetUserId: String(targetId),
+    //         answer
+    //     });
+    // };
+
 
     const endCall = () => {
-        const targetId = id || incomingCaller?.id || incomingCaller?._id || incomingCaller?.userId;
+
         if (targetId) {
             socket.emit('end_call', { targetUserId: String(targetId) });
         }
         cleanupCall();
     };
 
-    const cleanupCall = () => {
-        if (peerConnnection.current) {
-            peerConnnection.current.close();
-            peerConnnection.current = null;
-        }
 
-        if (localStream.current) {
-            localStream.current.getTracks().forEach((track) => track.stop());
-            localStream.current = null;
-        }
 
-        if (localVideoRef.current) localVideoRef.current.srcObject = null;
-        if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
 
-        iceCandidatesQueue.current = [];
-        setCallStatus('idle');
-        setIncomingCaller(null);
-        setPendingOffer(null);
-    };
+
+
+
+
+
+
+
+
+
+
 
     return (
         <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
@@ -221,11 +385,7 @@ export default function Call() {
                 </div>
             </div>
 
-            {CallStatus === 'idle' && (
-                <button onClick={makeCall} style={{ padding: '8px 15px', backgroundColor: '#2e7d32', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-                    Start Call
-                </button>
-            )}
+
 
             {CallStatus === 'Calling' && (
                 <div>
@@ -236,17 +396,7 @@ export default function Call() {
                 </div>
             )}
 
-            {CallStatus === 'Incoming' && (
-                <div style={{ backgroundColor: '#fff3cd', padding: '15px', borderRadius: '8px', maxWidth: '350px' }}>
-                    <p style={{ margin: '0 0 10px 0' }}>Incoming call from: <strong>{incomingCaller?.username || incomingCaller?.id}</strong></p>
-                    <button onClick={AnswerCall} style={{ padding: '8px 15px', backgroundColor: '#2e7d32', color: '#fff', border: 'none', borderRadius: '4px', marginRight: '10px', cursor: 'pointer' }}>
-                        Accept
-                    </button>
-                    <button onClick={endCall} style={{ padding: '8px 15px', backgroundColor: '#d32f2f', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-                        Reject
-                    </button>
-                </div>
-            )}
+
 
             {CallStatus === 'Answered' && (
                 <div>
