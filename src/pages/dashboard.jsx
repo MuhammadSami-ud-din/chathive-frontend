@@ -20,12 +20,12 @@ export default function Dashboard() {
     const [PP, setPP] = useState({ pp: '', id: '' })
     const [inviteURL, setInviteURL] = useState('')
     const [showMessage, setShowMessage] = useState({ message: '', type: '' });
-    const videoRef = useRef(null);
-    const [userInfo ,setUserInfo] = useState([]);
 
+    const [userInfo, setUserInfo] = useState([]);
+    const ringtoneRef = useRef(null);
 
-    const [incomingCallData , setIncomingCallData] = useState(null);
-    
+    const [incomingCallData, setIncomingCallData] = useState(null);
+
 
 
 
@@ -59,7 +59,7 @@ export default function Dashboard() {
 
 
         return () => {
-            
+
             socket.off('get_online_users', handleOnlineUsers);
         };
     }, []);
@@ -87,7 +87,7 @@ export default function Dashboard() {
 
                 setData(result)
                 setUserInfo(result?.userInfo);
-               
+
                 //console.log(userInfo)
 
 
@@ -234,7 +234,7 @@ export default function Dashboard() {
 
     }
 
-    
+
 
 
 
@@ -257,7 +257,7 @@ export default function Dashboard() {
 
 
 
-    window.addEventListener('pagehide' , ()=>{
+    window.addEventListener('pagehide', () => {
         socket.disconnect();
     })
 
@@ -267,37 +267,48 @@ export default function Dashboard() {
 
 
 
-    useEffect(()=>{
-        if(!socket) return;
+    useEffect(() => {
+        if (!socket) return;
 
-        const handleIncoming = async ({offer , from})=>{
-            setIncomingCallData({offer , from});
+        const handleIncoming = async ({ offer, from }) => {
+            setIncomingCallData({ offer, from });
         }
 
-        socket.on('incoming_call' , handleIncoming);
+        const handleCallCut = ()=>{
+            setIncomingCallData(null);
+            ringtoneRef.current.pause();
+        }
 
-        return ()=> socket.off('incoming_call' , handleIncoming)
-    } , []);
 
-     
-    const handleAccept = ()=>{
+
+        socket.on('incoming_call', handleIncoming);
+        socket.on('call_ended' , handleCallCut)
+
+        return () =>{
+            socket.off('incoming_call', handleIncoming) 
+            socket.off('call_ended' , handleCallCut)
+        }
+
+    }, []);
+
+
+    const handleAccept = () => {
         const callerId = incomingCallData?.from?.id || incomingCallData?.from?._id;
 
-        navigate(`/@me/${callerId}/call`, 
-        {
-        state: {
-            offer : incomingCallData?.offer,
-            from : incomingCallData?.from
-        }
-        })
+        navigate(`/@me/${callerId}/call`,
+            {
+                state: {
+                    offer: incomingCallData?.offer,
+                    from: incomingCallData?.from
+                }
+            })
         setIncomingCallData(null);
     }
 
-    const handleReject = ()=>
-    {
+    const handleReject = () => {
         const callerId = incomingCallData?.from?.id || incomingCallData?.from?._id;
         if (callerId)
-        socket.emit('end_call' , {targetUserId : callerId})
+            socket.emit('end_call', { targetUserId: callerId })
 
         setIncomingCallData(null);
     }
@@ -305,7 +316,24 @@ export default function Dashboard() {
 
 
 
+    
+    useEffect(() => {
+        
+        if (incomingCallData) {
+            ringtoneRef.current = new Audio('/ringtone.mp3');
+            ringtoneRef.current.loop = true;
+            ringtoneRef.current.play().catch((err) => console.log('Autoplay blocked:', err));
+        }
 
+        
+        
+        return () => {
+            if (ringtoneRef.current) {
+                ringtoneRef.current.pause();
+                ringtoneRef.current.currentTime = 0;
+            }
+        };
+    }, [incomingCallData]);
 
 
 
@@ -315,7 +343,7 @@ export default function Dashboard() {
     return (
         <>
 
-        {/* <div className="flex justify-center items-center w-full h-full">
+            {/* <div className="flex justify-center items-center w-full h-full">
             <video ref={videoRef} autoPlay playsInline muted className="w-full h-full" />
         </div> */}
 
@@ -557,7 +585,7 @@ export default function Dashboard() {
 
 
                     <div className="flex  flex-1 overflow-hidden min-h-0">
-                        <Outlet context={{ setHeaderTitle, AddJoinedServers, onlineUsers, PP, setPP, uploadAvatar , userInfo  }} />
+                        <Outlet context={{ setHeaderTitle, AddJoinedServers, onlineUsers, PP, setPP, uploadAvatar, userInfo }} />
                     </div>
 
 
@@ -608,43 +636,43 @@ export default function Dashboard() {
                     <div className="text-xs text-zinc-400">{onlineUsers?.includes(String(data?.userInfo?.id)) ? 'Online' : 'Offline'}</div>
                 </div>
 
-                <div  className=" group h-8 w-8 flex justify-center items-center rounded-lg transition-all hover:bg-zinc-600 mr-3 ">
+                <div className=" group h-8 w-8 flex justify-center items-center rounded-lg transition-all hover:bg-zinc-600 mr-3 ">
                     <span className="group" onClick={() => setProfileOpen(true)}>
                         <svg
-                    className='text-zinc-400 h-6 w-6 transition-transform duration-300 group-hover:rotate-180'
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                >
-                    <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" />
-                </svg>
+                            className='text-zinc-400 h-6 w-6 transition-transform duration-300 group-hover:rotate-180'
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                        >
+                            <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" />
+                        </svg>
                     </span>
                 </div>
             </div>
 
 
 
-             {profileOpen && < UserProfile
+            {profileOpen && < UserProfile
                 isOpen
                 onClose={() => setProfileOpen(false)}
                 userInfo={data?.userInfo}
-               
+
             />}
 
 
 
 
-           {incomingCallData && (
-            <div className="fixed animate-glide right-2 top-2 rounded-xl bg-zinc-900/20 border border-zinc-700/50 backdrop-blur p-2 w-80 text-zinc-200 flex flex-col items-center gap-y-3 pb-4">
-            <div>Incoming Call...</div>
-            <img className="h-20 w-20 rounded-full object-fit" src={incomingCallData?.from?.avatar} aria-placeholder="Callers PP" />
-            <div>{incomingCallData?.from?.username}</div>
-            <div className="flex w-full gap-x-1">
-                <button className="p-1 flex-1 bg-red-500 rounded-sm" onClick={handleReject}>Reject</button>
-                <button className="p-1 flex-1 bg-green-500 rounded-sm" onClick={handleAccept}>Accept</button>
-            </div>
+            {incomingCallData && (
+                <div className="fixed animate-glide right-2 top-2 rounded-xl bg-zinc-900/20 border border-zinc-700/50 backdrop-blur p-2 w-80 text-zinc-200 flex flex-col items-center gap-y-3 pb-4">
+                    <div>Incoming Call...</div>
+                    <img className="h-20 w-20 rounded-full object-fit" src={incomingCallData?.from?.avatar} aria-placeholder="Callers PP" />
+                    <div>{incomingCallData?.from?.username}</div>
+                    <div className="flex w-full gap-x-1">
+                        <button className="p-1 flex-1 bg-red-500 rounded-sm" onClick={handleReject}>Reject</button>
+                        <button className="p-1 flex-1 bg-green-500 rounded-sm" onClick={handleAccept}>Accept</button>
+                    </div>
 
-           </div>
-           )}
+                </div>
+            )}
 
 
 
