@@ -32,6 +32,8 @@ export default function Call() {
     const [CallStatus, setCallStatus] = useState(offerFromRouter ? 'Incoming' : 'Calling');
     const callInitialized = useRef(false);
     const hasNavigatedBack = useRef(false);
+    const ringtoneRef = useRef(null)
+
     const userInfoRef = useRef(userInfo);
     useEffect(() => {
         userInfoRef.current = userInfo;
@@ -252,7 +254,11 @@ export default function Call() {
                         alert("No recipient ID provided in route params.");
                         return;
                     }
+
                     setCallStatus('Calling');
+
+
+
 
 
                     const pc = CreatePeerConnection(id, stream);
@@ -282,6 +288,8 @@ export default function Call() {
         call();
 
 
+
+
         // return () => {
 
         //             cleanupCall();
@@ -297,6 +305,30 @@ export default function Call() {
     }, [CreatePeerConnection, offerFromRouter, id, targetId, currentUserId, processQueuedIceCandidates, cleanupCall, teardownConnections]);
 
 
+
+    useEffect(() => {
+      
+        if (CallStatus === 'Calling') {
+            ringtoneRef.current = new Audio('/ring.mp3');
+            ringtoneRef.current.loop = true;
+            ringtoneRef.current.play().catch((err) => console.log('Autoplay blocked:', err));
+        }
+
+        
+        if (CallStatus === 'Answered' || CallStatus === 'Ended' || CallStatus === 'Idle') {
+            if (ringtoneRef.current) {
+                ringtoneRef.current.pause();
+                ringtoneRef.current.currentTime = 0;
+            }
+        }
+
+        return () => {
+            if (ringtoneRef.current) {
+                ringtoneRef.current.pause();
+                ringtoneRef.current.currentTime = 0;
+            }
+        };
+    }, [CallStatus]); 
 
     // const makeCall = async () => {
     //     if (!id) {
@@ -370,44 +402,44 @@ export default function Call() {
 
 
     return (
-        <div className=" fixed inset-0 z-[110] h-screen w-screen bg-zinc-500">
-         <div className="relative w-screen h-screen bg-zinc-900">
-             <div className="text-center mt-4 absolute left-1/2 -translate-x-1/2 z-30 bg-zinc-800/20 backdrop-blur p-2 px-4 rounded-2xl"> 
-             <h1 className="text-xl">{userInfo?.username}</h1>
-          </div>
+        <div className=" fixed inset-0 z-[110] h-screen w-screen bg-zinc-500 ">
+            <div className="relative w-screen h-screen bg-zinc-900">
+                <div className="text-center mt-4 absolute left-1/2 -translate-x-1/2 z-30 bg-zinc-800/20 backdrop-blur p-2 px-4 rounded-2xl">
+                    <h1 className="text-xl">{userInfo?.username}</h1>
+                </div>
 
-            
+
                 <div>
                     {/* <h4>My Video</h4> */}
-                    <video ref={localVideoRef} autoPlay playsInline muted  className="absolute bottom-4 right-4 rounded-xl bg-black h-49 w-65 z-20" />
+                    <video ref={localVideoRef} autoPlay playsInline muted className="absolute bottom-4 right-4 rounded-xl bg-black h-49 w-65 z-20" />
                 </div>
                 <div className="w-full h-full">
                     {/* <h4>Remote Video</h4> */}
-                    <video ref={remoteVideoRef} autoPlay playsInline  className="w-full h-full object-contain z-10" />
+                    <video ref={remoteVideoRef} autoPlay playsInline className="w-full h-full object-contain z-10" />
                 </div>
-        
 
 
 
-            {CallStatus === 'Calling' && (
-                <div  className="absolute bottom-8 left-1/2 z-30 -translate-x-1/2 flex flex-col justify-center items-center ">
-                    <p className="animate-pulse">Calling {id}...</p>
-                    <button onClick={endCall}  className="cursor-pointer rounded-full bg-red-500 px-8 py-3 font-semibold text-white shadow-xl transition hover:bg-red-600 active:scale-95 ">
-                        Cancel Call
-                    </button>
-                </div>
-            )}
+
+                {CallStatus === 'Calling' && (
+                    <div className="absolute bottom-8 left-1/2 z-30 -translate-x-1/2 flex flex-col justify-center items-center ">
+                        <p className="animate-pulse">Calling {id}...</p>
+                        <button onClick={endCall} className="cursor-pointer rounded-full bg-red-500 px-8 py-3 font-semibold text-white shadow-xl transition hover:bg-red-600 active:scale-95 ">
+                            Cancel Call
+                        </button>
+                    </div>
+                )}
 
 
 
-            {CallStatus === 'Answered' && (
-                <div className="absolute bottom-8 left-1/2 z-30 -translate-x-1/2 ">
-                    <button onClick={endCall} className="cursor-pointer rounded-full bg-red-500 px-8 py-3 font-semibold text-white shadow-xl transition hover:bg-red-600 active:scale-95 ">
-                        End Call
-                    </button>
-                </div>
-            )}
-         </div>
+                {CallStatus === 'Answered' && (
+                    <div className="absolute bottom-8 left-1/2 z-30 -translate-x-1/2 ">
+                        <button onClick={endCall} className="cursor-pointer rounded-full bg-red-500 px-8 py-3 font-semibold text-white shadow-xl transition hover:bg-red-600 active:scale-95 ">
+                            End Call
+                        </button>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
