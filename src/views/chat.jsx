@@ -379,8 +379,9 @@ export default function ChatArea() {
             <div className="flex flex-col overflow-hidden w-full h-full">
 
                 {/* upper bar to show Friend name */}
-                <div className="flex items-center border-b border-b-neutral-800 h-13 pl-3 text-sm gap-x-3 shrink-0">
-                    <span className="h-8 w-8 rounded-full bg-zinc-700/50 flex justify-center items-center text-lg text-yellow-200/50">
+                <div className="flex justify-between items-center border-b border-b-neutral-800 h-13 pl-3 text-sm gap-x-3 shrink-0">
+                  <div className="flex gap-x-2">
+                      <span className="h-8 w-8 rounded-full bg-zinc-700/50 flex justify-center items-center text-lg text-yellow-200/50">
                         {data.user?.avatar ? (
                             <img src={currentAvatar || data?.user?.avatar} alt="avatar" className="h-full w-full object-cover rounded-full" />
                         ) : (
@@ -414,10 +415,11 @@ export default function ChatArea() {
                             </span>
                         </div>
                     </div>
+                  </div>
 
                      <NavLink 
                     to={`call`}
-                    className="w-10 h-10" >
+                    className="w-10 h-10 flex items-center justify-center mr-5" >
                         <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#e9eaec" strokeWidth="0.5s" strokeLinecap="round" strokeLinejoin="round">
                             <rect x="2" y="5" width="11" height="14" rx="3" />
                             <path d="M13 10l5.73-3.82A1 1 0 0120.5 7v10a1 1 0 01-1.77.62L13 14" />

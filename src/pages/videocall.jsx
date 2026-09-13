@@ -370,27 +370,29 @@ export default function Call() {
 
 
     return (
-        <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
-            <h2>WebRTC Video Call</h2>
-            <p>Your User ID: <strong>{currentUserId}</strong></p>
+        <div className=" fixed inset-0 z-[110] h-screen w-screen bg-zinc-500">
+         <div className="relative w-screen h-screen bg-zinc-900">
+             <div className="text-center mt-4 absolute left-1/2 -translate-x-1/2 z-30 bg-zinc-800/20 backdrop-blur p-2 px-4 rounded-2xl"> 
+             <h1 className="text-xl">{userInfo?.username}</h1>
+          </div>
 
-            <div style={{ display: 'flex', gap: '20px', margin: '20px 0' }}>
+            
                 <div>
-                    <h4>My Video</h4>
-                    <video ref={localVideoRef} autoPlay playsInline muted style={{ width: '300px', height: '200px', backgroundColor: '#000', borderRadius: '8px' }} />
+                    {/* <h4>My Video</h4> */}
+                    <video ref={localVideoRef} autoPlay playsInline muted  className="absolute bottom-4 right-4 rounded-xl bg-black h-49 w-65 z-20" />
                 </div>
-                <div>
-                    <h4>Remote Video</h4>
-                    <video ref={remoteVideoRef} autoPlay playsInline style={{ width: '300px', height: '200px', backgroundColor: '#000', borderRadius: '8px' }} />
+                <div className="w-full h-full">
+                    {/* <h4>Remote Video</h4> */}
+                    <video ref={remoteVideoRef} autoPlay playsInline  className="w-full h-full object-contain z-10" />
                 </div>
-            </div>
+        
 
 
 
             {CallStatus === 'Calling' && (
-                <div>
-                    <p>Calling {id}...</p>
-                    <button onClick={endCall} style={{ padding: '8px 15px', backgroundColor: '#d32f2f', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                <div  className="absolute bottom-8 left-1/2 z-30 -translate-x-1/2 flex flex-col justify-center items-center ">
+                    <p className="animate-pulse">Calling {id}...</p>
+                    <button onClick={endCall}  className="cursor-pointer rounded-full bg-red-500 px-8 py-3 font-semibold text-white shadow-xl transition hover:bg-red-600 active:scale-95 ">
                         Cancel Call
                     </button>
                 </div>
@@ -399,12 +401,13 @@ export default function Call() {
 
 
             {CallStatus === 'Answered' && (
-                <div>
-                    <button onClick={endCall} style={{ padding: '8px 15px', backgroundColor: '#d32f2f', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                <div className="absolute bottom-8 left-1/2 z-30 -translate-x-1/2 ">
+                    <button onClick={endCall} className="cursor-pointer rounded-full bg-red-500 px-8 py-3 font-semibold text-white shadow-xl transition hover:bg-red-600 active:scale-95 ">
                         End Call
                     </button>
                 </div>
             )}
+         </div>
         </div>
     );
 }
