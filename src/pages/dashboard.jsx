@@ -24,6 +24,10 @@ export default function Dashboard() {
     const [userInfo ,setUserInfo] = useState([]);
 
 
+    const [incomingCallData , setIncomingCallData] = useState(null);
+    
+
+
 
 
     const queryClient = useQueryClient();
@@ -261,6 +265,42 @@ export default function Dashboard() {
 
 
 
+
+
+    useEffect(()=>{
+        if(!socket) return;
+
+        const handleIncoming = async ({offer , from})=>{
+            setIncomingCallData({offer , from});
+        }
+
+        socket.on('incoming_call' , handleIncoming);
+
+        return ()=> socket.off('incoming_call' , handleIncoming)
+    } , []);
+
+     
+    const handleAccept = ()=>{
+        const callerId = incomingCallData?.from?.id || incomingCallData?.from?._id;
+
+        navigate(`/@me/${callerId}/call`, 
+        {
+        state: {
+            offer : incomingCallData?.offer,
+            from : incomingCallData?.from
+        }
+        })
+        setIncomingCallData(null);
+    }
+
+    const handleReject = ()=>
+    {
+        const callerId = incomingCallData?.from?.id || incomingCallData?.from?._id;
+        if (callerId)
+        socket.emit('end_call' , {targetUserId : callerId})
+
+        setIncomingCallData(null);
+    }
 
 
 
@@ -592,6 +632,19 @@ export default function Dashboard() {
 
 
 
+
+           {incomingCallData && (
+            <div className="fixed right-2 top-2 rounded-xl bg-zinc-900/20 border border-zinc-700/50 backdrop-blur p-2 w-80 text-zinc-200 flex flex-col items-center gap-y-3 pb-4">
+            <div>Incoming Call...</div>
+            <img className="h-20 w-20 rounded-full object-fit" src={incomingCallData?.from?.avatar} aria-placeholder="Callers PP" />
+            <div>{incomingCallData?.from?.username}</div>
+            <div className="flex w-full gap-x-1">
+                <button className="p-1 flex-1 bg-red-500 rounded-sm" onClick={handleReject}>Reject</button>
+                <button className="p-1 flex-1 bg-green-500 rounded-sm" onClick={handleAccept}>Accept</button>
+            </div>
+
+           </div>
+           )}
 
 
 
