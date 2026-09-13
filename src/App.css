@@ -35,3 +35,20 @@ input:invalid {
 .animate-auto-glide {
   animation: autoGlide 4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
+
+@keyframes autoGlide {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1; 
+  }
+ 
+}
+
+.animate-glide {
+  animation: autoGlide 2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+

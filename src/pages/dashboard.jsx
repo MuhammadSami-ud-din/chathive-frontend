@@ -634,7 +634,7 @@ export default function Dashboard() {
 
 
            {incomingCallData && (
-            <div className="fixed right-2 top-2 rounded-xl bg-zinc-900/20 border border-zinc-700/50 backdrop-blur p-2 w-80 text-zinc-200 flex flex-col items-center gap-y-3 pb-4">
+            <div className="fixed animate-glide right-2 top-2 rounded-xl bg-zinc-900/20 border border-zinc-700/50 backdrop-blur p-2 w-80 text-zinc-200 flex flex-col items-center gap-y-3 pb-4">
             <div>Incoming Call...</div>
             <img className="h-20 w-20 rounded-full object-fit" src={incomingCallData?.from?.avatar} aria-placeholder="Callers PP" />
             <div>{incomingCallData?.from?.username}</div>
