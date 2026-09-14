@@ -389,7 +389,15 @@ export default function Call() {
 
 
  const audioToggle = ()=>{
-    console.log('audio toggle');
+    if(!localStream.current) return;
+    const audioTrack = localStream.current.getAudioTracks()[0];
+
+    if(audioTrack){
+        audioTrack.enabled = !audioTrack.enabled;
+        setIsMuted(!audioTrack.enabled);
+        console.log(!audioTrack.enabled);
+    }
+    
 }
 
  const videoToggle = ()=>{
