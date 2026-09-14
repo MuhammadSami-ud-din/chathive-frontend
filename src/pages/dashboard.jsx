@@ -276,7 +276,7 @@ export default function Dashboard() {
 
         const handleCallCut = ()=>{
             setIncomingCallData(null);
-            ringtoneRef.current.pause();
+            ringtoneRef.current?.pause();
         }
 
 
@@ -294,8 +294,9 @@ export default function Dashboard() {
 
     const handleAccept = () => {
         const callerId = incomingCallData?.from?.id || incomingCallData?.from?._id;
+        const name = incomingCallData?.from?.username;
 
-        navigate(`/@me/${callerId}/call`,
+        navigate(`/@me/${callerId}/call/${name}`,
             {
                 state: {
                     offer: incomingCallData?.offer,
@@ -322,14 +323,14 @@ export default function Dashboard() {
         if (incomingCallData) {
             ringtoneRef.current = new Audio('/ringtone.mp3');
             ringtoneRef.current.loop = true;
-            ringtoneRef.current.play().catch((err) => console.log('Autoplay blocked:', err));
+            ringtoneRef.current?.play().catch((err) => console.log('Autoplay blocked:', err));
         }
 
         
         
         return () => {
             if (ringtoneRef.current) {
-                ringtoneRef.current.pause();
+                ringtoneRef.current?.pause();
                 ringtoneRef.current.currentTime = 0;
             }
         };

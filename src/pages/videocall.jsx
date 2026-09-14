@@ -15,7 +15,7 @@ export default function Call() {
     // const [incomingCaller, setIncomingCaller] = useState(null);
     // const [PendingOffer, setPendingOffer] = useState(null);
     const navigate = useNavigate();
-    const { id } = useParams(); // Target user ID from route
+    const { id , name } = useParams(); // Target user ID from route
 
     const localVideoRef = useRef(null);
     const remoteVideoRef = useRef(null);
@@ -409,8 +409,18 @@ export default function Call() {
         setIsVideoOff(!videoTrack.enabled);
         console.log(!videoTrack.enabled);
     }
+
 }
 
+useEffect(()=>{
+     if(!isVideoOff && localVideoRef.current && localStream.current){
+            localVideoRef.current.srcObject = null;
+            localVideoRef.current.srcObject = localStream.current;
+            localVideoRef.current.play().catch((err)=>{
+                console.log('error in resuming' , err);
+            })
+        }
+})
 
     
 
@@ -428,16 +438,18 @@ export default function Call() {
         <div className=" fixed inset-0 z-[110] h-screen w-screen bg-zinc-500 ">
             <div className="relative w-screen h-screen bg-zinc-900">
                 <div className="text-center mt-4 absolute left-1/2 -translate-x-1/2 z-30 bg-zinc-800/20 backdrop-blur p-2 px-4 rounded-2xl">
-                    <h1 className="text-xl">{userInfo?.username}</h1>
+                    <h1 className="text-xl">{name}</h1>
                 </div>
 
 
                 <div>
                     {/* <h4>My Video</h4> */}
-                    <video ref={localVideoRef} autoPlay playsInline muted className="absolute bottom-4 right-4 rounded-xl bg-black h-49 w-65 z-20" />
+                        { isVideoOff ? (<div className="absolute bottom-4 right-4 rounded-xl bg-black h-49 w-65 z-20 flex justify-center items-center"><img src={userInfo?.avatar} className=" h-30 h-30 rounded-full" /></div>) :
+                   ( <video ref={localVideoRef} autoPlay playsInline muted className="absolute bottom-4 right-4 rounded-xl bg-black h-49 w-65 z-20" />)}
                 </div>
                 <div className="w-full h-full">
                     {/* <h4>Remote Video</h4> */}
+                
                     <video ref={remoteVideoRef} autoPlay playsInline className="w-full h-full object-contain z-10" />
                 </div>
 
