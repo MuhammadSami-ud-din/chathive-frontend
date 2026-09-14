@@ -39,6 +39,9 @@ export default function Call() {
         userInfoRef.current = userInfo;
     }, [userInfo]);
 
+    const [isMuted , setIsMuted] = useState(false);
+    const [isVideoOff , setIsVideoOff] = useState(false);
+
 
 
     const StartCamera = async () => {
@@ -290,10 +293,7 @@ export default function Call() {
 
 
 
-        // return () => {
-
-        //             cleanupCall();
-        //         };
+     
         return () => {
             cancelled = true;
             teardownConnections();
@@ -311,20 +311,20 @@ export default function Call() {
         if (CallStatus === 'Calling') {
             ringtoneRef.current = new Audio('/ring.mp3');
             ringtoneRef.current.loop = true;
-            ringtoneRef.current.play().catch((err) => console.log('Autoplay blocked:', err));
+            ringtoneRef.current?.play().catch((err) => console.log('Autoplay blocked:', err));
         }
 
         
         if (CallStatus === 'Answered' || CallStatus === 'Ended' || CallStatus === 'Idle') {
             if (ringtoneRef.current) {
-                ringtoneRef.current.pause();
+                ringtoneRef.current?.pause();
                 ringtoneRef.current.currentTime = 0;
             }
         }
 
         return () => {
             if (ringtoneRef.current) {
-                ringtoneRef.current.pause();
+                ringtoneRef.current?.pause();
                 ringtoneRef.current.currentTime = 0;
             }
         };
@@ -388,8 +388,16 @@ export default function Call() {
     };
 
 
+ const audioToggle = ()=>{
+    console.log('audio toggle');
+}
+
+ const videoToggle = ()=>{
+    console.log('video toggle');
+}
 
 
+    
 
 
 
@@ -436,6 +444,12 @@ export default function Call() {
                     <div className="absolute bottom-8 left-1/2 z-30 -translate-x-1/2 ">
                         <button onClick={endCall} className="cursor-pointer rounded-full bg-red-500 px-8 py-3 font-semibold text-white shadow-xl transition hover:bg-red-600 active:scale-95 ">
                             End Call
+                        </button>
+                          <button type="button" onClick={audioToggle} className="cursor-pointer rounded-full bg-red-500 px-8 py-3 font-semibold text-white shadow-xl transition hover:bg-red-600 active:scale-95 ">
+                            {isMuted ? 'Unmute' : 'Mute'}
+                        </button>
+                          <button type="button" onClick={videoToggle} className="cursor-pointer rounded-full bg-red-500 px-8 py-3 font-semibold text-white shadow-xl transition hover:bg-red-600 active:scale-95 ">
+                             {isVideoOff ? 'Video On' : 'Video Off'}
                         </button>
                     </div>
                 )}
