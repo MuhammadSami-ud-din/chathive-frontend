@@ -300,7 +300,9 @@ export default function Dashboard() {
             {
                 state: {
                     offer: incomingCallData?.offer,
-                    from: incomingCallData?.from
+                    from: incomingCallData?.from,
+                    avatar : incomingCallData?.from?.avatar
+
                 }
             })
         setIncomingCallData(null);

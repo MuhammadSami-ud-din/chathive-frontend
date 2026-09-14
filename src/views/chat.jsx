@@ -419,6 +419,7 @@ export default function ChatArea() {
 
                      <NavLink 
                     to={`call/${data.user?.username}`}
+                    state={{avatar : data.user?.avatar }}
                     className="w-10 h-10 flex items-center justify-center mr-5" >
                         <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#e9eaec" strokeWidth="0.5s" strokeLinecap="round" strokeLinejoin="round">
                             <rect x="2" y="5" width="11" height="14" rx="3" />

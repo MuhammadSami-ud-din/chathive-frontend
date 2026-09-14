@@ -15,16 +15,19 @@ export default function Call() {
     // const [incomingCaller, setIncomingCaller] = useState(null);
     // const [PendingOffer, setPendingOffer] = useState(null);
     const navigate = useNavigate();
-    const { id , name } = useParams(); // Target user ID from route
+    const { id, name } = useParams(); // Target user ID from route
 
     const localVideoRef = useRef(null);
     const remoteVideoRef = useRef(null);
     const localStream = useRef(null);
     const peerConnection = useRef(null);
     const iceCandidatesQueue = useRef([]);
+    const [remoteVideoOff, setRemoteVideoOff] = useState(false)
+    const remoteStreamRef = useRef(null);
 
     const offerFromRouter = location.state?.offer;
     const callerInfo = location.state?.from;
+    const avatar = location.state?.avatar
     const targetId = id || callerInfo?.id;
 
     const currentUserId = userInfo?.id || userInfo?._id;
@@ -39,8 +42,8 @@ export default function Call() {
         userInfoRef.current = userInfo;
     }, [userInfo]);
 
-    const [isMuted , setIsMuted] = useState(false);
-    const [isVideoOff , setIsVideoOff] = useState(false);
+    const [isMuted, setIsMuted] = useState(false);
+    const [isVideoOff, setIsVideoOff] = useState(false);
 
 
 
@@ -74,6 +77,7 @@ export default function Call() {
             localStream.current = null;
         }
 
+        remoteStreamRef.current = null;
         if (localVideoRef.current) localVideoRef.current.srcObject = null;
         if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
 
@@ -116,10 +120,12 @@ export default function Call() {
                 pc.addTrack(track, stream);
             });
         }
-
         pc.ontrack = (event) => {
-            if (remoteVideoRef.current && event.streams[0]) {
-                remoteVideoRef.current.srcObject = event.streams[0];
+            if (event.streams[0]) {
+                remoteStreamRef.current = event.streams[0];
+                if (remoteVideoRef.current) {
+                    remoteVideoRef.current.srcObject = event.streams[0];
+                }
             }
         };
 
@@ -293,7 +299,7 @@ export default function Call() {
 
 
 
-     
+
         return () => {
             cancelled = true;
             teardownConnections();
@@ -307,14 +313,14 @@ export default function Call() {
 
 
     useEffect(() => {
-      
+
         if (CallStatus === 'Calling') {
             ringtoneRef.current = new Audio('/ring.mp3');
             ringtoneRef.current.loop = true;
             ringtoneRef.current?.play().catch((err) => console.log('Autoplay blocked:', err));
         }
 
-        
+
         if (CallStatus === 'Answered' || CallStatus === 'Ended' || CallStatus === 'Idle') {
             if (ringtoneRef.current) {
                 ringtoneRef.current?.pause();
@@ -328,7 +334,7 @@ export default function Call() {
                 ringtoneRef.current.currentTime = 0;
             }
         };
-    }, [CallStatus]); 
+    }, [CallStatus]);
 
     // const makeCall = async () => {
     //     if (!id) {
@@ -388,41 +394,67 @@ export default function Call() {
     };
 
 
- const audioToggle = ()=>{
-    if(!localStream.current) return;
-    const audioTrack = localStream.current.getAudioTracks()[0];
+    const audioToggle = () => {
+        if (!localStream.current) return;
+        const audioTrack = localStream.current.getAudioTracks()[0];
 
-    if(audioTrack){
-        audioTrack.enabled = !audioTrack.enabled;
-        setIsMuted(!audioTrack.enabled);
-        console.log(!audioTrack.enabled);
-    }
-    
-}
+        if (audioTrack) {
+            audioTrack.enabled = !audioTrack.enabled;
+            setIsMuted(!audioTrack.enabled);
+            console.log(!audioTrack.enabled);
+        }
 
- const videoToggle = ()=>{
-     if(!localStream.current) return;
-    const videoTrack = localStream.current.getVideoTracks()[0];
-
-    if(videoTrack){
-        videoTrack.enabled = !videoTrack.enabled;
-        setIsVideoOff(!videoTrack.enabled);
-        console.log(!videoTrack.enabled);
     }
 
-}
+    const videoToggle = () => {
+        if (!localStream.current) return;
+        const videoTrack = localStream.current.getVideoTracks()[0];
 
-useEffect(()=>{
-     if(!isVideoOff && localVideoRef.current && localStream.current){
-            localVideoRef.current.srcObject = null;
-            localVideoRef.current.srcObject = localStream.current;
-            localVideoRef.current.play().catch((err)=>{
-                console.log('error in resuming' , err);
+        if (videoTrack) {
+            videoTrack.enabled = !videoTrack.enabled;
+            setIsVideoOff(!videoTrack.enabled);
+            console.log(!videoTrack.enabled);
+
+
+            if (targetId) {
+                socket.emit('video_toggle', {
+                    targetUserId: targetId,
+                    videoOff: !videoTrack.enabled
+                })
+            }
+        }
+
+    }
+
+    useEffect(() => {
+        if (!remoteVideoOff && remoteVideoRef.current) {
+            remoteVideoRef.current.srcObject = null;
+            remoteVideoRef.current.srcObject = remoteStreamRef.current;
+            remoteVideoRef.current.play().catch((err) => {
+                console.log('error in resuming', err);
             })
         }
-})
+        if (!isVideoOff && localVideoRef.current && localStream.current) {
+            localVideoRef.current.srcObject = null;
+            localVideoRef.current.srcObject = localStream.current;
+            localVideoRef.current.play().catch((err) => {
+                console.log('error in resuming', err);
+            })
+        }
+    }, [isVideoOff, remoteVideoOff])
 
-    
+
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleVideoToggle = (({ videoOff }) => {
+            setRemoteVideoOff(videoOff)
+        })
+        socket.on('video_toggle', handleVideoToggle)
+
+        return () => socket.off('video_toggle', handleVideoToggle);
+    }, [])
+
 
 
 
@@ -444,13 +476,17 @@ useEffect(()=>{
 
                 <div>
                     {/* <h4>My Video</h4> */}
-                        { isVideoOff ? (<div className="absolute bottom-4 right-4 rounded-xl bg-black h-49 w-65 z-20 flex justify-center items-center"><img src={userInfo?.avatar} className=" h-30 h-30 rounded-full" /></div>) :
-                   ( <video ref={localVideoRef} autoPlay playsInline muted className="absolute bottom-4 right-4 rounded-xl bg-black h-49 w-65 z-20" />)}
+                    <video ref={localVideoRef} autoPlay playsInline muted className={`absolute bottom-4 right-4 rounded-xl bg-black h-49 w-65 z-[21] ${isVideoOff ? 'invisible' : 'visible'}`}/>
+                    {isVideoOff && <div className="absolute bottom-4 right-4 rounded-xl bg-black h-49 w-65 z-[21] flex justify-center items-center"><img src={userInfo?.avatar} className=" w-30 h-30 rounded-full" /></div>
+                    }
                 </div>
-                <div className="w-full h-full">
+                <div className="w-full h-full relative ">
                     {/* <h4>Remote Video</h4> */}
-                
-                    <video ref={remoteVideoRef} autoPlay playsInline className="w-full h-full object-contain z-10" />
+                    <video ref={remoteVideoRef} autoPlay playsInline className={` absolute w-full h-full object-contain z-10 ${remoteVideoOff ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} />
+                    {remoteVideoOff && (<div className="absolute z-20 bg-black h-full w-full flex justify-center items-center "><img src={avatar} className=" h-50 w-50 rounded-full z-20 " /></div>)
+
+                    }
+
                 </div>
 
 
@@ -472,11 +508,11 @@ useEffect(()=>{
                         <button onClick={endCall} className="cursor-pointer rounded-full bg-red-500 px-8 py-3 font-semibold text-white shadow-xl transition hover:bg-red-600 active:scale-95 ">
                             End Call
                         </button>
-                          <button type="button" onClick={audioToggle} className="cursor-pointer rounded-full bg-red-500 px-8 py-3 font-semibold text-white shadow-xl transition hover:bg-red-600 active:scale-95 ">
+                        <button type="button" onClick={audioToggle} className="cursor-pointer rounded-full bg-red-500 px-8 py-3 font-semibold text-white shadow-xl transition hover:bg-red-600 active:scale-95 ">
                             {isMuted ? 'Unmute' : 'Mute'}
                         </button>
-                          <button type="button" onClick={videoToggle} className="cursor-pointer rounded-full bg-red-500 px-8 py-3 font-semibold text-white shadow-xl transition hover:bg-red-600 active:scale-95 ">
-                             {isVideoOff ? 'Video On' : 'Video Off'}
+                        <button type="button" onClick={videoToggle} className="cursor-pointer rounded-full bg-red-500 px-8 py-3 font-semibold text-white shadow-xl transition hover:bg-red-600 active:scale-95 ">
+                            {isVideoOff ? 'Video On' : 'Video Off'}
                         </button>
                     </div>
                 )}
