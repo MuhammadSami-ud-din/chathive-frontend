@@ -401,7 +401,14 @@ export default function Call() {
 }
 
  const videoToggle = ()=>{
-    console.log('video toggle');
+     if(!localStream.current) return;
+    const videoTrack = localStream.current.getVideoTracks()[0];
+
+    if(videoTrack){
+        videoTrack.enabled = !videoTrack.enabled;
+        setIsVideoOff(!videoTrack.enabled);
+        console.log(!videoTrack.enabled);
+    }
 }
 
 
