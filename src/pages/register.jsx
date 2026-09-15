@@ -49,7 +49,7 @@ export default function RegisterUser(){
 
             setMessage({text : result.message , type : 'success'});
             
-            console.log(result.message)
+      
            setTimeout(() => {
              navigate('/login');
               }, 1000);

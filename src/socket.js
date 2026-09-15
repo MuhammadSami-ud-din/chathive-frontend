@@ -8,7 +8,10 @@ export const socket = io(Api_URL, {
   reconnection: true,
   reconnectionAttempts: 5,
   reconnectionDelay: 5000,
+  transports: ["websocket"], 
+  withCredentials: true,
   auth: (cb) => {
     cb({ token: localStorage.getItem("authToken") });
   }
+  
 });

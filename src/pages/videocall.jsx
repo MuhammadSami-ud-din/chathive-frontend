@@ -509,7 +509,20 @@ export default function Call() {
                             End Call
                         </button>
                         <button type="button" onClick={audioToggle} className="cursor-pointer rounded-full bg-red-500 px-8 py-3 font-semibold text-white shadow-xl transition hover:bg-red-600 active:scale-95 ">
-                            {isMuted ? 'Unmute' : 'Mute'}
+                            {!isMuted ? (<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="2" width="6" height="11" rx="3" />
+                                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                                <line x1="12" y1="19" x2="12" y2="22" />
+                                <line x1="8" y1="22" x2="16" y2="22" />
+                            </svg>
+                            </div>) : (<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="2" width="6" height="11" rx="3" />
+                                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                                <line x1="12" y1="19" x2="12" y2="22" />
+                                <line x1="8" y1="22" x2="16" y2="22" />
+                                <line x1="2" y1="2" x2="22" y2="22" stroke-width="2.5" />
+                            </svg> </div>
+                            )}
                         </button>
                         <button type="button" onClick={videoToggle} className="cursor-pointer rounded-full bg-red-500 px-8 py-3 font-semibold text-white shadow-xl transition hover:bg-red-600 active:scale-95 ">
                             {isVideoOff ? 'Video On' : 'Video Off'}

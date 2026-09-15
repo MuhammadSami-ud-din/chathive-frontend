@@ -59,7 +59,7 @@ export default function ChannelChat() {
 
     const [message, setMessage] = useState('');
 
-    const [isFocused, setIsFocused] = useState(true);
+    const [isFocused, setIsFocused] = useState(false);
     const [showMessage, setShowMessage] = useState({ text: '', type: '' });
     const channels = useOutletContext();
     const messageEndRef = useRef(null);

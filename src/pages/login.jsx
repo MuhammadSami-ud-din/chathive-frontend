@@ -51,7 +51,7 @@ export default function LoginUser(){
       socket.connect();
     }
       setMessage({ text: result.message || 'Login Successful!', type: 'success' });
-      console.log('login successful');
+    
       
       setTimeout(() => {
         navigate('/');
