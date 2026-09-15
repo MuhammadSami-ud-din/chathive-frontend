@@ -476,7 +476,7 @@ export default function Call() {
 
                 <div>
                     {/* <h4>My Video</h4> */}
-                    <video ref={localVideoRef} autoPlay playsInline muted className={`absolute bottom-4 right-4 rounded-xl bg-black h-49 w-65 z-[21] ${isVideoOff ? 'invisible' : 'visible'}`}/>
+                    <video ref={localVideoRef} autoPlay playsInline muted className={`absolute bottom-4 right-4 rounded-xl bg-black h-49 w-65 z-[21] ${isVideoOff ? 'invisible' : 'visible'}`} />
                     {isVideoOff && <div className="absolute bottom-4 right-4 rounded-xl bg-black h-49 w-65 z-[21] flex justify-center items-center"><img src={userInfo?.avatar} className=" w-30 h-30 rounded-full" /></div>
                     }
                 </div>
@@ -496,7 +496,11 @@ export default function Call() {
                     <div className="absolute bottom-8 left-1/2 z-30 -translate-x-1/2 flex flex-col justify-center items-center ">
                         <p className="animate-pulse">Calling {id}...</p>
                         <button onClick={endCall} className="cursor-pointer rounded-full bg-red-500 px-8 py-3 font-semibold text-white shadow-xl transition hover:bg-red-600 active:scale-95 ">
-                            Cancel Call
+                            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <g transform="rotate(135 12 12)">
+                                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                                </g>
+                            </svg>
                         </button>
                     </div>
                 )}
@@ -504,18 +508,31 @@ export default function Call() {
 
 
                 {CallStatus === 'Answered' && (
-                    <div className="absolute bottom-8 left-1/2 z-30 -translate-x-1/2 ">
-                        <button onClick={endCall} className="cursor-pointer rounded-full bg-red-500 px-8 py-3 font-semibold text-white shadow-xl transition hover:bg-red-600 active:scale-95 ">
-                            End Call
+                    <div className="absolute bottom-8 left-1/2 z-30 -translate-x-1/2  flex  gap-x-2 ">
+
+                        <button type="button" onClick={videoToggle} className="cursor-pointer rounded-full  px-8 py-3 font-semibold text-white  transition hover:bg-red-600 active:scale-95 hover:bg-zinc-300/30 ">
+                            {!isVideoOff ? (<div><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M23 7l-7 5 7 5V7z" />
+                                <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+                            </svg>
+                            </div>) : (<div><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M23 7l-7 5 7 5V7z" />
+                                <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+                                <line x1="2" y1="2" x2="22" y2="22" stroke-width="2.5" />
+                            </svg>
+                            </div>)}
                         </button>
-                        <button type="button" onClick={audioToggle} className="cursor-pointer rounded-full bg-red-500 px-8 py-3 font-semibold text-white shadow-xl transition hover:bg-red-600 active:scale-95 ">
-                            {!isMuted ? (<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
+
+
+                        <button type="button" onClick={audioToggle} className="cursor-pointer rounded-full  px-8 py-3 font-semibold text-white  transition hover:bg-red-600 active:scale-95 hover:bg-zinc-300/30">
+                            {!isMuted ? (<div><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <rect x="9" y="2" width="6" height="11" rx="3" />
                                 <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
                                 <line x1="12" y1="19" x2="12" y2="22" />
                                 <line x1="8" y1="22" x2="16" y2="22" />
                             </svg>
-                            </div>) : (<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            </div>) : (<div><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <rect x="9" y="2" width="6" height="11" rx="3" />
                                 <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
                                 <line x1="12" y1="19" x2="12" y2="22" />
@@ -524,8 +541,18 @@ export default function Call() {
                             </svg> </div>
                             )}
                         </button>
-                        <button type="button" onClick={videoToggle} className="cursor-pointer rounded-full bg-red-500 px-8 py-3 font-semibold text-white shadow-xl transition hover:bg-red-600 active:scale-95 ">
-                            {isVideoOff ? 'Video On' : 'Video Off'}
+
+
+
+
+
+                        <button onClick={endCall} className="cursor-pointer rounded-full bg-red-500 px-8 py-3 font-semibold text-white shadow-xl transition hover:bg-red-600 active:scale-95 ">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <g transform="rotate(135 12 12)">
+                                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                                </g>
+                            </svg>
+
                         </button>
                     </div>
                 )}
