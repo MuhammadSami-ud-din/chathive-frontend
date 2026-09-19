@@ -160,7 +160,7 @@ export default function DM() {
                         Friends</NavLink>
                 </div>
 
-                <div className=" flex-1  mt-2 overflow-scroll p-2 ">
+                <div className=" flex-1  mt-2 overflow-scroll scrollbar-none p-2 ">
                     <span className="block w-full h-7  text-sm text-zinc-500 hover:text-zinc-100 ">Direct Messages</span>
 
 

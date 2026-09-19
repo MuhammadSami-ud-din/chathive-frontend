@@ -108,7 +108,7 @@ return(
 
 
                 {/* scrolable  */}
-                <div ref={scrolableContainer} className="overflow-y-auto w-full h-full ">
+                <div ref={scrolableContainer} className="overflow-y-auto w-full h-full scrollbar-none">
 
                     {/* Servers Dicover */}
                     <div className="border-b border-b-neutral-800 bg-gradient-to-r from-cyan-900 via-blue-950 to-neutral-950 min-h-90 w-full flex flex-col justify-center p-4 md:p-6 shrink-0">
