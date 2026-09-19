@@ -70,14 +70,32 @@ export default function DMFriends() {
             }
 
             queryClient.setQueryData(['Dmlist'], (oldData) => {
+              
+                if (!result?.FriendsInfo) {
+                    return oldData || { success: true, data: [] };
+                }
 
-                if (!oldData) return { success: true, data: [result.conversation] }
+                
+                if (!oldData || !oldData.data) {
+                    return {
+                        success: true,
+                        data: [result?.FriendsInfo]
+                    };
+                }
 
+              
+                const alreadyExists = oldData.data.some(item => item?.id === result?.FriendsInfo?.id);
+                if (alreadyExists) {
+                    return oldData;
+                }
+
+     
                 return {
                     ...oldData,
-                    data: [...oldData.data, result.FriendsInfo]
-                }
-            })
+                    data: [...oldData.data, result?.FriendsInfo]
+                };
+            });
+
 
 
 
