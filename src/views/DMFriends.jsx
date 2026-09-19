@@ -136,11 +136,11 @@ export default function DMFriends() {
                         <div className="absolute left-0 top-full mt-2 w-full bg-zinc-800 border border-zinc-700 rounded-lg p-2 z-50 shadow-xl max-h-60 overflow-y-auto">
                             {searchedUsers.length > 0 ? (
                                 searchedUsers.map((user) => {
-                                    const isActive = location.pathname === `/@me/${user.id}`;
+                                    const isActive = location.pathname === `/@me/${user?.id}`;
 
                                     return (
                                         <div
-                                            key={user.id}
+                                            key={user?.id}
                                             onMouseDown={(e) => {
                                                 e.preventDefault();
                                                 GetOrCreate(user.id);
@@ -153,14 +153,14 @@ export default function DMFriends() {
                                             `}
                                         >
                                             <div className="h-8 w-8 bg-zinc-700 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden text-white font-semibold">
-                                                {user.avatar ? (
-                                                    <img src={user.avatar} alt="avatar" className="w-full h-full object-cover" />
+                                                {user?.avatar ? (
+                                                    <img src={user?.avatar} alt="avatar" className="w-full h-full object-cover" />
                                                 ) : (
-                                                    user.username?.charAt(0).toUpperCase()
+                                                    user?.username?.charAt(0).toUpperCase()
                                                 )}
                                             </div>
                                             <div className="flex-1 text-sm text-zinc-200 group-hover:text-white truncate">
-                                                {user.username}
+                                                {user?.username}
                                             </div>
                                         </div>
                                     );
