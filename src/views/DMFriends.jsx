@@ -34,10 +34,10 @@ export default function DMFriends() {
                 const result = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(result.error || 'No users found');
+                    throw new Error(result?.error || 'No users found');
                 }
 
-                setSearchedUsers(result.data || []);
+                setSearchedUsers(result?.data || []);
             } catch (error) {
                 console.error(error.message);
 
@@ -143,7 +143,7 @@ export default function DMFriends() {
                                             key={user?.id}
                                             onMouseDown={(e) => {
                                                 e.preventDefault();
-                                                GetOrCreate(user.id);
+                                                GetOrCreate(user?.id);
                                             }}
                                             className={`
                                                 w-full flex items-center p-2 space-x-3 rounded-xl mb-1 transition-all duration-150 group cursor-pointer
