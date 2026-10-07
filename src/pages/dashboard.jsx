@@ -149,7 +149,7 @@ export default function Dashboard() {
             if (!response.ok) {
                 throw new Error(result.error || 'Profile Picture Set Failed')
             }
-            console.log(result);
+            
             queryClient.invalidateQueries({ queryKey: ['DMmessages'] })
             setUploadAvatar(result.avatar);
             setPP({ pp: result.avatar })
@@ -170,7 +170,7 @@ export default function Dashboard() {
         //     setServerAvatar(url)
         // }
 
-        console.log('Hi My firend');
+     
     }
 
 

@@ -267,13 +267,13 @@ export default function ChatArea() {
         const HandleTyping = (data) => {
 
             if (String(data?.userId) === String(id)) {
-                console.log('typing')
+              
                 setTyping(true)
             }
         }
         const HandleStopTyping = ({ userId }) => {
             if (String(userId) === String(id)) {
-                console.log("not typing")
+                
                 setTyping(false)
             }
         }

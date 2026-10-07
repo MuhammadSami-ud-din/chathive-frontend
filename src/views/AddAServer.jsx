@@ -136,7 +136,7 @@ export default function AddServer({ isOpen, onClose, userInfo, setData ,  setInv
 
 
 
-        console.log('Hi My friend');
+       
     }
 
 

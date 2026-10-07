@@ -253,7 +253,7 @@ export default function ServerPage() {
             if (!response.ok) {
                 throw new Error(result.error || 'Profile Picture Set Failed')
             }
-            console.log(result);
+            
             setUploadAvatar(result.avatar);
             setPP({ pp: result.avatar, id: data?.Serverinfo?.[0]?.server_id })
             queryClient.invalidateQueries(['FetchChannels', server_id]);
@@ -276,7 +276,7 @@ export default function ServerPage() {
         //     setServerAvatar(url)
         // }
 
-        console.log('Hi My firend');
+        
     }
 
 
@@ -301,7 +301,7 @@ export default function ServerPage() {
             if (!response.ok) {
                 throw new Error(result.error || 'Profile Picture Set Failed')
             }
-            console.log(result);
+           
             setUploadImg(result.server_img);
             queryClient.invalidateQueries(['FetchChannels', server_id]);
 
@@ -314,7 +314,7 @@ export default function ServerPage() {
         //     setUploadImg(url)
         // }
 
-        console.log('Hi My friend');
+      
     }
 
 
