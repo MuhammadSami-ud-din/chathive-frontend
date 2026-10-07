@@ -1,16 +1,55 @@
-# React + Vite
+# ChatHive Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React client for **ChatHive**, a real-time chat app with servers, channels, direct messages, and 1-on-1 video calling.
 
-Currently, two official plugins are available:
+**Live demo:** https://chathive-chat.vercel.app
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+- Real-time channel and direct messaging
+- Create servers, join via invite links
+- Online status and typing indicators
+- 1-on-1 video/voice calls (WebRTC) with mute toggles
+- Profile picture upload
+- Instant UI updates: socket events write straight into the React Query cache
+- Duplicate-safe messages (deduplicated by `_id`)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tech Stack
 
-## Expanding the ESLint configuration
+- **React** + **Vite**
+- **React Router v6**
+- **TanStack React Query** for data fetching and caching
+- **Socket.io Client** for real-time events
+- **WebRTC** for peer-to-peer calls (STUN only)
+- Deployed on **Vercel**
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Getting Started
+
+```bash
+git clone https://github.com/MuhammadSami-ud-din/chathive-frontend.git
+cd chathive-frontend
+npm install
+npm run dev
+```
+
+The app runs at `http://localhost:5173`. You'll need the [ChatHive backend](https://github.com/MuhammadSami-ud-din/CHATHIVE) running for it to work.
+
+## Scripts
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Start the dev server |
+| `npm run build` | Production build |
+| `npm run preview` | Preview the production build locally |
+
+## Deployment
+
+Hosted on Vercel. A `vercel.json` rewrite sends all routes to `index.html`, so client-side routes like `/channels/123` don't 404 on refresh.
+
+## Notes
+
+- Video calling uses STUN only (no TURN), so calls may fail on strict or symmetric NATs.
+
+## Author
+
+**Muhammad Sami ud Din**, [GitHub](https://github.com/MuhammadSami-ud-din)
