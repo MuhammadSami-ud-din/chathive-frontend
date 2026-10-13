@@ -5,6 +5,7 @@ import { useParams, useOutletContext, NavLink } from "react-router-dom"
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const Api_URL = import.meta.env.VITE_API_URL;
+const AI_ID = import.meta.env.VITE_AI_ID;
 import { socket } from "../socket.js";
 
 
@@ -79,7 +80,7 @@ export default function ChatArea() {
 
     const { id } = useParams();
     const [typing, setTyping] = useState(false);
-    const { conversationId, setConversationId, uploadAvatar } = useOutletContext() || {};
+    const { conversationId, setConversationId, uploadAvatar, } = useOutletContext() || {};
     const [message, setMessage] = useState('')
     const [isFocused, setIsFocused] = useState(false);
     const messageEndRef = useRef(null)
@@ -89,7 +90,7 @@ export default function ChatArea() {
     const conversationIdRef = useRef(conversationId);
     const queryClient = useQueryClient();
     const [showContext, setShowContext] = useState(false);
-
+    const [Thinking, setThinking] = useState(false)
     const [msgId, setMsgId] = useState(null);
 
 
@@ -140,7 +141,11 @@ export default function ChatArea() {
 
     useEffect(() => {
         const handleNewMessage = (msg) => {
+
             if (String(msg.conversation_id) === String(conversationIdRef.current)) {
+                if (String(msg.sender_id) === String(AI_ID)) {
+                    setThinking(false)
+                }
                 queryClient.setQueryData(['DMmessages', id], (prev) => {
                     const alreadyExists = prev.data.some((m) => String(m._id) === String(msg._id));
                     if (alreadyExists) return prev;
@@ -183,7 +188,20 @@ export default function ChatArea() {
 
 
     async function SendMsg() {
+        if (!message || !message.trim()) return;
+
+
+        const currentMessage = message;
+        setMessage('');
+
         const url = `${Api_URL}/messages/dm/${id}`;
+
+        console.log(typeof (AI_ID), AI_ID)
+        if (id === AI_ID) {
+            setThinking(true);
+        }
+
+
 
         try {
             const response = await fetch(url, {
@@ -216,11 +234,15 @@ export default function ChatArea() {
             }
             socket.emit('stop_typing', { conversation_id: conversationId })
 
-            setMessage('');
+
+
 
         } catch (error) {
             console.log(error.message);
+            setMessage(currentMessage)
+            setThinking(false);
         }
+
     }
 
 
@@ -259,6 +281,16 @@ export default function ChatArea() {
             isTypingRef.current = false;
         }, 2000);
     };
+
+// useEffect(() => {
+   
+
+//     if (Thinking) {
+//      setTyping(true)
+//     } else {
+//     setTyping(false)
+//     }
+// }, [Thinking]);
 
 
     useEffect(() => {
@@ -380,47 +412,47 @@ export default function ChatArea() {
 
                 {/* upper bar to show Friend name */}
                 <div className="flex justify-between items-center border-b border-b-neutral-800 h-13 pl-3 text-sm gap-x-3 shrink-0">
-                  <div className="flex gap-x-2">
-                      <span className="h-8 w-8 rounded-full bg-zinc-700/50 flex justify-center items-center text-lg text-yellow-200/50">
-                        {data.user?.avatar ? (
-                            <img src={currentAvatar || data?.user?.avatar} alt="avatar" className="h-full w-full object-cover rounded-full" />
-                        ) : (
-                            data.user?.username ? data.user.username.charAt(0).toUpperCase() : '?'
-                        )}
-                    </span>
+                    <div className="flex gap-x-2">
+                        <span className="h-8 w-8 rounded-full bg-zinc-700/50 flex justify-center items-center text-lg text-yellow-200/50">
+                            {data.user?.avatar ? (
+                                <img src={currentAvatar || data?.user?.avatar} alt="avatar" className="h-full w-full object-cover rounded-full" />
+                            ) : (
+                                data.user?.username ? data.user.username.charAt(0).toUpperCase() : '?'
+                            )}
+                        </span>
 
-                    <div className="flex flex-col">
-                        <span className="text-zinc-100">{data?.user?.username}</span>
+                        <div className="flex flex-col">
+                            <span className="text-zinc-100">{data?.user?.username}</span>
 
 
-                        <div className="h-4 overflow-hidden relative text-[10px] font-normal">
-                            {/* Typing Indicator */}
-                            <span
-                                className={`absolute inset-0 text-zinc-400  font-medium transition-all duration-300 ease-in-out ${typing
-                                    ? 'opacity-100 translate-y-0'
-                                    : 'opacity-0 -translate-y-2 pointer-events-none'
-                                    }`}
-                            >
-                                Typing...
-                            </span>
+                            <div className="h-4 overflow-hidden relative text-[10px] font-normal">
+                                {/* Typing Indicator */}
+                                <span
+                                    className={`absolute inset-0 text-zinc-400  font-medium transition-all duration-300 ease-in-out ${typing || Thinking
+                                        ? 'opacity-100 translate-y-0'
+                                        : 'opacity-0 -translate-y-2 pointer-events-none'
+                                        }`}
+                                >
+                                    Typing...
+                                </span>
 
-                            {/* Online Status */}
-                            <span
-                                className={`absolute inset-0 text-zinc-400 transition-all duration-300 ease-in-out ${isOnline && !typing
-                                    ? 'opacity-100 translate-y-0'
-                                    : 'opacity-0 translate-y-2 pointer-events-none'
-                                    }`}
-                            >
-                                Online
-                            </span>
+                                {/* Online Status */}
+                                <span
+                                    className={`absolute inset-0 text-zinc-400 transition-all duration-300 ease-in-out ${isOnline && !typing
+                                        ? 'opacity-100 translate-y-0'
+                                        : 'opacity-0 translate-y-2 pointer-events-none'
+                                        }`}
+                                >
+                                    Online
+                                </span>
+                            </div>
                         </div>
                     </div>
-                  </div>
 
-                     <NavLink 
-                    to={`call/${data.user?.username}`}
-                    state={{avatar : data.user?.avatar }}
-                    className="w-10 h-10 flex items-center justify-center mr-5" >
+                    <NavLink
+                        to={`call/${data.user?.username}`}
+                        state={{ avatar: data.user?.avatar }}
+                        className="w-10 h-10 flex items-center justify-center mr-5" >
                         <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#e9eaec" strokeWidth="0.5s" strokeLinecap="round" strokeLinejoin="round">
                             <rect x="2" y="5" width="11" height="14" rx="3" />
                             <path d="M13 10l5.73-3.82A1 1 0 0120.5 7v10a1 1 0 01-1.77.62L13 14" />
@@ -475,7 +507,7 @@ export default function ChatArea() {
 
                                         <div className={` flex w-full  items-start ${isMe ? 'justify-end ' : 'justify-start '} `} >
 
-                                            <div className={` relative  px-3 py-2   rounded-2xl text-sm flex-none max-w-[70%]    break-words shadow-sm leading-relaxed ${isMe ? 'bg-green-700/50 ' : 'bg-zinc-500/50 '} ${showContext && (msgId === msg._id) ? 'z-50' : 'z-0'}`} onContextMenu={(e) => {
+                                            <div className={` relative  px-3 py-2 whitespace-pre-line  rounded-2xl text-sm flex-none max-w-[70%]    break-words shadow-sm leading-relaxed ${isMe ? 'bg-green-700/50 ' : 'bg-zinc-500/50 '} ${showContext && (msgId === msg._id) ? 'z-50' : 'z-0'}`} onContextMenu={(e) => {
                                                 if (isMe) {
                                                     e.preventDefault()
                                                     HandleRightClick(e);
@@ -541,7 +573,7 @@ export default function ChatArea() {
                                     TypingIndicator();
                                 }} />
 
-                            <button className="h-7 w-15 bg-green-400/50 mr-2 ml-2 rounded-2xl transition-colors disabled:bg-zinc-800 disabled:text-zinc-500 disabled:cursor-not-allowed disabled:hover:bg-zinc-800" onClick={SendMsg} disabled={!message.trim()}>Send</button>
+                            <button className="px-3 py-0.5 bg-green-400/50 mr-2 ml-2 rounded-2xl transition-colors disabled:bg-zinc-800 disabled:text-zinc-500 disabled:cursor-not-allowed disabled:hover:bg-zinc-800" onClick={SendMsg} disabled={!message.trim() || Thinking}>{Thinking ? 'Thinking' : 'Send'}</button>
                         </div>
 
                     </div>
