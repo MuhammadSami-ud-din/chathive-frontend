@@ -198,7 +198,9 @@ export default function ChatArea() {
 
         console.log(typeof (AI_ID), AI_ID)
         if (id === AI_ID) {
-            setThinking(true);
+           setTimeout(()=>{
+             setThinking(true);
+           }, 500)
         }
 
 

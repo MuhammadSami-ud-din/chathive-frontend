@@ -41,14 +41,22 @@ input:invalid {
     transform: translateX(100%);
     opacity: 0;
   }
-  100% {
+  20% {
     transform: translateX(0);
     opacity: 1; 
+  }
+  80% {
+    transform: translateX(0);
+    opacity: 1; 
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0; 
   }
  
 }
 
 .animate-glide {
-  animation: autoGlide 2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: autoGlide 4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
