@@ -5,9 +5,7 @@ React client for **ChatHive**, a real-time chat app with servers, channels, dire
 **Live demo:** https://chathive-chat.vercel.app
 
 **Login Credentials:** 
-
 **Email:** testuser@gmail.com
-
 **Password:** Test@user
 
 ## Features
