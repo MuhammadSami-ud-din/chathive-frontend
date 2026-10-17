@@ -15,6 +15,7 @@
     "framer-motion": "^13.1.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "react-markdown": "^10.1.0",
     "react-router-dom": "^7.18.2",
     "socket.io-client": "^4.8.3",
     "tailwindcss": "^4.3.3"
@@ -36,6 +37,7 @@
     "react-router-dom@7.18.2": true,
     "socket.io-client@4.8.3": true,
     "framer-motion@13.1.0": true,
-    "@tanstack/react-query@5.102.0": true
+    "@tanstack/react-query@5.102.0": true,
+    "react-markdown@10.1.0": true
   }
 }

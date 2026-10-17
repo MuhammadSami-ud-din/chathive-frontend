@@ -142,7 +142,7 @@ return(
                                     <div className="flex flex-col justify-between flex-1 gap-1 ml-4 mt-8 text-zinc-400">
                                         <div className="flex flex-col">
                                             <span className="text-xl font-semibold  ">{server.server_name}</span>
-                                            <span className="test-xs ">{server.server_description}</span>
+                                            <span className="test-xs line-clamp-2 ">{server.server_description}</span>
                                         </div>
                                         <div className="text-xs  mb-2 float-left text-zinc-100/50">6694508 Members</div>
 

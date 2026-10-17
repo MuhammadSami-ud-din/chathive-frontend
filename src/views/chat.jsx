@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import React from "react";
 import { useParams, useOutletContext, NavLink } from "react-router-dom"
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import ReactMarkdown from 'react-markdown';
 
 const Api_URL = import.meta.env.VITE_API_URL;
 const AI_ID = import.meta.env.VITE_AI_ID;
@@ -517,7 +518,7 @@ export default function ChatArea() {
                                                 }
 
                                             }}>
-                                                {msg.content}
+                                              <ReactMarkdown>{String(msg?.content || "")}</ReactMarkdown>
                                                 <span className="float-right ml-2 mt-3 text-[10px] text-zinc-300 opacity-70 select-none leading-none">
                                                     {CleanTime(msg.created_at)}
                                                 </span>
